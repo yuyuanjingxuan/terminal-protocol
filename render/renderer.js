@@ -28,8 +28,9 @@ class Renderer {
 
     if (!path || path.length < 2) return;
 
-    ctx.strokeStyle = 'gray';
-    ctx.lineWidth = 20;
+    // Draw path with neon effect
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 25;
     ctx.beginPath();
     ctx.moveTo(path[0].x, path[0].y);
 
@@ -39,16 +40,55 @@ class Renderer {
 
     ctx.stroke();
 
-    // Draw start and end points
-    ctx.fillStyle = 'green';
+    // Add glow effect
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 20;
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
+    ctx.lineWidth = 30;
     ctx.beginPath();
-    ctx.arc(path[0].x, path[0].y, 10, 0, Math.PI * 2);
+    ctx.moveTo(path[0].x, path[0].y);
+
+    for (let i = 1; i < path.length; i++) {
+      ctx.lineTo(path[i].x, path[i].y);
+    }
+
+    ctx.stroke();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw start and end points with neon effect
+    ctx.fillStyle = '#00ff88';
+    ctx.beginPath();
+    ctx.arc(path[0].x, path[0].y, 12, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = 'red';
+    // Add glow to start point
+    ctx.shadowColor = '#00ff88';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(0, 255, 136, 0.5)';
     ctx.beginPath();
-    ctx.arc(path[path.length - 1].x, path[path.length - 1].y, 10, 0, Math.PI * 2);
+    ctx.arc(path[0].x, path[0].y, 12, 0, Math.PI * 2);
     ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = '#ff4444';
+    ctx.beginPath();
+    ctx.arc(path[path.length - 1].x, path[path.length - 1].y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow to end point
+    ctx.shadowColor = '#ff4444';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(255, 68, 68, 0.5)';
+    ctx.beginPath();
+    ctx.arc(path[path.length - 1].x, path[path.length - 1].y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
   }
 
   renderUI() {

@@ -59,15 +59,26 @@ class Enemy {
   }
 
   render(ctx) {
-    // Draw enemy
-    ctx.fillStyle = 'red';
+    // Draw enemy with neon effect
+    ctx.fillStyle = '#ff4444';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
     ctx.fill();
 
+    // Add glow effect
+    ctx.shadowColor = '#ff4444';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(255, 68, 68, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
     // Draw health bar
     const healthPercentage = this.health / this.maxHealth;
-    ctx.fillStyle = 'green';
+    ctx.fillStyle = '#4CAF50';
     ctx.fillRect(this.x - 10, this.y - 15, 20 * healthPercentage, 4);
   }
 }
@@ -83,15 +94,26 @@ class BasicEnemy extends Enemy {
   }
 
   render(ctx) {
-    // Draw basic enemy
+    // Draw basic enemy with neon effect
     ctx.fillStyle = '#F44336';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
     ctx.fill();
 
+    // Add glow effect
+    ctx.shadowColor = '#F44336';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(244, 67, 54, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
     // Draw health bar
     const healthPercentage = this.health / this.maxHealth;
-    ctx.fillStyle = 'green';
+    ctx.fillStyle = '#4CAF50';
     ctx.fillRect(this.x - 10, this.y - 15, 20 * healthPercentage, 4);
   }
 }

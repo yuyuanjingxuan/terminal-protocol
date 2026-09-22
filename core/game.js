@@ -80,8 +80,31 @@ class Game {
 
   gameOver(isWin) {
     this.isRunning = false;
+    
+    // Show game over message on canvas
+    const ctx = this.ctx;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    ctx.fillStyle = isWin ? '#00ff88' : '#ff4444';
+    ctx.font = '48px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(
+      isWin ? 'LEVEL COMPLETE!' : 'GAME OVER',
+      this.canvas.width / 2,
+      this.canvas.height / 2
+    );
+    
+    ctx.fillStyle = 'white';
+    ctx.font = '24px Arial';
+    ctx.fillText(
+      isWin ? 'All waves defeated!' : 'The terminal was breached...',
+      this.canvas.width / 2,
+      this.canvas.height / 2 + 40
+    );
+    
     console.log(isWin ? 'Level Complete!' : 'Game Over!');
-    // TODO: Show game over screen
   }
 
   addTower(tower) {

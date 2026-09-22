@@ -59,14 +59,25 @@ class Tower {
   }
 
   render(ctx) {
-    // Draw tower base
-    ctx.fillStyle = 'blue';
+    // Draw tower base with neon effect
+    ctx.fillStyle = '#00a2ff';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
     ctx.fill();
 
+    // Add glow effect
+    ctx.shadowColor = '#00a2ff';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(0, 162, 255, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
     // Draw range indicator (for debugging)
-    ctx.strokeStyle = 'rgba(0, 0, 255, 0.2)';
+    ctx.strokeStyle = 'rgba(0, 162, 255, 0.2)';
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
     ctx.stroke();
@@ -83,11 +94,22 @@ class BasicTower extends Tower {
   }
 
   render(ctx) {
-    // Draw basic tower
+    // Draw basic tower with neon effect
     ctx.fillStyle = '#4CAF50';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
     ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = '#4CAF50';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(76, 175, 80, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
 
     // Draw tower top
     ctx.fillStyle = '#2E7D32';

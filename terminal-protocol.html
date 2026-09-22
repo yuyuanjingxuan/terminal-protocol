@@ -197,8 +197,31 @@ class Game {
 
   gameOver(isWin) {
     this.isRunning = false;
+    
+    // Show game over message on canvas
+    const ctx = this.ctx;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    ctx.fillStyle = isWin ? '#00ff88' : '#ff4444';
+    ctx.font = '48px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(
+      isWin ? 'LEVEL COMPLETE!' : 'GAME OVER',
+      this.canvas.width / 2,
+      this.canvas.height / 2
+    );
+    
+    ctx.fillStyle = 'white';
+    ctx.font = '24px Arial';
+    ctx.fillText(
+      isWin ? 'All waves defeated!' : 'The terminal was breached...',
+      this.canvas.width / 2,
+      this.canvas.height / 2 + 40
+    );
+    
     console.log(isWin ? 'Level Complete!' : 'Game Over!');
-    // TODO: Show game over screen
   }
 
   addTower(tower) {
@@ -346,15 +369,26 @@ class Enemy {
   }
 
   render(ctx) {
-    // Draw enemy
-    ctx.fillStyle = 'red';
+    // Draw enemy with neon effect
+    ctx.fillStyle = '#ff4444';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
     ctx.fill();
 
+    // Add glow effect
+    ctx.shadowColor = '#ff4444';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(255, 68, 68, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
     // Draw health bar
     const healthPercentage = this.health / this.maxHealth;
-    ctx.fillStyle = 'green';
+    ctx.fillStyle = '#4CAF50';
     ctx.fillRect(this.x - 10, this.y - 15, 20 * healthPercentage, 4);
   }
 }
@@ -370,15 +404,26 @@ class BasicEnemy extends Enemy {
   }
 
   render(ctx) {
-    // Draw basic enemy
+    // Draw basic enemy with neon effect
     ctx.fillStyle = '#F44336';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
     ctx.fill();
 
+    // Add glow effect
+    ctx.shadowColor = '#F44336';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(244, 67, 54, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
     // Draw health bar
     const healthPercentage = this.health / this.maxHealth;
-    ctx.fillStyle = 'green';
+    ctx.fillStyle = '#4CAF50';
     ctx.fillRect(this.x - 10, this.y - 15, 20 * healthPercentage, 4);
   }
 }
@@ -506,14 +551,25 @@ class Tower {
   }
 
   render(ctx) {
-    // Draw tower base
-    ctx.fillStyle = 'blue';
+    // Draw tower base with neon effect
+    ctx.fillStyle = '#00a2ff';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
     ctx.fill();
 
+    // Add glow effect
+    ctx.shadowColor = '#00a2ff';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(0, 162, 255, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
     // Draw range indicator (for debugging)
-    ctx.strokeStyle = 'rgba(0, 0, 255, 0.2)';
+    ctx.strokeStyle = 'rgba(0, 162, 255, 0.2)';
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
     ctx.stroke();
@@ -530,11 +586,22 @@ class BasicTower extends Tower {
   }
 
   render(ctx) {
-    // Draw basic tower
+    // Draw basic tower with neon effect
     ctx.fillStyle = '#4CAF50';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
     ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = '#4CAF50';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(76, 175, 80, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
 
     // Draw tower top
     ctx.fillStyle = '#2E7D32';
@@ -656,8 +723,9 @@ class Renderer {
 
     if (!path || path.length < 2) return;
 
-    ctx.strokeStyle = 'gray';
-    ctx.lineWidth = 20;
+    // Draw path with neon effect
+    ctx.strokeStyle = '#00f0ff';
+    ctx.lineWidth = 25;
     ctx.beginPath();
     ctx.moveTo(path[0].x, path[0].y);
 
@@ -667,16 +735,55 @@ class Renderer {
 
     ctx.stroke();
 
-    // Draw start and end points
-    ctx.fillStyle = 'green';
+    // Add glow effect
+    ctx.shadowColor = '#00f0ff';
+    ctx.shadowBlur = 20;
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
+    ctx.lineWidth = 30;
     ctx.beginPath();
-    ctx.arc(path[0].x, path[0].y, 10, 0, Math.PI * 2);
+    ctx.moveTo(path[0].x, path[0].y);
+
+    for (let i = 1; i < path.length; i++) {
+      ctx.lineTo(path[i].x, path[i].y);
+    }
+
+    ctx.stroke();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw start and end points with neon effect
+    ctx.fillStyle = '#00ff88';
+    ctx.beginPath();
+    ctx.arc(path[0].x, path[0].y, 12, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = 'red';
+    // Add glow to start point
+    ctx.shadowColor = '#00ff88';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(0, 255, 136, 0.5)';
     ctx.beginPath();
-    ctx.arc(path[path.length - 1].x, path[path.length - 1].y, 10, 0, Math.PI * 2);
+    ctx.arc(path[0].x, path[0].y, 12, 0, Math.PI * 2);
     ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = '#ff4444';
+    ctx.beginPath();
+    ctx.arc(path[path.length - 1].x, path[path.length - 1].y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow to end point
+    ctx.shadowColor = '#ff4444';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(255, 68, 68, 0.5)';
+    ctx.beginPath();
+    ctx.arc(path[path.length - 1].x, path[path.length - 1].y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
   }
 
   renderUI() {
