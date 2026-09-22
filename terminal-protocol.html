@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal Protocol</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    #gameContainer {
+      position: relative;
+    }
+
+    #gameCanvas {
+      background-color: #000;
+      border: 2px solid #444;
+    }
+
+    #uiPanel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="uiPanel">
+      <div id="resources">Resources: 100</div>
+      <div id="health">Health: 10</div>
+      <div id="waveInfo">Wave: 0/0</div>
+    </div>
+  </div>
+
+  <script>
+    // Inlined JavaScript will be inserted here
+    // main.js - Main entry point
+class TerminalProtocol {
+  constructor() {
+    this.game = null;
+    this.inputHandler = null;
+    this.audioManager = null;
+    this.renderer = null;
+  }
+
+  init() {
+    // Initialize game
+    this.game = new Game();
+    this.game.init('gameCanvas');
+
+    // Initialize input handler
+    this.inputHandler = new InputHandler(this.game);
+
+    // Initialize audio manager
+    this.audioManager = new AudioManager();
+
+    // Initialize renderer
+    this.renderer = new Renderer(this.game);
+
+    // Load level
+    this.loadLevel('level1');
+
+    // Start game loop
+    console.log('Terminal Protocol initialized');
+  }
+
+  loadLevel(levelName) {
+    // Load level data
+    const levelData = levels[levelName];
+    if (!levelData) {
+      console.error(`Level ${levelName} not found`);
+      return;
+    }
+
+    // Set current level
+    this.game.currentLevel = {
+      name: levelData.name,
+      path: levelData.path
+    };
+
+    // Setup wave manager
+    const waveManager = this.game.waveManager;
+    waveManager.reset();
+
+    // Add waves
+    levelData.waves.forEach(wave => {
+      const waveEnemies = wave.map(enemyData => ({
+        path: levelData.path
+      }));
+      waveManager.addWave(waveEnemies);
+    });
+
+    // Start first wave
+    waveManager.startNextWave();
+  }
+}
+
+// Initialize game when page loads
+window.addEventListener('load', () => {
+  const game = new TerminalProtocol();
+  game.init();
+});
+
+// core/game.js - Game loop and state management
+class Game {
+  constructor() {
+    this.canvas = null;
+    this.ctx = null;
+    this.lastTime = 0;
+    this.deltaTime = 0;
+    this.isRunning = false;
+    this.currentLevel = null;
+    this.towers = [];
+    this.enemies = [];
+    this.projectiles = [];
+    this.resources = 100; // Starting resources
+    this.health = 10; // Starting health
+    this.waveManager = null;
+  }
+
+  init(canvasId) {
+    this.canvas = document.getElementById(canvasId);
+    this.ctx = this.canvas.getContext('2d');
+    this.waveManager = new WaveManager(this);
+    this.isRunning = true;
+    this.lastTime = performance.now();
+    requestAnimationFrame(this.loop.bind(this));
+  }
+
+  loop(currentTime) {
+    this.deltaTime = (currentTime - this.lastTime) / 1000;
+    this.lastTime = currentTime;
+
+    this.update(this.deltaTime);
+    this.render();
+
+    if (this.isRunning) {
+      requestAnimationFrame(this.loop.bind(this));
+    }
+  }
+
+  update(deltaTime) {
+    // Update game state
+    this.towers.forEach(tower => tower.update(deltaTime));
+    this.enemies.forEach(enemy => enemy.update(deltaTime));
+    this.projectiles.forEach(projectile => projectile.update(deltaTime));
+
+    // Clean up dead entities
+    this.enemies = this.enemies.filter(enemy => !enemy.isDead);
+    this.projectiles = this.projectiles.filter(projectile => !projectile.isDead);
+
+    // Check game over conditions
+    if (this.health <= 0) {
+      this.gameOver(false);
+    }
+
+    // Check wave completion
+    if (this.waveManager.checkWavesComplete() && this.enemies.length === 0) {
+      this.gameOver(true);
+    }
+  }
+
+  render() {
+    // Clear canvas
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Render game elements
+    this.enemies.forEach(enemy => enemy.render(this.ctx));
+    this.towers.forEach(tower => tower.render(this.ctx));
+    this.projectiles.forEach(projectile => projectile.render(this.ctx));
+
+    // Render UI
+    this.renderUI();
+  }
+
+  renderUI() {
+    // Draw resources and health
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = '16px Arial';
+    this.ctx.fillText(`Resources: ${this.resources}`, 10, 20);
+    this.ctx.fillText(`Health: ${this.health}`, 10, 40);
+  }
+
+  gameOver(isWin) {
+    this.isRunning = false;
+    console.log(isWin ? 'Level Complete!' : 'Game Over!');
+    // TODO: Show game over screen
+  }
+
+  addTower(tower) {
+    this.towers.push(tower);
+  }
+
+  addEnemy(enemy) {
+    this.enemies.push(enemy);
+  }
+
+  addProjectile(projectile) {
+    this.projectiles.push(projectile);
+  }
+
+  spendResources(amount) {
+    if (this.resources >= amount) {
+      this.resources -= amount;
+      return true;
+    }
+    return false;
+  }
+
+  gainResources(amount) {
+    this.resources += amount;
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+  }
+}
+
+// core/input.js - Input handling
+class InputHandler {
+  constructor(game) {
+    this.game = game;
+    this.mouseX = 0;
+    this.mouseY = 0;
+    this.isMouseDown = false;
+    this.setupEventListeners();
+  }
+
+  setupEventListeners() {
+    // Mouse events
+    this.game.canvas.addEventListener('mousemove', (e) => {
+      const rect = this.game.canvas.getBoundingClientRect();
+      this.mouseX = e.clientX - rect.left;
+      this.mouseY = e.clientY - rect.top;
+    });
+
+    this.game.canvas.addEventListener('mousedown', (e) => {
+      this.isMouseDown = true;
+      this.handleMouseDown(e);
+    });
+
+    this.game.canvas.addEventListener('mouseup', (e) => {
+      this.isMouseDown = false;
+    });
+
+    this.game.canvas.addEventListener('mouseleave', () => {
+      this.isMouseDown = false;
+    });
+  }
+
+  handleMouseDown(e) {
+    // Check if clicking on a tower placement spot
+    const gridSize = 40;
+    const towerX = Math.floor(this.mouseX / gridSize) * gridSize + gridSize / 2;
+    const towerY = Math.floor(this.mouseY / gridSize) * gridSize + gridSize / 2;
+
+    // Check if this position is valid for tower placement
+    if (this.isValidTowerPosition(towerX, towerY)) {
+      // Create a basic tower for now
+      const tower = new BasicTower(this.game, towerX, towerY);
+      if (this.game.spendResources(tower.cost)) {
+        this.game.addTower(tower);
+      }
+    }
+  }
+
+  isValidTowerPosition(x, y) {
+    // Simple validation - not on the path for now
+    // In a real implementation, this would check against the level's path
+    return true;
+  }
+}
+
+// entities/enemy.js - Base Enemy class
+class Enemy {
+  constructor(game, path) {
+    this.game = game;
+    this.path = path;
+    this.pathIndex = 0;
+    this.x = path[0].x;
+    this.y = path[0].y;
+    this.speed = 50; // pixels per second
+    this.health = 30;
+    this.maxHealth = 30;
+    this.isDead = false;
+    this.reward = 10; // resources rewarded when killed
+  }
+
+  update(deltaTime) {
+    if (this.isDead) return;
+
+    // Move along path
+    if (this.pathIndex < this.path.length - 1) {
+      const targetPoint = this.path[this.pathIndex + 1];
+      const dx = targetPoint.x - this.x;
+      const dy = targetPoint.y - this.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > 0) {
+        const moveX = (dx / distance) * this.speed * deltaTime;
+        const moveY = (dy / distance) * this.speed * deltaTime;
+
+        this.x += moveX;
+        this.y += moveY;
+
+        // Check if we've reached the next point
+        const newDistance = Math.sqrt(
+          Math.pow(targetPoint.x - this.x, 2) + Math.pow(targetPoint.y - this.y, 2)
+        );
+
+        if (newDistance < 5) { // Close enough to next point
+          this.pathIndex++;
+        }
+      }
+    } else {
+      // Reached the end - damage player
+      this.game.takeDamage(1);
+      this.isDead = true;
+    }
+  }
+
+  takeDamage(amount) {
+    this.health -= amount;
+    if (this.health <= 0) {
+      this.die();
+    }
+  }
+
+  die() {
+    this.isDead = true;
+    this.game.gainResources(this.reward);
+  }
+
+  render(ctx) {
+    // Draw enemy
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw health bar
+    const healthPercentage = this.health / this.maxHealth;
+    ctx.fillStyle = 'green';
+    ctx.fillRect(this.x - 10, this.y - 15, 20 * healthPercentage, 4);
+  }
+}
+
+// Basic enemy implementation
+class BasicEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    this.speed = 60;
+    this.health = 25;
+    this.maxHealth = 25;
+    this.reward = 8;
+  }
+
+  render(ctx) {
+    // Draw basic enemy
+    ctx.fillStyle = '#F44336';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw health bar
+    const healthPercentage = this.health / this.maxHealth;
+    ctx.fillStyle = 'green';
+    ctx.fillRect(this.x - 10, this.y - 15, 20 * healthPercentage, 4);
+  }
+}
+
+// entities/projectile.js - Projectile class
+class Projectile {
+  constructor(game, startX, startY, targetX, targetY, damage) {
+    this.game = game;
+    this.x = startX;
+    this.y = startY;
+    this.targetX = targetX;
+    this.targetY = targetY;
+    this.damage = damage;
+    this.speed = 300; // pixels per second
+    this.isDead = false;
+
+    // Calculate direction
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    this.velocityX = (dx / distance) * this.speed;
+    this.velocityY = (dy / distance) * this.speed;
+  }
+
+  update(deltaTime) {
+    this.x += this.velocityX * deltaTime;
+    this.y += this.velocityY * deltaTime;
+
+    // Check if reached target
+    const distanceToTarget = Math.sqrt(
+      Math.pow(this.targetX - this.x, 2) + Math.pow(this.targetY - this.y, 2)
+    );
+
+    if (distanceToTarget < 5) {
+      this.hitTarget();
+    }
+  }
+
+  hitTarget() {
+    this.isDead = true;
+
+    // Find enemy at target position and deal damage
+    const enemies = this.game.enemies;
+    for (let i = 0; i < enemies.length; i++) {
+      const enemy = enemies[i];
+      const distance = Math.sqrt(
+        Math.pow(enemy.x - this.targetX, 2) + Math.pow(enemy.y - this.targetY, 2)
+      );
+
+      if (distance < 15) { // Close enough to be the target
+        enemy.takeDamage(this.damage);
+        break;
+      }
+    }
+  }
+
+  render(ctx) {
+    // Draw projectile
+    ctx.fillStyle = 'yellow';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// entities/tower.js - Base Tower class
+class Tower {
+  constructor(game, x, y) {
+    this.game = game;
+    this.x = x;
+    this.y = y;
+    this.range = 100;
+    this.damage = 10;
+    this.cooldown = 1; // seconds
+    this.currentCooldown = 0;
+    this.target = null;
+    this.cost = 50;
+  }
+
+  update(deltaTime) {
+    this.currentCooldown -= deltaTime;
+
+    if (this.currentCooldown <= 0) {
+      this.findTarget();
+      if (this.target) {
+        this.attack();
+        this.currentCooldown = this.cooldown;
+      }
+    }
+  }
+
+  findTarget() {
+    // Find closest enemy in range
+    let closestEnemy = null;
+    let closestDistance = this.range;
+
+    this.game.enemies.forEach(enemy => {
+      const distance = Math.sqrt(
+        Math.pow(enemy.x - this.x, 2) + Math.pow(enemy.y - this.y, 2)
+      );
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestEnemy = enemy;
+      }
+    });
+
+    this.target = closestEnemy;
+  }
+
+  attack() {
+    if (this.target) {
+      // Create a projectile
+      const projectile = new Projectile(
+        this.game,
+        this.x,
+        this.y,
+        this.target.x,
+        this.target.y,
+        this.damage
+      );
+      this.game.addProjectile(projectile);
+    }
+  }
+
+  render(ctx) {
+    // Draw tower base
+    ctx.fillStyle = 'blue';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw range indicator (for debugging)
+    ctx.strokeStyle = 'rgba(0, 0, 255, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+// Basic tower implementation
+class BasicTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 15;
+    this.cooldown = 0.8;
+    this.cost = 60;
+  }
+
+  render(ctx) {
+    // Draw basic tower
+    ctx.fillStyle = '#4CAF50';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw tower top
+    ctx.fillStyle = '#2E7D32';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// systems/waveManager.js - Wave management system
+class WaveManager {
+  constructor(game) {
+    this.game = game;
+    this.waves = [];
+    this.currentWave = 0;
+    this.waveTimer = 0;
+    this.waveInterval = 5; // seconds between waves
+    this.isWaveActive = false;
+  }
+
+  addWave(enemies) {
+    this.waves.push(enemies);
+  }
+
+  startNextWave() {
+    if (this.currentWave < this.waves.length) {
+      this.isWaveActive = true;
+      const waveEnemies = this.waves[this.currentWave];
+
+      // Spawn all enemies in this wave
+      waveEnemies.forEach(enemyData => {
+        const enemy = new BasicEnemy(this.game, enemyData.path);
+        this.game.addEnemy(enemy);
+      });
+
+      this.currentWave++;
+    }
+  }
+
+  update(deltaTime) {
+    if (!this.isWaveActive && this.currentWave < this.waves.length) {
+      this.waveTimer += deltaTime;
+
+      if (this.waveTimer >= this.waveInterval) {
+        this.startNextWave();
+        this.waveTimer = 0;
+      }
+    }
+  }
+
+  checkWavesComplete() {
+    return this.currentWave >= this.waves.length;
+  }
+
+  reset() {
+    this.currentWave = 0;
+    this.waveTimer = 0;
+    this.isWaveActive = false;
+  }
+}
+
+// content/levels.js - Level definitions
+const levels = {
+  level1: {
+    name: "Level 1",
+    description: "Basic level to test core mechanics",
+    path: [
+      { x: 50, y: 200 },
+      { x: 350, y: 200 },
+      { x: 350, y: 400 },
+      { x: 600, y: 400 }
+    ],
+    waves: [
+      [
+        { type: 'basic', path: this.path },
+        { type: 'basic', path: this.path },
+        { type: 'basic', path: this.path }
+      ],
+      [
+        { type: 'basic', path: this.path },
+        { type: 'basic', path: this.path }
+      ]
+    ]
+  }
+};
+
+// Export levels object
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = levels;
+}
+
+// render/renderer.js - Rendering system
+class Renderer {
+  constructor(game) {
+    this.game = game;
+  }
+
+  render() {
+    const ctx = this.game.ctx;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+
+    // Render path
+    this.renderPath();
+
+    // Render entities
+    this.game.enemies.forEach(enemy => enemy.render(ctx));
+    this.game.towers.forEach(tower => tower.render(ctx));
+    this.game.projectiles.forEach(projectile => projectile.render(ctx));
+
+    // Render UI
+    this.renderUI();
+  }
+
+  renderPath() {
+    const ctx = this.game.ctx;
+    const path = this.game.currentLevel.path;
+
+    if (!path || path.length < 2) return;
+
+    ctx.strokeStyle = 'gray';
+    ctx.lineWidth = 20;
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+
+    for (let i = 1; i < path.length; i++) {
+      ctx.lineTo(path[i].x, path[i].y);
+    }
+
+    ctx.stroke();
+
+    // Draw start and end points
+    ctx.fillStyle = 'green';
+    ctx.beginPath();
+    ctx.arc(path[0].x, path[0].y, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'red';
+    ctx.beginPath();
+    ctx.arc(path[path.length - 1].x, path[path.length - 1].y, 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  renderUI() {
+    const ctx = this.game.ctx;
+
+    // Draw resources and health
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    ctx.fillText(`Resources: ${this.game.resources}`, 10, 20);
+    ctx.fillText(`Health: ${this.game.health}`, 10, 40);
+
+    // Draw wave info
+    if (this.game.waveManager) {
+      ctx.fillText(
+        `Wave: ${this.game.waveManager.currentWave}/${this.game.waveManager.waves.length}`,
+        10,
+        60
+      );
+    }
+  }
+}
+
+// audio/audioManager.js - Audio management system
+class AudioManager {
+  constructor() {
+    this.audioContext = null;
+    this.sounds = {};
+    this.init();
+  }
+
+  init() {
+    // Create audio context
+    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Initialize sounds
+    this.initSounds();
+  }
+
+  initSounds() {
+    // Placeholder for sound initialization
+    // In a real implementation, this would set up various sound effects
+  }
+
+  playSound(name) {
+    if (this.sounds[name]) {
+      const source = this.audioContext.createBufferSource();
+      source.buffer = this.sounds[name];
+      source.connect(this.audioContext.destination);
+      source.start(0);
+    }
+  }
+
+  playTowerBuilt() {
+    // Simple beep sound for tower built
+    if (!this.audioContext) return;
+
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    oscillator.frequency.value = 800;
+    gainNode.gain.value = 0.1;
+
+    oscillator.start();
+    oscillator.stop(this.audioContext.currentTime + 0.1);
+  }
+
+  playEnemyDie() {
+    // Simple sound for enemy death
+    if (!this.audioContext) return;
+
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    oscillator.frequency.value = 300;
+    gainNode.gain.value = 0.1;
+
+    oscillator.start();
+    oscillator.stop(this.audioContext.currentTime + 0.2);
+  }
+}
+
+
+  </script>
+</body>
+</html>

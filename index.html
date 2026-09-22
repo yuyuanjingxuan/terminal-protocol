@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal Protocol</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    #gameContainer {
+      position: relative;
+    }
+
+    #gameCanvas {
+      background-color: #000;
+      border: 2px solid #444;
+    }
+
+    #uiPanel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="uiPanel">
+      <div id="resources">Resources: 100</div>
+      <div id="health">Health: 10</div>
+      <div id="waveInfo">Wave: 0/0</div>
+    </div>
+  </div>
+
+  <!-- Include all JavaScript files -->
+  <script src="core/game.js"></script>
+  <script src="core/input.js"></script>
+  <script src="entities/tower.js"></script>
+  <script src="entities/enemy.js"></script>
+  <script src="entities/projectile.js"></script>
+  <script src="systems/waveManager.js"></script>
+  <script src="content/levels.js"></script>
+  <script src="render/renderer.js"></script>
+  <script src="audio/audioManager.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
