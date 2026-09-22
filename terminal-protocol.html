@@ -428,7 +428,7 @@ class BasicEnemy extends Enemy {
   }
 }
 
-// entities/projectile.js - Projectile class
+// entities/projectile.js - Projectile classes
 class Projectile {
   constructor(game, startX, startY, targetX, targetY, damage) {
     this.game = game;
@@ -439,6 +439,7 @@ class Projectile {
     this.damage = damage;
     this.speed = 300; // pixels per second
     this.isDead = false;
+    this.color = 'yellow';
 
     // Calculate direction
     const dx = targetX - startX;
@@ -483,10 +484,399 @@ class Projectile {
 
   render(ctx) {
     // Draw projectile
-    ctx.fillStyle = 'yellow';
+    ctx.fillStyle = this.color;
     ctx.beginPath();
     ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
     ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+  }
+}
+
+class ExplosionProjectile extends Projectile {
+  constructor(game, startX, startY, targetX, targetY, damage, explosionRadius) {
+    super(game, startX, startY, targetX, targetY, damage);
+    this.explosionRadius = explosionRadius;
+    this.color = '#ff6600';
+  }
+
+  hitTarget() {
+    this.isDead = true;
+
+    // Find all enemies in explosion radius
+    const enemies = this.game.enemies;
+    for (let i = 0; i < enemies.length; i++) {
+      const enemy = enemies[i];
+      const distance = Math.sqrt(
+        Math.pow(enemy.x - this.targetX, 2) + Math.pow(enemy.y - this.targetY, 2)
+      );
+
+      if (distance < this.explosionRadius) {
+        enemy.takeDamage(this.damage);
+      }
+    }
+  }
+
+  render(ctx) {
+    // Draw explosion projectile
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(255, 102, 0, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+  }
+}
+
+class LaserProjectile extends Projectile {
+  constructor(game, startX, startY, targetX, targetY, damage) {
+    super(game, startX, startY, targetX, targetY, damage);
+    this.speed = 500; // Faster than regular projectiles
+    this.color = '#00f0ff';
+    this.width = 3;
+
+    // Recalculate velocity with new speed
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    this.velocityX = (dx / distance) * this.speed;
+    this.velocityY = (dy / distance) * this.speed;
+  }
+
+  render(ctx) {
+    // Draw laser beam
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = this.width;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x - this.velocityX * 0.1, this.y - this.velocityY * 0.1);
+    ctx.stroke();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 12;
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.6)';
+    ctx.lineWidth = this.width + 2;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x - this.velocityX * 0.1, this.y - this.velocityY * 0.1);
+    ctx.stroke();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+  }
+}
+
+class EMPProjectile extends Projectile {
+  constructor(game, startX, startY, targetX, targetY, damage, slowAmount, slowDuration) {
+    super(game, startX, startY, targetX, targetY, damage);
+    this.slowAmount = slowAmount;
+    this.slowDuration = slowDuration;
+    this.color = '#9c27b0';
+  }
+
+  hitTarget() {
+    this.isDead = true;
+
+    // Find enemy at target position and apply slow
+    const enemies = this.game.enemies;
+    for (let i = 0; i < enemies.length; i++) {
+      const enemy = enemies[i];
+      const distance = Math.sqrt(
+        Math.pow(enemy.x - this.targetX, 2) + Math.pow(enemy.y - this.targetY, 2)
+      );
+
+      if (distance < 15) {
+        enemy.takeDamage(this.damage);
+        enemy.speed *= (1 - this.slowAmount);
+
+        // Reset speed after duration
+        setTimeout(() => {
+          enemy.speed /= (1 - this.slowAmount);
+        }, this.slowDuration * 1000);
+        break;
+      }
+    }
+  }
+
+  render(ctx) {
+    // Draw EMP projectile
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(156, 39, 176, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+  }
+}
+
+class PulseProjectile extends Projectile {
+  constructor(game, startX, startY, radius, stunDuration) {
+    super(game, startX, startY, startX, startY, 0);
+    this.radius = radius;
+    this.stunDuration = stunDuration;
+    this.color = '#673ab7';
+    this.speed = 0; // Doesn't move
+    this.velocityX = 0;
+    this.velocityY = 0;
+    this.lifetime = 0.5; // seconds
+    this.currentLifetime = 0;
+  }
+
+  update(deltaTime) {
+    this.currentLifetime += deltaTime;
+
+    if (this.currentLifetime >= this.lifetime) {
+      this.hitTarget();
+    }
+  }
+
+  hitTarget() {
+    this.isDead = true;
+
+    // Find all enemies in pulse radius and stun them
+    const enemies = this.game.enemies;
+    for (let i = 0; i < enemies.length; i++) {
+      const enemy = enemies[i];
+      const distance = Math.sqrt(
+        Math.pow(enemy.x - this.x, 2) + Math.pow(enemy.y - this.y, 2)
+      );
+
+      if (distance < this.radius) {
+        const originalSpeed = enemy.speed;
+        enemy.speed = 0; // Stun
+
+        // Reset speed after duration
+        setTimeout(() => {
+          enemy.speed = originalSpeed;
+        }, this.stunDuration * 1000);
+      }
+    }
+  }
+
+  render(ctx) {
+    // Draw pulse effect
+    const progress = this.currentLifetime / this.lifetime;
+    const currentRadius = this.radius * progress;
+
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 15;
+    ctx.strokeStyle = 'rgba(103, 58, 183, 0.3)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, currentRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+  }
+}
+
+class ChainProjectile extends Projectile {
+  constructor(game, startX, startY, targetX, targetY, damage, chainTargets, chainDamage, range) {
+    super(game, startX, startY, targetX, targetY, damage);
+    this.chainTargets = chainTargets;
+    this.chainDamage = chainDamage;
+    this.range = range;
+    this.chainCount = 0;
+    this.color = '#3f51b5';
+    this.chainedEnemies = [];
+  }
+
+  hitTarget() {
+    this.chainedEnemies.push({x: this.targetX, y: this.targetY});
+    this.chainCount++;
+
+    // Damage current target
+    const enemies = this.game.enemies;
+    for (let i = 0; i < enemies.length; i++) {
+      const enemy = enemies[i];
+      const distance = Math.sqrt(
+        Math.pow(enemy.x - this.targetX, 2) + Math.pow(enemy.y - this.targetY, 2)
+      );
+
+      if (distance < 15) {
+        enemy.takeDamage(this.damage);
+        break;
+      }
+    }
+
+    // Find next target to chain to
+    if (this.chainCount < this.chainTargets) {
+      let closestEnemy = null;
+      let closestDistance = this.range;
+
+      enemies.forEach(enemy => {
+        // Don't chain to already chained enemies
+        const alreadyChained = this.chainedEnemies.some(
+          pos => Math.sqrt(Math.pow(pos.x - enemy.x, 2) + Math.pow(pos.y - enemy.y, 2)) < 15
+        );
+
+        if (!alreadyChained) {
+          const distance = Math.sqrt(
+            Math.pow(enemy.x - this.targetX, 2) + Math.pow(enemy.y - this.targetY, 2)
+          );
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestEnemy = enemy;
+          }
+        }
+      });
+
+      if (closestEnemy) {
+        // Chain to next enemy
+        this.targetX = closestEnemy.x;
+        this.targetY = closestEnemy.y;
+        this.damage *= this.chainDamage;
+
+        // Recalculate direction
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        this.velocityX = (dx / distance) * this.speed;
+        this.velocityY = (dy / distance) * this.speed;
+      } else {
+        this.isDead = true;
+      }
+    } else {
+      this.isDead = true;
+    }
+  }
+
+  render(ctx) {
+    // Draw chain lightning
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.targetX, this.targetY);
+    ctx.stroke();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 10;
+    ctx.strokeStyle = 'rgba(63, 81, 181, 0.5)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.targetX, this.targetY);
+    ctx.stroke();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw chained positions
+    this.chainedEnemies.forEach(pos => {
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+}
+
+class RepairProjectile extends Projectile {
+  constructor(game, startX, startY, targetX, targetY, repairAmount, repairDuration) {
+    super(game, startX, startY, targetX, targetY, 0);
+    this.repairAmount = repairAmount;
+    this.repairDuration = repairDuration;
+    this.color = '#4CAF50';
+    this.speed = 400;
+
+    // Recalculate velocity with new speed
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    this.velocityX = (dx / distance) * this.speed;
+    this.velocityY = (dy / distance) * this.speed;
+  }
+
+  hitTarget() {
+    this.isDead = true;
+
+    // Find tower at target position and repair it
+    const towers = this.game.towers;
+    for (let i = 0; i < towers.length; i++) {
+      const tower = towers[i];
+      const distance = Math.sqrt(
+        Math.pow(tower.x - this.targetX, 2) + Math.pow(tower.y - this.targetY, 2)
+      );
+
+      if (distance < 15) {
+        // Repair tower over time
+        const repairInterval = setInterval(() => {
+          // Tower doesn't have health yet, so we'll just add a visual effect
+          // In a real implementation, this would repair tower health
+        }, 1000);
+
+        // Stop repairing after duration
+        setTimeout(() => {
+          clearInterval(repairInterval);
+        }, this.repairDuration * 1000);
+        break;
+      }
+    }
+  }
+
+  render(ctx) {
+    // Draw repair beam
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.targetX, this.targetY);
+    ctx.stroke();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 12;
+    ctx.strokeStyle = 'rgba(76, 175, 80, 0.6)';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.targetX, this.targetY);
+    ctx.stroke();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
   }
 }
 
@@ -576,26 +966,28 @@ class Tower {
   }
 }
 
-// Basic tower implementation
-class BasicTower extends Tower {
+// Energy Faction - Single target high damage
+class LaserTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
-    this.damage = 15;
-    this.cooldown = 0.8;
-    this.cost = 60;
+    this.damage = 25;
+    this.cooldown = 1.2;
+    this.range = 150;
+    this.cost = 80;
+    this.color = '#00f0ff';
   }
 
   render(ctx) {
-    // Draw basic tower with neon effect
-    ctx.fillStyle = '#4CAF50';
+    // Draw laser tower
+    ctx.fillStyle = this.color;
     ctx.beginPath();
     ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
     ctx.fill();
 
     // Add glow effect
-    ctx.shadowColor = '#4CAF50';
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = 'rgba(76, 175, 80, 0.4)';
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.3)';
     ctx.beginPath();
     ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
     ctx.fill();
@@ -603,11 +995,1047 @@ class BasicTower extends Tower {
     // Reset shadow
     ctx.shadowBlur = 0;
 
-    // Draw tower top
-    ctx.fillStyle = '#2E7D32';
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
     ctx.beginPath();
-    ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+class PlasmaTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 35;
+    this.cooldown = 1.8;
+    this.range = 120;
+    this.cost = 100;
+    this.color = '#00a2ff';
+  }
+
+  render(ctx) {
+    // Draw plasma tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
     ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = 'rgba(0, 162, 255, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(0, 162, 255, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+class RailgunTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 50;
+    this.cooldown = 3.0;
+    this.range = 200;
+    this.cost = 150;
+    this.color = '#0066ff';
+  }
+
+  render(ctx) {
+    // Draw railgun tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 25;
+    ctx.fillStyle = 'rgba(0, 102, 255, 0.5)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(0, 102, 255, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+// Explosive Faction - Area of effect damage
+class CannonTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 20;
+    this.cooldown = 2.0;
+    this.range = 100;
+    this.cost = 90;
+    this.color = '#ff6600';
+    this.explosionRadius = 40;
+  }
+
+  attack() {
+    if (this.target) {
+      // Create explosion projectile
+      const projectile = new ExplosionProjectile(
+        this.game,
+        this.x,
+        this.y,
+        this.target.x,
+        this.target.y,
+        this.damage,
+        this.explosionRadius
+      );
+      this.game.addProjectile(projectile);
+    }
+  }
+
+  render(ctx) {
+    // Draw cannon tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(255, 102, 0, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(255, 102, 0, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Draw explosion radius indicator
+    ctx.strokeStyle = 'rgba(255, 102, 0, 0.1)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.explosionRadius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+class MissileTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 18;
+    this.cooldown = 1.5;
+    this.range = 130;
+    this.cost = 75;
+    this.color = '#ff3300';
+    this.explosionRadius = 35;
+  }
+
+  attack() {
+    if (this.target) {
+      // Create missile projectile
+      const projectile = new ExplosionProjectile(
+        this.game,
+        this.x,
+        this.y,
+        this.target.x,
+        this.target.y,
+        this.damage,
+        this.explosionRadius
+      );
+      this.game.addProjectile(projectile);
+    }
+  }
+
+  render(ctx) {
+    // Draw missile tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = 'rgba(255, 51, 0, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(255, 51, 0, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Draw explosion radius indicator
+    ctx.strokeStyle = 'rgba(255, 51, 0, 0.1)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.explosionRadius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+class BombTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 22;
+    this.cooldown = 2.5;
+    this.range = 90;
+    this.cost = 110;
+    this.color = '#cc0000';
+    this.explosionRadius = 50;
+  }
+
+  attack() {
+    if (this.target) {
+      // Create bomb projectile
+      const projectile = new ExplosionProjectile(
+        this.game,
+        this.x,
+        this.y,
+        this.target.x,
+        this.target.y,
+        this.damage,
+        this.explosionRadius
+      );
+      this.game.addProjectile(projectile);
+    }
+  }
+
+  render(ctx) {
+    // Draw bomb tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = 'rgba(204, 0, 0, 0.5)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(204, 0, 0, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Draw explosion radius indicator
+    ctx.strokeStyle = 'rgba(204, 0, 0, 0.1)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.explosionRadius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+// Electromagnetic Faction - Control and debuff
+class EMPTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 5;
+    this.cooldown = 0.5;
+    this.range = 140;
+    this.cost = 70;
+    this.color = '#9c27b0';
+    this.slowAmount = 0.5; // 50% slow
+    this.slowDuration = 2.0; // seconds
+  }
+
+  attack() {
+    if (this.target) {
+      // Create EMP projectile that slows enemies
+      const projectile = new EMPProjectile(
+        this.game,
+        this.x,
+        this.y,
+        this.target.x,
+        this.target.y,
+        this.damage,
+        this.slowAmount,
+        this.slowDuration
+      );
+      this.game.addProjectile(projectile);
+    }
+  }
+
+  render(ctx) {
+    // Draw EMP tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(156, 39, 176, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(156, 39, 176, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+class PulseTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 0; // No direct damage
+    this.cooldown = 3.0;
+    this.range = 180;
+    this.cost = 90;
+    this.color = '#673ab7';
+    this.pulseRadius = 100;
+    this.stunDuration = 1.5; // seconds
+  }
+
+  attack() {
+    if (this.target) {
+      // Create pulse that stuns all enemies in radius
+      const projectile = new PulseProjectile(
+        this.game,
+        this.x,
+        this.y,
+        this.pulseRadius,
+        this.stunDuration
+      );
+      this.game.addProjectile(projectile);
+    }
+  }
+
+  render(ctx) {
+    // Draw pulse tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = 'rgba(103, 58, 183, 0.5)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(103, 58, 183, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Draw pulse radius indicator
+    ctx.strokeStyle = 'rgba(103, 58, 183, 0.15)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.pulseRadius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+class DisruptorTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 8;
+    this.cooldown = 1.0;
+    this.range = 160;
+    this.cost = 85;
+    this.color = '#3f51b5';
+    this.chainTargets = 3; // Number of enemies to chain to
+    this.chainDamage = 0.6; // 60% damage per chain
+  }
+
+  attack() {
+    if (this.target) {
+      // Create chain lightning projectile
+      const projectile = new ChainProjectile(
+        this.game,
+        this.x,
+        this.y,
+        this.target.x,
+        this.target.y,
+        this.damage,
+        this.chainTargets,
+        this.chainDamage,
+        this.range
+      );
+      this.game.addProjectile(projectile);
+    }
+  }
+
+  render(ctx) {
+    // Draw disruptor tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = 'rgba(63, 81, 181, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(63, 81, 181, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+// Support Faction - Buffs and utility
+class RepairTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 0; // No direct damage
+    this.cooldown = 2.0;
+    this.range = 120;
+    this.cost = 60;
+    this.color = '#4CAF50';
+    this.repairAmount = 5; // Health repaired per second
+    this.repairDuration = 3.0; // seconds
+  }
+
+  findTarget() {
+    // Find closest damaged tower in range
+    let closestTower = null;
+    let closestDistance = this.range;
+
+    this.game.towers.forEach(tower => {
+      if (tower === this) return; // Don't target self
+
+      const distance = Math.sqrt(
+        Math.pow(tower.x - this.x, 2) + Math.pow(tower.y - this.y, 2)
+      );
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestTower = tower;
+      }
+    });
+
+    this.target = closestTower;
+  }
+
+  attack() {
+    if (this.target) {
+      // Create repair beam
+      const projectile = new RepairProjectile(
+        this.game,
+        this.x,
+        this.y,
+        this.target.x,
+        this.target.y,
+        this.repairAmount,
+        this.repairDuration
+      );
+      this.game.addProjectile(projectile);
+    }
+  }
+
+  render(ctx) {
+    // Draw repair tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(76, 175, 80, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+class BoostTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 0; // No direct damage
+    this.cooldown = 1.0;
+    this.range = 150;
+    this.cost = 75;
+    this.color = '#FFEB3B';
+    this.boostAmount = 0.3; // 30% damage boost
+    this.boostDuration = 5.0; // seconds
+  }
+
+  findTarget() {
+    // Find closest tower in range to boost
+    let closestTower = null;
+    let closestDistance = this.range;
+
+    this.game.towers.forEach(tower => {
+      if (tower === this) return; // Don't target self
+
+      const distance = Math.sqrt(
+        Math.pow(tower.x - this.x, 2) + Math.pow(tower.y - this.y, 2)
+      );
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestTower = tower;
+      }
+    });
+
+    this.target = closestTower;
+  }
+
+  attack() {
+    if (this.target) {
+      // Apply boost to target tower
+      this.target.damage *= (1 + this.boostAmount);
+      this.target.color = '#FFEB3B'; // Change color to show boost
+
+      // Reset boost after duration
+      setTimeout(() => {
+        this.target.damage /= (1 + this.boostAmount);
+        // Reset color based on tower type
+        if (this.target instanceof LaserTower) {
+          this.target.color = '#00f0ff';
+        } else if (this.target instanceof CannonTower) {
+          this.target.color = '#ff6600';
+        } else if (this.target instanceof EMPTower) {
+          this.target.color = '#9c27b0';
+        } else if (this.target instanceof RepairTower) {
+          this.target.color = '#4CAF50';
+        }
+      }, this.boostDuration * 1000);
+    }
+  }
+
+  render(ctx) {
+    // Draw boost tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = 'rgba(255, 235, 59, 0.4)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw range indicator
+    ctx.strokeStyle = 'rgba(255, 235, 59, 0.2)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+class ResourceTower extends Tower {
+  constructor(game, x, y) {
+    super(game, x, y);
+    this.damage = 0; // No direct damage
+    this.cooldown = 5.0;
+    this.range = 0; // No range, affects game directly
+    this.cost = 120;
+    this.color = '#FFC107';
+    this.resourceAmount = 20; // Resources generated
+  }
+
+  attack() {
+    // Generate resources directly
+    this.game.gainResources(this.resourceAmount);
+  }
+
+  render(ctx) {
+    // Draw resource tower
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add glow effect
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = 'rgba(255, 193, 7, 0.5)';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+
+    // Draw resource generation indicator
+    ctx.fillStyle = 'white';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('+' + this.resourceAmount, this.x, this.y + 25);
+    ctx.textAlign = 'left';
+  }
+}
+
+// systems/techTree.js - Technology tree system
+class TechTree {
+  constructor(game) {
+    this.game = game;
+    this.nodes = {
+      // Energy faction tech tree
+      'energy_1': {
+        name: 'Advanced Targeting',
+        description: 'Energy towers gain +10% damage',
+        cost: 50,
+        unlocked: false,
+        faction: 'energy',
+        effect: (tower) => {
+          if (tower instanceof LaserTower || tower instanceof PlasmaTower || tower instanceof RailgunTower) {
+            tower.damage *= 1.1;
+          }
+        }
+      },
+      'energy_2': {
+        name: 'Overcharge Capacitors',
+        description: 'Energy towers gain +15% attack speed',
+        cost: 100,
+        unlocked: false,
+        faction: 'energy',
+        effect: (tower) => {
+          if (tower instanceof LaserTower || tower instanceof PlasmaTower || tower instanceof RailgunTower) {
+            tower.cooldown *= 0.85;
+          }
+        }
+      },
+      'energy_3': {
+        name: 'Extended Range',
+        description: 'Energy towers gain +20% range',
+        cost: 150,
+        unlocked: false,
+        faction: 'energy',
+        effect: (tower) => {
+          if (tower instanceof LaserTower || tower instanceof PlasmaTower || tower instanceof RailgunTower) {
+            tower.range *= 1.2;
+          }
+        }
+      },
+      
+      // Explosive faction tech tree
+      'explosive_1': {
+        name: 'High Explosives',
+        description: 'Explosive towers gain +15% explosion radius',
+        cost: 50,
+        unlocked: false,
+        faction: 'explosive',
+        effect: (tower) => {
+          if (tower instanceof CannonTower || tower instanceof MissileTower || tower instanceof BombTower) {
+            tower.explosionRadius *= 1.15;
+          }
+        }
+      },
+      'explosive_2': {
+        name: 'Shrapnel Rounds',
+        description: 'Explosive towers gain +10% damage',
+        cost: 100,
+        unlocked: false,
+        faction: 'explosive',
+        effect: (tower) => {
+          if (tower instanceof CannonTower || tower instanceof MissileTower || tower instanceof BombTower) {
+            tower.damage *= 1.1;
+          }
+        }
+      },
+      'explosive_3': {
+        name: 'Rapid Reload',
+        description: 'Explosive towers gain +20% attack speed',
+        cost: 150,
+        unlocked: false,
+        faction: 'explosive',
+        effect: (tower) => {
+          if (tower instanceof CannonTower || tower instanceof MissileTower || tower instanceof BombTower) {
+            tower.cooldown *= 0.8;
+          }
+        }
+      },
+      
+      // Electromagnetic faction tech tree
+      'electromagnetic_1': {
+        name: 'Enhanced EMP',
+        description: 'EMP effects last 20% longer',
+        cost: 50,
+        unlocked: false,
+        faction: 'electromagnetic',
+        effect: (tower) => {
+          if (tower instanceof EMPTower || tower instanceof PulseTower || tower instanceof DisruptorTower) {
+            if (tower.slowDuration) tower.slowDuration *= 1.2;
+            if (tower.stunDuration) tower.stunDuration *= 1.2;
+          }
+        }
+      },
+      'electromagnetic_2': {
+        name: 'Wider Pulse',
+        description: 'Pulse and chain effects reach 15% further',
+        cost: 100,
+        unlocked: false,
+        faction: 'electromagnetic',
+        effect: (tower) => {
+          if (tower instanceof EMPTower || tower instanceof PulseTower || tower instanceof DisruptorTower) {
+            if (tower.pulseRadius) tower.pulseRadius *= 1.15;
+            if (tower.range) tower.range *= 1.15;
+          }
+        }
+      },
+      'electromagnetic_3': {
+        name: 'Chain Reaction',
+        description: 'Chain lightning can jump to 1 additional target',
+        cost: 150,
+        unlocked: false,
+        faction: 'electromagnetic',
+        effect: (tower) => {
+          if (tower instanceof DisruptorTower) {
+            tower.chainTargets += 1;
+          }
+        }
+      },
+      
+      // Support faction tech tree
+      'support_1': {
+        name: 'Efficient Repair',
+        description: 'Repair towers heal 20% more health',
+        cost: 50,
+        unlocked: false,
+        faction: 'support',
+        effect: (tower) => {
+          if (tower instanceof RepairTower) {
+            tower.repairAmount *= 1.2;
+          }
+        }
+      },
+      'support_2': {
+        name: 'Resource Optimization',
+        description: 'Resource towers generate 25% more resources',
+        cost: 100,
+        unlocked: false,
+        faction: 'support',
+        effect: (tower) => {
+          if (tower instanceof ResourceTower) {
+            tower.resourceAmount *= 1.25;
+          }
+        }
+      },
+      'support_3': {
+        name: 'Boost Amplification',
+        description: 'Boost effects are 30% stronger',
+        cost: 150,
+        unlocked: false,
+        faction: 'support',
+        effect: (tower) => {
+          if (tower instanceof BoostTower) {
+            tower.boostAmount *= 1.3;
+          }
+        }
+      },
+      
+      // Global upgrades
+      'global_1': {
+        name: 'Advanced Training',
+        description: 'All towers cost 10% less to build',
+        cost: 200,
+        unlocked: false,
+        faction: 'global',
+        effect: (tower) => {
+          // This would be applied when building towers
+        }
+      },
+      'global_2': {
+        name: 'Reinforced Structures',
+        description: 'All towers gain +10% health (when implemented)',
+        cost: 200,
+        unlocked: false,
+        faction: 'global',
+        effect: (tower) => {
+          // This would be applied when building towers
+        }
+      }
+    };
+
+    this.dependencies = {
+      'energy_2': ['energy_1'],
+      'energy_3': ['energy_2'],
+      'explosive_2': ['explosive_1'],
+      'explosive_3': ['explosive_2'],
+      'electromagnetic_2': ['electromagnetic_1'],
+      'electromagnetic_3': ['electromagnetic_2'],
+      'support_2': ['support_1'],
+      'support_3': ['support_2']
+    };
+  }
+
+  unlockNode(nodeId) {
+    const node = this.nodes[nodeId];
+    
+    if (!node) return false;
+    
+    // Check if node is already unlocked
+    if (node.unlocked) return true;
+    
+    // Check dependencies
+    if (this.dependencies[nodeId]) {
+      for (const depId of this.dependencies[nodeId]) {
+        if (!this.nodes[depId] || !this.nodes[depId].unlocked) {
+          console.log(`Dependency ${depId} not unlocked`);
+          return false;
+        }
+      }
+    }
+    
+    // Check if player can afford it
+    if (!this.game.spendResources(node.cost)) {
+      return false;
+    }
+    
+    // Unlock the node
+    node.unlocked = true;
+    
+    // Apply effect to existing towers
+    this.game.towers.forEach(tower => {
+      node.effect(tower);
+    });
+    
+    return true;
+  }
+
+  isNodeUnlocked(nodeId) {
+    const node = this.nodes[nodeId];
+    return node ? node.unlocked : false;
+  }
+
+  canUnlockNode(nodeId) {
+    const node = this.nodes[nodeId];
+    
+    if (!node || node.unlocked) return false;
+    
+    // Check dependencies
+    if (this.dependencies[nodeId]) {
+      for (const depId of this.dependencies[nodeId]) {
+        if (!this.nodes[depId] || !this.nodes[depId].unlocked) {
+          return false;
+        }
+      }
+    }
+    
+    // Check if player can afford it
+    return this.game.resources >= node.cost;
+  }
+
+  getNodeInfo(nodeId) {
+    return this.nodes[nodeId];
+  }
+
+  getAllNodes() {
+    return this.nodes;
+  }
+
+  getNodesByFaction(faction) {
+    return Object.fromEntries(
+      Object.entries(this.nodes).filter(([id, node]) => node.faction === faction)
+    );
+  }
+
+  reset() {
+    Object.values(this.nodes).forEach(node => {
+      node.unlocked = false;
+    });
+  }
+}
+
+// systems/upgradeSystem.js - Tower upgrade system
+class UpgradeSystem {
+  constructor(game) {
+    this.game = game;
+    this.upgrades = {
+      // Energy faction upgrades
+      'laser': [
+        { cost: 40, damage: 5, cooldown: -0.1, range: 10 },
+        { cost: 80, damage: 10, cooldown: -0.2, range: 20 },
+        { cost: 120, damage: 15, cooldown: -0.3, range: 30 }
+      ],
+      'plasma': [
+        { cost: 50, damage: 8, cooldown: -0.2, range: 15 },
+        { cost: 100, damage: 15, cooldown: -0.3, range: 25 },
+        { cost: 150, damage: 22, cooldown: -0.4, range: 35 }
+      ],
+      'railgun': [
+        { cost: 75, damage: 10, cooldown: -0.3, range: 25 },
+        { cost: 150, damage: 20, cooldown: -0.5, range: 35 },
+        { cost: 225, damage: 30, cooldown: -0.7, range: 45 }
+      ],
+      
+      // Explosive faction upgrades
+      'cannon': [
+        { cost: 45, damage: 4, cooldown: -0.2, explosionRadius: 5 },
+        { cost: 90, damage: 8, cooldown: -0.3, explosionRadius: 10 },
+        { cost: 135, damage: 12, cooldown: -0.4, explosionRadius: 15 }
+      ],
+      'missile': [
+        { cost: 38, damage: 4, cooldown: -0.1, explosionRadius: 5 },
+        { cost: 76, damage: 8, cooldown: -0.2, explosionRadius: 8 },
+        { cost: 114, damage: 12, cooldown: -0.3, explosionRadius: 12 }
+      ],
+      'bomb': [
+        { cost: 55, damage: 5, cooldown: -0.3, explosionRadius: 8 },
+        { cost: 110, damage: 10, cooldown: -0.4, explosionRadius: 12 },
+        { cost: 165, damage: 15, cooldown: -0.5, explosionRadius: 18 }
+      ],
+      
+      // Electromagnetic faction upgrades
+      'emp': [
+        { cost: 35, damage: 1, slowAmount: 0.1, slowDuration: 0.5 },
+        { cost: 70, damage: 2, slowAmount: 0.2, slowDuration: 1.0 },
+        { cost: 105, damage: 3, slowAmount: 0.3, slowDuration: 1.5 }
+      ],
+      'pulse': [
+        { cost: 45, stunDuration: 0.3, pulseRadius: 15 },
+        { cost: 90, stunDuration: 0.6, pulseRadius: 25 },
+        { cost: 135, stunDuration: 1.0, pulseRadius: 35 }
+      ],
+      'disruptor': [
+        { cost: 43, chainDamage: 0.1, chainTargets: 1 },
+        { cost: 86, chainDamage: 0.15, chainTargets: 2 },
+        { cost: 129, chainDamage: 0.2, chainTargets: 3 }
+      ],
+      
+      // Support faction upgrades
+      'repair': [
+        { cost: 30, repairAmount: 2, repairDuration: 1.0 },
+        { cost: 60, repairAmount: 4, repairDuration: 2.0 },
+        { cost: 90, repairAmount: 6, repairDuration: 3.0 }
+      ],
+      'boost': [
+        { cost: 38, boostAmount: 0.1, boostDuration: 2.0 },
+        { cost: 76, boostAmount: 0.2, boostDuration: 3.0 },
+        { cost: 114, boostAmount: 0.3, boostDuration: 4.0 }
+      ],
+      'resource': [
+        { cost: 60, resourceAmount: 10, cooldown: -1.0 },
+        { cost: 120, resourceAmount: 20, cooldown: -2.0 },
+        { cost: 180, resourceAmount: 30, cooldown: -3.0 }
+      ]
+    };
+  }
+
+  upgradeTower(tower, upgradeLevel) {
+    const towerType = this.getTowerType(tower);
+    
+    if (!towerType || !this.upgrades[towerType] || !this.upgrades[towerType][upgradeLevel]) {
+      return false;
+    }
+
+    const upgrade = this.upgrades[towerType][upgradeLevel];
+    
+    // Check if player can afford the upgrade
+    if (!this.game.spendResources(upgrade.cost)) {
+      return false;
+    }
+
+    // Apply upgrade
+    if (upgrade.damage) tower.damage += upgrade.damage;
+    if (upgrade.cooldown) tower.cooldown += upgrade.cooldown;
+    if (upgrade.range) tower.range += upgrade.range;
+    if (upgrade.explosionRadius) tower.explosionRadius += upgrade.explosionRadius;
+    if (upgrade.slowAmount) tower.slowAmount += upgrade.slowAmount;
+    if (upgrade.slowDuration) tower.slowDuration += upgrade.slowDuration;
+    if (upgrade.stunDuration) tower.stunDuration += upgrade.stunDuration;
+    if (upgrade.pulseRadius) tower.pulseRadius += upgrade.pulseRadius;
+    if (upgrade.chainDamage) tower.chainDamage += upgrade.chainDamage;
+    if (upgrade.chainTargets) tower.chainTargets += upgrade.chainTargets;
+    if (upgrade.repairAmount) tower.repairAmount += upgrade.repairAmount;
+    if (upgrade.repairDuration) tower.repairDuration += upgrade.repairDuration;
+    if (upgrade.boostAmount) tower.boostAmount += upgrade.boostAmount;
+    if (upgrade.boostDuration) tower.boostDuration += upgrade.boostDuration;
+    if (upgrade.resourceAmount) tower.resourceAmount += upgrade.resourceAmount;
+
+    return true;
+  }
+
+  getTowerType(tower) {
+    if (tower instanceof LaserTower) return 'laser';
+    if (tower instanceof PlasmaTower) return 'plasma';
+    if (tower instanceof RailgunTower) return 'railgun';
+    if (tower instanceof CannonTower) return 'cannon';
+    if (tower instanceof MissileTower) return 'missile';
+    if (tower instanceof BombTower) return 'bomb';
+    if (tower instanceof EMPTower) return 'emp';
+    if (tower instanceof PulseTower) return 'pulse';
+    if (tower instanceof DisruptorTower) return 'disruptor';
+    if (tower instanceof RepairTower) return 'repair';
+    if (tower instanceof BoostTower) return 'boost';
+    if (tower instanceof ResourceTower) return 'resource';
+    
+    return null;
+  }
+
+  getUpgradeInfo(towerType, upgradeLevel) {
+    if (!this.upgrades[towerType] || !this.upgrades[towerType][upgradeLevel]) {
+      return null;
+    }
+    
+    return this.upgrades[towerType][upgradeLevel];
+  }
+
+  getMaxUpgradeLevel(towerType) {
+    if (!this.upgrades[towerType]) {
+      return 0;
+    }
+    
+    return this.upgrades[towerType].length;
   }
 }
 
