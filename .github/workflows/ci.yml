@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: node build.js
+
+    - name: Test build output
+      run: |
+        if [ -f terminal-protocol.html ]; then
+          echo "Build successful - terminal-protocol.html exists"
+          ls -lh terminal-protocol.html
+        else
+          echo "Build failed - terminal-protocol.html not found"
+          exit 1
+        fi
