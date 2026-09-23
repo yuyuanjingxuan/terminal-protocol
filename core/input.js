@@ -20,6 +20,7 @@ class InputHandler {
     });
 
     this.game.canvas.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return; // Left click only
       this.isMouseDown = true;
       this.handleMouseDown(e);
     });
@@ -31,6 +32,13 @@ class InputHandler {
     this.game.canvas.addEventListener('mouseleave', () => {
       this.isMouseDown = false;
       this.game.mouseOnCanvas = false;
+    });
+
+    // Right-click cancels tower selection
+    this.game.canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      this.game.selectedTowerType = null;
+      this.updateTowerButtons();
     });
 
     // Keyboard tower selection

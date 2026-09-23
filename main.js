@@ -15,10 +15,11 @@ class TerminalProtocol {
     // Initialize input handler
     this.inputHandler = new InputHandler(this.game);
 
-    // Tower selection buttons
+    // Tower selection buttons (click again to deselect)
     document.querySelectorAll('.tower-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        this.game.selectedTowerType = btn.dataset.type;
+        const type = btn.dataset.type;
+        this.game.selectedTowerType = (this.game.selectedTowerType === type) ? null : type;
         this.inputHandler.updateTowerButtons();
       });
     });
