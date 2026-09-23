@@ -110,9 +110,10 @@ class Tower {
   }
 
   findTarget() {
-    // Find closest enemy in range (stealthed enemies are invisible unless this tower can reveal)
-    let closestEnemy = null;
-    let closestDistance = this.range;
+    // Target the enemy FURTHEST along the path within range (classic TD "first" targeting).
+    // Stealthed enemies are invisible unless this tower can reveal them.
+    let bestEnemy = null;
+    let bestProgress = -1;
 
     this.game.enemies.forEach(enemy => {
       if (enemy.isDead) return;
@@ -121,26 +122,29 @@ class Tower {
       const distance = Math.sqrt(
         Math.pow(enemy.x - this.x, 2) + Math.pow(enemy.y - this.y, 2)
       );
+      if (distance > this.range) return;
 
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestEnemy = enemy;
+      const progress = enemy.pathProgress();
+      if (progress > bestProgress) {
+        bestProgress = progress;
+        bestEnemy = enemy;
       }
     });
 
-    this.target = closestEnemy;
+    this.target = bestEnemy;
   }
 
   attack() {
     if (this.target) {
-      // Create a projectile
+      // Create a homing projectile that locks onto the target enemy
       const projectile = new Projectile(
         this.game,
         this.x,
         this.y,
         this.target.x,
         this.target.y,
-        this.damage
+        this.damage,
+        this.target
       );
       this.game.addProjectile(projectile);
     }
@@ -177,7 +181,7 @@ class LaserTower extends Tower {
     this.damage = 25;
     this.cooldown = 1.2;
     this.range = 150;
-    this.cost = 80;
+    this.cost = 50;
     this.color = '#00f0ff';
     this.shape = 'triangle';
   }
@@ -191,7 +195,7 @@ class PlasmaTower extends Tower {
     this.damage = 35;
     this.cooldown = 1.8;
     this.range = 120;
-    this.cost = 100;
+    this.cost = 75;
     this.color = '#00a2ff';
     this.shape = 'diamond';
     this.size = 18;
@@ -206,7 +210,7 @@ class RailgunTower extends Tower {
     this.damage = 50;
     this.cooldown = 3.0;
     this.range = 200;
-    this.cost = 150;
+    this.cost = 120;
     this.color = '#0066ff';
     this.shape = 'hexagon';
     this.size = 13;
@@ -222,7 +226,7 @@ class CannonTower extends Tower {
     this.damage = 20;
     this.cooldown = 2.0;
     this.range = 100;
-    this.cost = 90;
+    this.cost = 60;
     this.color = '#ff6600';
     this.explosionRadius = 40;
     this.shape = 'square';
@@ -239,7 +243,8 @@ class CannonTower extends Tower {
         this.target.x,
         this.target.y,
         this.damage,
-        this.explosionRadius
+        this.explosionRadius,
+        this.target
       );
       this.game.addProjectile(projectile);
     }
@@ -254,7 +259,7 @@ class MissileTower extends Tower {
     this.damage = 18;
     this.cooldown = 1.5;
     this.range = 130;
-    this.cost = 75;
+    this.cost = 55;
     this.color = '#ff3300';
     this.explosionRadius = 35;
     this.shape = 'pentagon';
@@ -271,7 +276,8 @@ class MissileTower extends Tower {
         this.target.x,
         this.target.y,
         this.damage,
-        this.explosionRadius
+        this.explosionRadius,
+        this.target
       );
       this.game.addProjectile(projectile);
     }
@@ -286,7 +292,7 @@ class BombTower extends Tower {
     this.damage = 22;
     this.cooldown = 2.5;
     this.range = 90;
-    this.cost = 110;
+    this.cost = 90;
     this.color = '#cc0000';
     this.explosionRadius = 50;
     this.shape = 'circle';
@@ -303,7 +309,8 @@ class BombTower extends Tower {
         this.target.x,
         this.target.y,
         this.damage,
-        this.explosionRadius
+        this.explosionRadius,
+        this.target
       );
       this.game.addProjectile(projectile);
     }
@@ -319,7 +326,7 @@ class EMPTower extends Tower {
     this.damage = 5;
     this.cooldown = 0.5;
     this.range = 140;
-    this.cost = 70;
+    this.cost = 45;
     this.color = '#9c27b0';
     this.slowAmount = 0.5; // 50% slow
     this.slowDuration = 2.0; // seconds
@@ -339,7 +346,8 @@ class EMPTower extends Tower {
         this.target.y,
         this.damage,
         this.slowAmount,
-        this.slowDuration
+        this.slowDuration,
+        this.target
       );
       this.game.addProjectile(projectile);
     }
@@ -355,7 +363,7 @@ class PulseTower extends Tower {
     this.damage = 0; // No direct damage
     this.cooldown = 3.0;
     this.range = 180;
-    this.cost = 90;
+    this.cost = 70;
     this.color = '#673ab7';
     this.pulseRadius = 100;
     this.stunDuration = 1.5; // seconds
@@ -388,7 +396,7 @@ class DisruptorTower extends Tower {
     this.damage = 8;
     this.cooldown = 1.0;
     this.range = 160;
-    this.cost = 85;
+    this.cost = 65;
     this.color = '#3f51b5';
     this.chainTargets = 3; // Number of enemies to chain to
     this.chainDamage = 0.6; // 60% damage per chain
@@ -409,7 +417,8 @@ class DisruptorTower extends Tower {
         this.damage,
         this.chainTargets,
         this.chainDamage,
-        this.range
+        this.range,
+        this.target
       );
       this.game.addProjectile(projectile);
     }
@@ -426,7 +435,7 @@ class RepairTower extends Tower {
     this.damage = 0; // No direct damage
     this.cooldown = 2.0;
     this.range = 120;
-    this.cost = 60;
+    this.cost = 50;
     this.color = '#4CAF50';
     this.repairAmount = 5; // Health repaired per second
     this.repairDuration = 3.0; // seconds
@@ -535,16 +544,16 @@ class BoostTower extends Tower {
 
 // Tower type registry for selection UI
 const TOWER_TYPES = {
-  laser: { name: 'Laser', class: LaserTower, cost: 80, range: 150, color: '#00f0ff', shape: 'triangle', faction: 'Energy' },
-  plasma: { name: 'Plasma', class: PlasmaTower, cost: 100, range: 120, color: '#00a2ff', shape: 'diamond', faction: 'Energy' },
-  railgun: { name: 'Railgun', class: RailgunTower, cost: 150, range: 200, color: '#0066ff', shape: 'hexagon', faction: 'Energy' },
-  cannon: { name: 'Cannon', class: CannonTower, cost: 90, range: 100, color: '#ff6600', shape: 'square', faction: 'Explosive' },
-  missile: { name: 'Missile', class: MissileTower, cost: 75, range: 130, color: '#ff3300', shape: 'pentagon', faction: 'Explosive' },
-  bomb: { name: 'Bomb', class: BombTower, cost: 110, range: 90, color: '#cc0000', shape: 'circle', faction: 'Explosive' },
-  emp: { name: 'EMP', class: EMPTower, cost: 70, range: 140, color: '#9c27b0', shape: 'ring', faction: 'EM' },
-  pulse: { name: 'Pulse', class: PulseTower, cost: 90, range: 180, color: '#673ab7', shape: 'double', faction: 'EM' },
-  disruptor: { name: 'Disruptor', class: DisruptorTower, cost: 85, range: 160, color: '#3f51b5', shape: 'bolt', faction: 'EM' },
-  repair: { name: 'Repair', class: RepairTower, cost: 60, range: 120, color: '#4CAF50', shape: 'cross', faction: 'Support' }
+  laser: { name: 'Laser', class: LaserTower, cost: 50, range: 150, color: '#00f0ff', shape: 'triangle', faction: 'Energy' },
+  plasma: { name: 'Plasma', class: PlasmaTower, cost: 75, range: 120, color: '#00a2ff', shape: 'diamond', faction: 'Energy' },
+  railgun: { name: 'Railgun', class: RailgunTower, cost: 120, range: 200, color: '#0066ff', shape: 'hexagon', faction: 'Energy' },
+  cannon: { name: 'Cannon', class: CannonTower, cost: 60, range: 100, color: '#ff6600', shape: 'square', faction: 'Explosive' },
+  missile: { name: 'Missile', class: MissileTower, cost: 55, range: 130, color: '#ff3300', shape: 'pentagon', faction: 'Explosive' },
+  bomb: { name: 'Bomb', class: BombTower, cost: 90, range: 90, color: '#cc0000', shape: 'circle', faction: 'Explosive' },
+  emp: { name: 'EMP', class: EMPTower, cost: 45, range: 140, color: '#9c27b0', shape: 'ring', faction: 'EM' },
+  pulse: { name: 'Pulse', class: PulseTower, cost: 70, range: 180, color: '#673ab7', shape: 'double', faction: 'EM' },
+  disruptor: { name: 'Disruptor', class: DisruptorTower, cost: 65, range: 160, color: '#3f51b5', shape: 'bolt', faction: 'EM' },
+  repair: { name: 'Repair', class: RepairTower, cost: 50, range: 120, color: '#4CAF50', shape: 'cross', faction: 'Support' }
 };
 
 class ResourceTower extends Tower {

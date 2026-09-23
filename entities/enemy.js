@@ -116,6 +116,20 @@ class Enemy {
     this.revealed = Math.max(this.revealed, duration);
   }
 
+  // Total distance traveled along the path (higher = further ahead)
+  pathProgress() {
+    let progress = 0;
+    for (let i = 0; i < this.pathIndex; i++) {
+      const a = this.path[i];
+      const b = this.path[i + 1];
+      progress += Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
+    }
+    // Distance from the current waypoint to the enemy's position
+    const cur = this.path[this.pathIndex];
+    progress += Math.sqrt(Math.pow(this.x - cur.x, 2) + Math.pow(this.y - cur.y, 2));
+    return progress;
+  }
+
   isTargetable() {
     return !this.isStealthed || this.revealed > 0;
   }
@@ -288,7 +302,7 @@ class BasicEnemy extends Enemy {
     this.baseSpeed = 60;
     this.health = 25;
     this.maxHealth = 25;
-    this.reward = 8;
+    this.reward = 10;
     this.color = '#F44336';
   }
 }
@@ -300,7 +314,7 @@ class FastEnemy extends Enemy {
     this.baseSpeed = 110;
     this.health = 14;
     this.maxHealth = 14;
-    this.reward = 7;
+    this.reward = 9;
     this.size = 9;
     this.color = '#FF9800';
   }
@@ -315,7 +329,7 @@ class ArmoredEnemy extends Enemy {
     this.maxHealth = 40;
     this.shield = 30;
     this.maxShield = 30;
-    this.reward = 14;
+    this.reward = 16;
     this.size = 14;
     this.color = '#607D8B';
   }
@@ -328,7 +342,7 @@ class HealerEnemy extends Enemy {
     this.baseSpeed = 50;
     this.health = 30;
     this.maxHealth = 30;
-    this.reward = 12;
+    this.reward = 14;
     this.size = 11;
     this.color = '#4CAF50';
     this.healRate = 4; // hp/s to self
@@ -343,7 +357,7 @@ class StealthEnemy extends Enemy {
     this.baseSpeed = 70;
     this.health = 22;
     this.maxHealth = 22;
-    this.reward = 12;
+    this.reward = 14;
     this.size = 10;
     this.color = '#B39DDB';
     this.isStealthed = true;
@@ -357,7 +371,7 @@ class SplitterEnemy extends Enemy {
     this.baseSpeed = 55;
     this.health = 45;
     this.maxHealth = 45;
-    this.reward = 15;
+    this.reward = 18;
     this.size = 15;
     this.color = '#E040FB';
     this.splitCount = 3;
@@ -372,7 +386,7 @@ class BossEnemy extends Enemy {
     this.baseSpeed = 25;
     this.health = 800;
     this.maxHealth = 800;
-    this.reward = 150;
+    this.reward = 200;
     this.size = 26;
     this.color = '#D50000';
     this.damageToBase = 5;

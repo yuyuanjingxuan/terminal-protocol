@@ -12,13 +12,48 @@ const levels = {
       { x: 750, y: 480 }
     ],
     waves: [
+      // Wave 1: gentle intro
       [
+        { type: 'basic' },
         { type: 'basic' },
         { type: 'basic' },
         { type: 'basic' }
       ],
+      // Wave 2: more basics
       [
         { type: 'basic' },
+        { type: 'basic' },
+        { type: 'basic' },
+        { type: 'basic' },
+        { type: 'basic' },
+        { type: 'basic' }
+      ],
+      // Wave 3: fast enemies appear
+      [
+        { type: 'fast' },
+        { type: 'basic' },
+        { type: 'fast' },
+        { type: 'basic' },
+        { type: 'fast' },
+        { type: 'basic' }
+      ],
+      // Wave 4: armored tanks
+      [
+        { type: 'armored' },
+        { type: 'basic' },
+        { type: 'basic' },
+        { type: 'armored' },
+        { type: 'basic' },
+        { type: 'basic' }
+      ],
+      // Wave 5: mixed pressure
+      [
+        { type: 'fast' },
+        { type: 'armored' },
+        { type: 'fast' },
+        { type: 'basic' },
+        { type: 'armored' },
+        { type: 'fast' },
         { type: 'basic' }
       ]
     ]

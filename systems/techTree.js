@@ -211,7 +211,7 @@ class TechTree {
   // --- Global modifiers for level setup ---
 
   getStartingResources() {
-    return 100 + (this.unlocked['support_3'] ? 50 : 0);
+    return 150 + (this.unlocked['support_3'] ? 50 : 0);
   }
 
   getStartingHealth() {

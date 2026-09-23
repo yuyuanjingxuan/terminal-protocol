@@ -24,19 +24,62 @@ class TerminalProtocol {
       });
     });
 
-    // Level selector buttons
+    // Level selector buttons (in-game quick switch)
     document.querySelectorAll('.level-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (!this.game.isLevelUnlocked(btn.dataset.level)) return;
         document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         this.loadLevel(btn.dataset.level);
       });
     });
 
-    // Wave controls: call next wave early + game speed
+    // Wave controls: "准备就绪" starts the first wave; "Next Wave" calls the next early
     document.getElementById('nextWaveBtn').addEventListener('click', () => {
-      this.game.waveManager.callNextWave();
+      if (this.game.gameState === 'ready') {
+        this.game.startPlaying();
+        this.game.waveManager.startNextWave();
+      } else {
+        this.game.waveManager.callNextWave();
+      }
     });
+
+    // Main menu buttons
+    const menuStartBtn = document.getElementById('menuStartBtn');
+    if (menuStartBtn) {
+      menuStartBtn.addEventListener('click', () => this.loadLevel('level1'));
+    }
+    const menuLevelContainer = document.getElementById('menuLevelList');
+    if (menuLevelContainer) {
+      menuLevelContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.menu-level-btn');
+        if (!btn || btn.disabled) return;
+        this.loadLevel(btn.dataset.level);
+      });
+    }
+
+    // Result screen buttons
+    const resultRetryBtn = document.getElementById('resultRetryBtn');
+    if (resultRetryBtn) {
+      resultRetryBtn.addEventListener('click', () => {
+        const key = this.game.currentLevel ? this.game.currentLevel.key : 'level1';
+        this.loadLevel(key);
+      });
+    }
+    const resultNextBtn = document.getElementById('resultNextBtn');
+    if (resultNextBtn) {
+      resultNextBtn.addEventListener('click', () => {
+        const allLevels = Object.keys(levels);
+        const key = this.game.currentLevel ? this.game.currentLevel.key : null;
+        const idx = allLevels.indexOf(key);
+        const nextKey = idx >= 0 ? allLevels[idx + 1] : null;
+        if (nextKey) this.loadLevel(nextKey);
+      });
+    }
+    const resultMenuBtn = document.getElementById('resultMenuBtn');
+    if (resultMenuBtn) {
+      resultMenuBtn.addEventListener('click', () => this.showMainMenu());
+    }
 
     document.querySelectorAll('.speed-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -134,11 +177,43 @@ class TerminalProtocol {
       this.flashSaveMsg('Progress reset');
     });
 
-    // Load level
-    this.loadLevel('level1');
+    // Show the main menu (level select) as the initial screen
+    this.showMainMenu();
 
-    // Start game loop
     console.log('Terminal Protocol initialized');
+  }
+
+  // Show the main menu overlay (level select)
+  showMainMenu() {
+    this.game.gameState = 'menu';
+    this.game.isRunning = false;
+    this.game.selectedTowerType = null;
+    this.inputHandler.updateTowerButtons();
+
+    // Hide result screen if visible
+    const resultScreen = document.getElementById('resultScreen');
+    if (resultScreen) resultScreen.classList.remove('show');
+
+    // Build the level list (locked levels shown but disabled)
+    const container = document.getElementById('menuLevelList');
+    if (container) {
+      container.innerHTML = '';
+      Object.keys(levels).forEach(key => {
+        const unlocked = this.game.isLevelUnlocked(key);
+        const btn = document.createElement('button');
+        btn.className = 'menu-level-btn' + (unlocked ? '' : ' locked');
+        btn.disabled = !unlocked;
+        btn.dataset.level = key;
+        const done = this.game.completedLevels.includes(key);
+        btn.innerHTML = unlocked
+          ? `<span class="menu-level-name">${key.replace('level', 'Level ')}</span><span class="menu-level-status">${done ? '✓ cleared' : '▶ play'}</span>`
+          : `<span class="menu-level-name">${key.replace('level', 'Level ')}</span><span class="menu-level-status">🔒 locked</span>`;
+        container.appendChild(btn);
+      });
+    }
+
+    const menu = document.getElementById('mainMenu');
+    if (menu) menu.classList.add('show');
   }
 
   flashSaveMsg(msg) {
@@ -218,6 +293,13 @@ class TerminalProtocol {
     this.game.health = this.game.techTree.getStartingHealth();
     this.game.selectedTowerType = null;
     this.inputHandler.updateTowerButtons();
+    if (this.game.effects) this.game.effects.clear();
+
+    // Hide overlays
+    const menu = document.getElementById('mainMenu');
+    if (menu) menu.classList.remove('show');
+    const resultScreen = document.getElementById('resultScreen');
+    if (resultScreen) resultScreen.classList.remove('show');
 
     // Restart the loop if a previous game ended
     if (!this.game.isRunning) {
@@ -246,8 +328,8 @@ class TerminalProtocol {
       waveManager.addWave(waveEnemies);
     });
 
-    // Start first wave
-    waveManager.startNextWave();
+    // Enter "ready" state: player builds defenses, then presses 准备就绪 to start wave 1
+    this.game.setReady();
 
     // Restart BGM for this chapter if audio is already unlocked (Phase 6)
     if (this.audioManager.ctx) {

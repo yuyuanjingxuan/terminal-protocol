@@ -326,13 +326,145 @@
       opacity: 0;
       transition: opacity 0.3s;
     }
+
+    /* Full-canvas overlays (main menu + result screen) */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 18px;
+      background: rgba(5, 5, 15, 0.88);
+      z-index: 20;
+      text-align: center;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .overlay h1 {
+      margin: 0;
+      font-size: 44px;
+      letter-spacing: 4px;
+      color: #00f0ff;
+      text-shadow: 0 0 18px rgba(0, 240, 255, 0.7);
+    }
+
+    .overlay .subtitle {
+      margin: 0;
+      color: #8899aa;
+      font-size: 14px;
+      letter-spacing: 2px;
+    }
+
+    .menu-level-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .menu-level-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 40px;
+      width: 280px;
+      padding: 12px 18px;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: #1a1a2e;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .menu-level-btn:hover:not(:disabled) {
+      border-color: #00f0ff;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+    }
+
+    .menu-level-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .menu-level-name {
+      font-weight: bold;
+      text-align: left;
+    }
+
+    .menu-level-status {
+      font-size: 12px;
+      color: #00ff88;
+    }
+
+    .menu-level-btn.locked .menu-level-status {
+      color: #888;
+    }
+
+    .overlay .big-btn {
+      padding: 12px 32px;
+      font-size: 18px;
+      border: 2px solid #00ff88;
+      border-radius: 8px;
+      background: rgba(0, 255, 136, 0.1);
+      color: #00ff88;
+      cursor: pointer;
+      letter-spacing: 2px;
+    }
+
+    .overlay .big-btn:hover {
+      box-shadow: 0 0 14px rgba(0, 255, 136, 0.6);
+    }
+
+    #resultTitle {
+      font-size: 48px;
+      letter-spacing: 4px;
+      margin: 0;
+    }
+
+    #resultSubtitle {
+      color: #ccc;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .result-buttons {
+      display: flex;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .result-btn {
+      padding: 10px 24px;
+      font-size: 15px;
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: #1a1a2e;
+      color: white;
+      cursor: pointer;
+    }
+
+    .result-btn:hover {
+      border-color: #00f0ff;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .result-btn.primary {
+      border-color: #00ff88;
+      color: #00ff88;
+    }
   </style>
 </head>
 <body>
   <div id="gameContainer">
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <div id="uiPanel">
-      <div id="resources">Resources: 100</div>
+      <div id="resources">Resources: 150</div>
       <div id="health">Health: 10</div>
       <div id="waveInfo">Wave: 0/0</div>
       <div id="techPoints">Tech: 0 pts</div>
@@ -363,16 +495,35 @@
       <button id="musicBtn" class="wave-btn" title="Toggle music">🎵</button>
     </div>
     <div id="towerBar">
-      <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span>Laser<span class="cost">80</span></button>
-      <button class="tower-btn" data-type="plasma" style="border-color:#00a2ff"><span class="key">2</span>Plasma<span class="cost">100</span></button>
-      <button class="tower-btn" data-type="railgun" style="border-color:#0066ff"><span class="key">3</span>Railgun<span class="cost">150</span></button>
-      <button class="tower-btn" data-type="cannon" style="border-color:#ff6600"><span class="key">4</span>Cannon<span class="cost">90</span></button>
-      <button class="tower-btn" data-type="missile" style="border-color:#ff3300"><span class="key">5</span>Missile<span class="cost">75</span></button>
-      <button class="tower-btn" data-type="bomb" style="border-color:#cc0000"><span class="key">6</span>Bomb<span class="cost">110</span></button>
-      <button class="tower-btn" data-type="emp" style="border-color:#9c27b0"><span class="key">7</span>EMP<span class="cost">70</span></button>
-      <button class="tower-btn" data-type="pulse" style="border-color:#673ab7"><span class="key">8</span>Pulse<span class="cost">90</span></button>
-      <button class="tower-btn" data-type="disruptor" style="border-color:#3f51b5"><span class="key">9</span>Disruptor<span class="cost">85</span></button>
-      <button class="tower-btn" data-type="repair" style="border-color:#4CAF50"><span class="key">0</span>Repair<span class="cost">60</span></button>
+      <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span>Laser<span class="cost">50</span></button>
+      <button class="tower-btn" data-type="plasma" style="border-color:#00a2ff"><span class="key">2</span>Plasma<span class="cost">75</span></button>
+      <button class="tower-btn" data-type="railgun" style="border-color:#0066ff"><span class="key">3</span>Railgun<span class="cost">120</span></button>
+      <button class="tower-btn" data-type="cannon" style="border-color:#ff6600"><span class="key">4</span>Cannon<span class="cost">60</span></button>
+      <button class="tower-btn" data-type="missile" style="border-color:#ff3300"><span class="key">5</span>Missile<span class="cost">55</span></button>
+      <button class="tower-btn" data-type="bomb" style="border-color:#cc0000"><span class="key">6</span>Bomb<span class="cost">90</span></button>
+      <button class="tower-btn" data-type="emp" style="border-color:#9c27b0"><span class="key">7</span>EMP<span class="cost">45</span></button>
+      <button class="tower-btn" data-type="pulse" style="border-color:#673ab7"><span class="key">8</span>Pulse<span class="cost">70</span></button>
+      <button class="tower-btn" data-type="disruptor" style="border-color:#3f51b5"><span class="key">9</span>Disruptor<span class="cost">65</span></button>
+      <button class="tower-btn" data-type="repair" style="border-color:#4CAF50"><span class="key">0</span>Repair<span class="cost">50</span></button>
+    </div>
+
+    <!-- Main menu (level select) -->
+    <div id="mainMenu" class="overlay">
+      <h1>TERMINAL PROTOCOL</h1>
+      <p class="subtitle">DEFEND THE TERMINAL · 终端协议</p>
+      <button id="menuStartBtn" class="big-btn">▶ START</button>
+      <div id="menuLevelList" class="menu-level-list"></div>
+    </div>
+
+    <!-- Result screen (win / lose) -->
+    <div id="resultScreen" class="overlay">
+      <h1 id="resultTitle">LEVEL COMPLETE</h1>
+      <p id="resultSubtitle"></p>
+      <div class="result-buttons">
+        <button id="resultRetryBtn" class="result-btn">↻ Retry</button>
+        <button id="resultNextBtn" class="result-btn primary">Next Level ▶</button>
+        <button id="resultMenuBtn" class="result-btn">⌂ Menu</button>
+      </div>
     </div>
   </div>
 

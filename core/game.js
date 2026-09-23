@@ -7,11 +7,12 @@ class Game {
     this.deltaTime = 0;
     this.isRunning = false;
     this.speed = 1; // game speed multiplier (1x/2x/3x)
+    this.gameState = 'menu'; // menu | ready | playing | gameover
     this.currentLevel = null;
     this.towers = [];
     this.enemies = [];
     this.projectiles = [];
-    this.resources = 100; // Starting resources
+    this.resources = 150; // Starting resources (overridden by techTree in loadLevel)
     this.health = 10; // Starting health
     this.waveManager = null;
     this.selectedTowerType = null; // Nothing selected by default
@@ -55,14 +56,16 @@ class Game {
   }
 
   update(deltaTime) {
+    // Effects always animate (menu backdrop, result screen, etc.)
+    this.effects.update(deltaTime);
+
+    if (this.gameState !== 'playing') return;
+
     // Update game state
     this.waveManager.update(deltaTime);
     this.towers.forEach(tower => tower.update(deltaTime));
     this.enemies.forEach(enemy => enemy.update(deltaTime));
     this.projectiles.forEach(projectile => projectile.update(deltaTime));
-
-    // Update particle effects
-    this.effects.update(deltaTime);
 
     // Clean up dead entities
     this.enemies = this.enemies.filter(enemy => !enemy.isDead);
@@ -71,11 +74,24 @@ class Game {
     // Check game over conditions
     if (this.health <= 0) {
       this.gameOver(false);
+      return;
     }
 
     // Check wave completion
     if (this.waveManager.checkWavesComplete() && this.enemies.length === 0) {
       this.gameOver(true);
+    }
+  }
+
+  // Enter the "ready" state: level loaded, player builds defenses before wave 1
+  setReady() {
+    this.gameState = 'ready';
+  }
+
+  // Start (or resume) the wave flow
+  startPlaying() {
+    if (this.gameState === 'ready' || this.gameState === 'playing') {
+      this.gameState = 'playing';
     }
   }
 
@@ -245,7 +261,9 @@ class Game {
     if (techEl) techEl.textContent = `Tech: ${this.techTree.points} pts`;
     if (waveEl) {
       const wm = this.waveManager;
-      if (wm.isWaveActive) {
+      if (this.gameState === 'ready') {
+        waveEl.textContent = `Wave: 0/${wm.waves.length} — build defenses, then press 准备就绪`;
+      } else if (wm.isWaveActive) {
         waveEl.textContent = `Wave: ${wm.currentWave}/${wm.waves.length}`;
       } else if (wm.currentWave < wm.waves.length) {
         const remaining = Math.ceil(wm.waveInterval - wm.waveTimer);
@@ -255,11 +273,18 @@ class Game {
       }
     }
 
-    // Next Wave button: enabled only between waves
+    // Wave button: "准备就绪" in ready state, "Next Wave" between waves
     const nextWaveBtn = document.getElementById('nextWaveBtn');
     if (nextWaveBtn) {
-      nextWaveBtn.disabled = this.waveManager.isWaveActive ||
-        this.waveManager.currentWave >= this.waveManager.waves.length;
+      if (this.gameState === 'ready') {
+        nextWaveBtn.textContent = '准备就绪 ▶';
+        nextWaveBtn.disabled = false;
+      } else {
+        nextWaveBtn.textContent = 'Next Wave ▶';
+        nextWaveBtn.disabled = this.gameState !== 'playing' ||
+          this.waveManager.isWaveActive ||
+          this.waveManager.currentWave >= this.waveManager.waves.length;
+      }
     }
 
     if (selEl) {
@@ -275,6 +300,7 @@ class Game {
   }
 
   gameOver(isWin) {
+    this.gameState = 'gameover';
     this.isRunning = false;
 
     // Play win/lose jingle
@@ -286,37 +312,31 @@ class Game {
     // Award meta-progression on victory
     if (isWin) this.completeLevel();
 
-    // Show game over message on canvas
-    const ctx = this.ctx;
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    
-    ctx.fillStyle = isWin ? '#00ff88' : '#ff4444';
-    ctx.font = '48px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(
-      isWin ? 'LEVEL COMPLETE!' : 'GAME OVER',
-      this.canvas.width / 2,
-      this.canvas.height / 2
-    );
-    
-    ctx.fillStyle = 'white';
-    ctx.font = '24px Arial';
-    ctx.fillText(
-      isWin ? 'All waves defeated!' : 'The terminal was breached...',
-      this.canvas.width / 2,
-      this.canvas.height / 2 + 40
-    );
-
-    if (isWin) {
-      ctx.fillStyle = '#ffd700';
-      ctx.font = '18px Arial';
-      ctx.fillText(
-        `+${this.lastTechReward} tech point${this.lastTechReward === 1 ? '' : 's'} earned`,
-        this.canvas.width / 2,
-        this.canvas.height / 2 + 70
-      );
+    // Show result screen (HTML overlay)
+    const overlay = document.getElementById('resultScreen');
+    if (overlay) {
+      const title = document.getElementById('resultTitle');
+      const subtitle = document.getElementById('resultSubtitle');
+      if (title) {
+        title.textContent = isWin ? 'LEVEL COMPLETE' : 'TERMINAL BREACHED';
+        title.style.color = isWin ? '#00ff88' : '#ff4444';
+      }
+      if (subtitle) {
+        const waves = this.waveManager ? this.waveManager.waves.length : 0;
+        subtitle.textContent = isWin
+          ? `All ${waves} waves cleared!` + (this.lastTechReward ? `  +${this.lastTechReward} tech point${this.lastTechReward === 1 ? '' : 's'}` : '')
+          : 'The terminal was breached...';
+      }
+      // "Next Level" only on victory when a next level exists
+      const nextBtn = document.getElementById('resultNextBtn');
+      if (nextBtn) {
+        const allLevels = Object.keys(levels);
+        const levelKey = this.currentLevel ? this.currentLevel.key : null;
+        const idx = allLevels.indexOf(levelKey);
+        const hasNext = isWin && idx >= 0 && !!allLevels[idx + 1];
+        nextBtn.style.display = hasNext ? 'inline-block' : 'none';
+      }
+      overlay.classList.add('show');
     }
 
     console.log(isWin ? 'Level Complete!' : 'Game Over!');

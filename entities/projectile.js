@@ -1,6 +1,6 @@
-// entities/projectile.js - Projectile classes
+// entities/projectile.js - Projectile classes (homing: lock onto target enemy)
 class Projectile {
-  constructor(game, startX, startY, targetX, targetY, damage) {
+  constructor(game, startX, startY, targetX, targetY, damage, targetEnemy = null) {
     this.game = game;
     this.x = startX;
     this.y = startY;
@@ -10,17 +10,36 @@ class Projectile {
     this.speed = 300; // pixels per second
     this.isDead = false;
     this.color = 'yellow';
+    this.targetEnemy = targetEnemy; // homing lock (may die mid-flight)
+    this.lifetime = 3; // safety: despawn after 3s
 
-    // Calculate direction
+    // Initial direction
     const dx = targetX - startX;
     const dy = targetY - startY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+    const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
 
     this.velocityX = (dx / distance) * this.speed;
     this.velocityY = (dy / distance) * this.speed;
   }
 
   update(deltaTime) {
+    this.lifetime -= deltaTime;
+    if (this.lifetime <= 0) {
+      this.isDead = true;
+      return;
+    }
+
+    // Home onto the locked enemy while it is alive
+    if (this.targetEnemy && !this.targetEnemy.isDead) {
+      this.targetX = this.targetEnemy.x;
+      this.targetY = this.targetEnemy.y;
+      const dx = this.targetX - this.x;
+      const dy = this.targetY - this.y;
+      const distance = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+      this.velocityX = (dx / distance) * this.speed;
+      this.velocityY = (dy / distance) * this.speed;
+    }
+
     this.x += this.velocityX * deltaTime;
     this.y += this.velocityY * deltaTime;
 
@@ -29,7 +48,7 @@ class Projectile {
       Math.pow(this.targetX - this.x, 2) + Math.pow(this.targetY - this.y, 2)
     );
 
-    if (distanceToTarget < 5) {
+    if (distanceToTarget < 10) {
       this.hitTarget();
     }
   }
@@ -42,19 +61,28 @@ class Projectile {
       this.game.effects.burst(this.targetX, this.targetY, this.color, 5, { speed: 80, life: 0.25, size: 2 });
     }
 
-    // Find enemy at target position and deal damage
-    const enemies = this.game.enemies;
-    for (let i = 0; i < enemies.length; i++) {
-      const enemy = enemies[i];
-      const distance = Math.sqrt(
-        Math.pow(enemy.x - this.targetX, 2) + Math.pow(enemy.y - this.targetY, 2)
+    // Prefer the locked enemy; fall back to position-based lookup
+    let victim = null;
+    if (this.targetEnemy && !this.targetEnemy.isDead) {
+      const d = Math.sqrt(
+        Math.pow(this.targetEnemy.x - this.targetX, 2) + Math.pow(this.targetEnemy.y - this.targetY, 2)
       );
-
-      if (distance < 15) { // Close enough to be the target
-        enemy.takeDamage(this.damage);
-        break;
+      if (d < 25) victim = this.targetEnemy;
+    }
+    if (!victim) {
+      const enemies = this.game.enemies;
+      for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+        const distance = Math.sqrt(
+          Math.pow(enemy.x - this.targetX, 2) + Math.pow(enemy.y - this.targetY, 2)
+        );
+        if (distance < 15) {
+          victim = enemy;
+          break;
+        }
       }
     }
+    if (victim) victim.takeDamage(this.damage);
   }
 
   render(ctx) {
@@ -78,8 +106,8 @@ class Projectile {
 }
 
 class ExplosionProjectile extends Projectile {
-  constructor(game, startX, startY, targetX, targetY, damage, explosionRadius) {
-    super(game, startX, startY, targetX, targetY, damage);
+  constructor(game, startX, startY, targetX, targetY, damage, explosionRadius, targetEnemy = null) {
+    super(game, startX, startY, targetX, targetY, damage, targetEnemy);
     this.explosionRadius = explosionRadius;
     this.color = '#ff6600';
   }
@@ -126,8 +154,8 @@ class ExplosionProjectile extends Projectile {
 }
 
 class LaserProjectile extends Projectile {
-  constructor(game, startX, startY, targetX, targetY, damage) {
-    super(game, startX, startY, targetX, targetY, damage);
+  constructor(game, startX, startY, targetX, targetY, damage, targetEnemy = null) {
+    super(game, startX, startY, targetX, targetY, damage, targetEnemy);
     this.speed = 500; // Faster than regular projectiles
     this.color = '#00f0ff';
     this.width = 3;
@@ -166,8 +194,8 @@ class LaserProjectile extends Projectile {
 }
 
 class EMPProjectile extends Projectile {
-  constructor(game, startX, startY, targetX, targetY, damage, slowAmount, slowDuration) {
-    super(game, startX, startY, targetX, targetY, damage);
+  constructor(game, startX, startY, targetX, targetY, damage, slowAmount, slowDuration, targetEnemy = null) {
+    super(game, startX, startY, targetX, targetY, damage, targetEnemy);
     this.slowAmount = slowAmount;
     this.slowDuration = slowDuration;
     this.color = '#9c27b0';
@@ -292,8 +320,8 @@ class PulseProjectile extends Projectile {
 }
 
 class ChainProjectile extends Projectile {
-  constructor(game, startX, startY, targetX, targetY, damage, chainTargets, chainDamage, range) {
-    super(game, startX, startY, targetX, targetY, damage);
+  constructor(game, startX, startY, targetX, targetY, damage, chainTargets, chainDamage, range, targetEnemy = null) {
+    super(game, startX, startY, targetX, targetY, damage, targetEnemy);
     this.chainTargets = chainTargets;
     this.chainDamage = chainDamage;
     this.range = range;
@@ -351,7 +379,8 @@ class ChainProjectile extends Projectile {
       });
 
       if (closestEnemy) {
-        // Chain to next enemy
+        // Chain to next enemy (re-lock homing onto it)
+        this.targetEnemy = closestEnemy;
         this.targetX = closestEnemy.x;
         this.targetY = closestEnemy.y;
         this.damage *= this.chainDamage;
