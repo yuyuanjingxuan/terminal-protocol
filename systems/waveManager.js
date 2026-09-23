@@ -29,6 +29,12 @@ class WaveManager {
   }
 
   update(deltaTime) {
+    // Wave is done when all its enemies are dead
+    if (this.isWaveActive && this.game.enemies.length === 0) {
+      this.isWaveActive = false;
+      this.waveTimer = 0;
+    }
+
     if (!this.isWaveActive && this.currentWave < this.waves.length) {
       this.waveTimer += deltaTime;
 

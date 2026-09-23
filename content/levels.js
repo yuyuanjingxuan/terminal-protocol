@@ -11,13 +11,13 @@ const levels = {
     ],
     waves: [
       [
-        { type: 'basic', path: this.path },
-        { type: 'basic', path: this.path },
-        { type: 'basic', path: this.path }
+        { type: 'basic' },
+        { type: 'basic' },
+        { type: 'basic' }
       ],
       [
-        { type: 'basic', path: this.path },
-        { type: 'basic', path: this.path }
+        { type: 'basic' },
+        { type: 'basic' }
       ]
     ]
   }

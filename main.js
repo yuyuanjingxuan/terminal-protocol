@@ -15,6 +15,14 @@ class TerminalProtocol {
     // Initialize input handler
     this.inputHandler = new InputHandler(this.game);
 
+    // Tower selection buttons
+    document.querySelectorAll('.tower-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.game.selectedTowerType = btn.dataset.type;
+        this.inputHandler.updateTowerButtons();
+      });
+    });
+
     // Initialize audio manager
     this.audioManager = new AudioManager();
 
@@ -46,9 +54,10 @@ class TerminalProtocol {
     const waveManager = this.game.waveManager;
     waveManager.reset();
 
-    // Add waves
+    // Add waves (path is resolved at spawn time)
     levelData.waves.forEach(wave => {
       const waveEnemies = wave.map(enemyData => ({
+        type: enemyData.type,
         path: levelData.path
       }));
       waveManager.addWave(waveEnemies);

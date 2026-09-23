@@ -699,6 +699,20 @@ class BoostTower extends Tower {
   }
 }
 
+// Tower type registry for selection UI
+const TOWER_TYPES = {
+  laser: { name: 'Laser', class: LaserTower, cost: 80, color: '#00f0ff', faction: 'Energy' },
+  plasma: { name: 'Plasma', class: PlasmaTower, cost: 100, color: '#00a2ff', faction: 'Energy' },
+  railgun: { name: 'Railgun', class: RailgunTower, cost: 150, color: '#0066ff', faction: 'Energy' },
+  cannon: { name: 'Cannon', class: CannonTower, cost: 90, color: '#ff6600', faction: 'Explosive' },
+  missile: { name: 'Missile', class: MissileTower, cost: 75, color: '#ff3300', faction: 'Explosive' },
+  bomb: { name: 'Bomb', class: BombTower, cost: 110, color: '#cc0000', faction: 'Explosive' },
+  emp: { name: 'EMP', class: EMPTower, cost: 70, color: '#9c27b0', faction: 'EM' },
+  pulse: { name: 'Pulse', class: PulseTower, cost: 90, color: '#673ab7', faction: 'EM' },
+  disruptor: { name: 'Disruptor', class: DisruptorTower, cost: 85, color: '#3f51b5', faction: 'EM' },
+  repair: { name: 'Repair', class: RepairTower, cost: 60, color: '#4CAF50', faction: 'Support' }
+};
+
 class ResourceTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
