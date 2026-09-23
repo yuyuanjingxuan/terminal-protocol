@@ -7,11 +7,12 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
+      padding: 16px;
+      box-sizing: border-box;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       background-color: #121212;
       color: white;
       font-family: Arial, sans-serif;
@@ -22,6 +23,10 @@
     }
 
     #gameCanvas {
+      display: block;
+      max-width: calc(100vw - 32px);
+      max-height: calc(100vh - 110px);
+      height: auto;
       background-color: #000;
       border: 2px solid #444;
     }

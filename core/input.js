@@ -9,11 +9,13 @@ class InputHandler {
   }
 
   setupEventListeners() {
-    // Mouse events
+    // Mouse events (scale-aware: canvas may be CSS-scaled to fit window)
     this.game.canvas.addEventListener('mousemove', (e) => {
       const rect = this.game.canvas.getBoundingClientRect();
-      this.mouseX = e.clientX - rect.left;
-      this.mouseY = e.clientY - rect.top;
+      const scaleX = this.game.canvas.width / rect.width;
+      const scaleY = this.game.canvas.height / rect.height;
+      this.mouseX = (e.clientX - rect.left) * scaleX;
+      this.mouseY = (e.clientY - rect.top) * scaleY;
       this.game.mouseX = this.mouseX;
       this.game.mouseY = this.mouseY;
       this.game.mouseOnCanvas = true;
