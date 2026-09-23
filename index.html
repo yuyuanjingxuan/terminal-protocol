@@ -187,6 +187,10 @@
       box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     }
 
+    .wave-btn.off {
+      opacity: 0.4;
+    }
+
     #techPanel {
       position: absolute;
       top: 96px;
@@ -355,6 +359,8 @@
       <button class="speed-btn active" data-speed="1">1x</button>
       <button class="speed-btn" data-speed="2">2x</button>
       <button class="speed-btn" data-speed="3">3x</button>
+      <button id="muteBtn" class="wave-btn" title="Toggle sound effects">🔊</button>
+      <button id="musicBtn" class="wave-btn" title="Toggle music">🎵</button>
     </div>
     <div id="towerBar">
       <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span>Laser<span class="cost">80</span></button>
@@ -381,6 +387,7 @@
   <script src="systems/saveSystem.js"></script>
   <script src="content/levels.js"></script>
   <script src="render/renderer.js"></script>
+  <script src="render/effects.js"></script>
   <script src="audio/audioManager.js"></script>
   <script src="main.js"></script>
 </body>

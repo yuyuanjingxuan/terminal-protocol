@@ -1,6 +1,5 @@
 # Internal files that should not be pushed to GitHub
-tower-defense-master-plan.md
-docs/tower-defense-master-plan.md
+docs/*.md
 
 # Build output
 terminal-protocol.html

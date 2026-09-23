@@ -29,6 +29,13 @@ class WaveManager {
       this.spawnTimer = 0;
 
       this.currentWave++;
+
+      // Wave start effect + sound at the path start (Phase 6)
+      const path = this.game.currentLevel ? this.game.currentLevel.path : null;
+      if (path && path.length > 0 && this.game.effects) {
+        this.game.effects.waveStart(path[0].x, path[0].y);
+      }
+      if (this.game.audio) this.game.audio.playWaveStart();
     }
   }
 

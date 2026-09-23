@@ -45,8 +45,43 @@ class TerminalProtocol {
       });
     });
 
-    // Initialize audio manager
+    // Initialize audio manager and wire it to the game (Phase 6)
     this.audioManager = new AudioManager();
+    this.game.audio = this.audioManager;
+
+    // Unlock audio on the first user gesture anywhere (browser autoplay policy)
+    const unlockAudio = () => {
+      this.audioManager.unlock();
+      if (this.game.currentLevel) {
+        const chapter = Object.keys(levels).indexOf(this.game.currentLevel.key);
+        this.audioManager.startMusic(chapter >= 0 ? chapter : 0);
+      }
+      window.removeEventListener('pointerdown', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+    window.addEventListener('pointerdown', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+
+    // Mute / music toggle buttons
+    const muteBtn = document.getElementById('muteBtn');
+    if (muteBtn) {
+      muteBtn.addEventListener('click', () => {
+        this.audioManager.setEnabled(!this.audioManager.enabled);
+        muteBtn.textContent = this.audioManager.enabled ? '🔊' : '🔇';
+        muteBtn.classList.toggle('off', !this.audioManager.enabled);
+      });
+    }
+    const musicBtn = document.getElementById('musicBtn');
+    if (musicBtn) {
+      musicBtn.addEventListener('click', () => {
+        this.audioManager.setMusicEnabled(!this.audioManager.musicEnabled);
+        musicBtn.classList.toggle('off', !this.audioManager.musicEnabled);
+        if (this.audioManager.musicEnabled && this.game.currentLevel) {
+          const chapter = Object.keys(levels).indexOf(this.game.currentLevel.key);
+          this.audioManager.startMusic(chapter >= 0 ? chapter : 0);
+        }
+      });
+    }
 
     // Initialize renderer
     this.renderer = new Renderer(this.game);
@@ -155,6 +190,9 @@ class TerminalProtocol {
               this.renderTechPanel();
               const techEl = document.getElementById('techPoints');
               if (techEl) techEl.textContent = `Tech: ${tt.points} pts`;
+              // Tech unlock sound + sparkle (Phase 6)
+              if (this.game.audio) this.game.audio.playTechUnlock();
+              if (this.game.effects) this.game.effects.techUnlock(this.game.canvas.width / 2, 60);
             }
           });
           factionEl.appendChild(btn);
@@ -210,6 +248,12 @@ class TerminalProtocol {
 
     // Start first wave
     waveManager.startNextWave();
+
+    // Restart BGM for this chapter if audio is already unlocked (Phase 6)
+    if (this.audioManager.ctx) {
+      const chapter = Object.keys(levels).indexOf(levelName);
+      this.audioManager.startMusic(chapter >= 0 ? chapter : 0);
+    }
   }
 }
 

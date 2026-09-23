@@ -140,6 +140,11 @@ class Enemy {
   die() {
     if (this.isDead) return;
     this.isDead = true;
+
+    // Death effect + sound
+    if (this.game.effects) this.game.effects.enemyDeath(this.x, this.y, this.color, this.size);
+    if (this.game.audio) this.game.audio.playEnemyDie(this.size);
+
     this.game.gainResources(this.reward);
     if (this.splitCount > 0 && this.splitType) {
       for (let i = 0; i < this.splitCount; i++) {

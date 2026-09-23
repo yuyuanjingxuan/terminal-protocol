@@ -24,6 +24,7 @@ class InputHandler {
     this.game.canvas.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return; // Left click only
       this.isMouseDown = true;
+      if (this.game.audio) this.game.audio.unlock(); // unlock audio on user gesture
       this.handleMouseDown(e);
     });
 
@@ -45,6 +46,7 @@ class InputHandler {
 
     // Keyboard tower selection
     document.addEventListener('keydown', (e) => {
+      if (this.game.audio) this.game.audio.unlock(); // unlock audio on user gesture
       const keyMap = {
         '1': 'laser', '2': 'plasma', '3': 'railgun',
         '4': 'cannon', '5': 'missile', '6': 'bomb',
@@ -77,7 +79,14 @@ class InputHandler {
       const tower = this.createSelectedTower(towerX, towerY);
       if (tower && this.game.spendResources(tower.cost)) {
         this.game.addTower(tower);
+        // Build effect + sound (Phase 6)
+        if (this.game.effects) this.game.effects.towerBuilt(towerX, towerY, tower.color);
+        if (this.game.audio) this.game.audio.playTowerBuilt();
+      } else if (tower && this.game.audio) {
+        this.game.audio.playError(); // not enough resources
       }
+    } else if (this.game.selectedTowerType && this.game.audio) {
+      this.game.audio.playError(); // invalid position
     }
   }
 

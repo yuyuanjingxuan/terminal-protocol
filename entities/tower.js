@@ -101,6 +101,10 @@ class Tower {
       if (this.target) {
         this.attack();
         this.currentCooldown = this.cooldown;
+
+        // Muzzle flash + faction attack sound (Phase 6)
+        if (this.game.effects) this.game.effects.muzzleFlash(this.x, this.y, this.color);
+        if (this.game.audio) this.game.audio.playAttack(this.faction);
       }
     }
   }

@@ -19,6 +19,10 @@ class Game {
     this.mouseY = 0;
     this.mouseOnCanvas = false;
 
+    // Visual & audio polish (Phase 6)
+    this.effects = new ParticleSystem(this);
+    this.audio = null; // AudioManager, wired by TerminalProtocol
+
     // Meta-progression (Phase 5)
     this.techTree = new TechTree(this);
     this.saveSystem = new SaveSystem();
@@ -57,6 +61,9 @@ class Game {
     this.enemies.forEach(enemy => enemy.update(deltaTime));
     this.projectiles.forEach(projectile => projectile.update(deltaTime));
 
+    // Update particle effects
+    this.effects.update(deltaTime);
+
     // Clean up dead entities
     this.enemies = this.enemies.filter(enemy => !enemy.isDead);
     this.projectiles = this.projectiles.filter(projectile => !projectile.isDead);
@@ -78,6 +85,11 @@ class Game {
     ctx.fillStyle = '#0a0a1a';
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // Apply screen shake offset to the world
+    const shake = this.effects.getShakeOffset();
+    ctx.save();
+    ctx.translate(shake.x, shake.y);
+
     // Render path
     if (this.currentLevel && this.currentLevel.path) {
       this.renderPath(ctx);
@@ -87,6 +99,11 @@ class Game {
     this.towers.forEach(tower => tower.render(ctx));
     this.enemies.forEach(enemy => enemy.render(ctx));
     this.projectiles.forEach(projectile => projectile.render(ctx));
+
+    // Render particle effects on top of entities
+    this.effects.render(ctx);
+
+    ctx.restore();
 
     // Render placement preview (ghost tower + range circle)
     this.renderPlacementPreview(ctx);
@@ -259,6 +276,12 @@ class Game {
 
   gameOver(isWin) {
     this.isRunning = false;
+
+    // Play win/lose jingle
+    if (this.audio) {
+      if (isWin) this.audio.playWin();
+      else this.audio.playLose();
+    }
 
     // Award meta-progression on victory
     if (isWin) this.completeLevel();

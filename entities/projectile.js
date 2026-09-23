@@ -37,6 +37,11 @@ class Projectile {
   hitTarget() {
     this.isDead = true;
 
+    // Impact spark effect
+    if (this.game.effects) {
+      this.game.effects.burst(this.targetX, this.targetY, this.color, 5, { speed: 80, life: 0.25, size: 2 });
+    }
+
     // Find enemy at target position and deal damage
     const enemies = this.game.enemies;
     for (let i = 0; i < enemies.length; i++) {
@@ -81,6 +86,10 @@ class ExplosionProjectile extends Projectile {
 
   hitTarget() {
     this.isDead = true;
+
+    // Explosion effect + sound
+    if (this.game.effects) this.game.effects.explosion(this.targetX, this.targetY, this.explosionRadius);
+    if (this.game.audio) this.game.audio.playExplosion();
 
     // Find all enemies in explosion radius
     const enemies = this.game.enemies;
@@ -167,6 +176,9 @@ class EMPProjectile extends Projectile {
   hitTarget() {
     this.isDead = true;
 
+    // EMP impact: purple ring
+    if (this.game.effects) this.game.effects.pulseRing(this.targetX, this.targetY, 60, '#9c27b0');
+
     // Find enemy at target position and apply slow
     const enemies = this.game.enemies;
     for (let i = 0; i < enemies.length; i++) {
@@ -234,6 +246,10 @@ class PulseProjectile extends Projectile {
   hitTarget() {
     this.isDead = true;
 
+    // Pulse: expanding ring + sound
+    if (this.game.effects) this.game.effects.pulseRing(this.x, this.y, this.radius, '#673ab7');
+    if (this.game.audio) this.game.audio.playPulse();
+
     // Find all enemies in pulse radius and stun them
     const enemies = this.game.enemies;
     for (let i = 0; i < enemies.length; i++) {
@@ -289,6 +305,11 @@ class ChainProjectile extends Projectile {
   hitTarget() {
     this.chainedEnemies.push({x: this.targetX, y: this.targetY});
     this.chainCount++;
+
+    // Chain lightning spark
+    if (this.game.effects) {
+      this.game.effects.burst(this.targetX, this.targetY, this.color, 4, { speed: 70, life: 0.2, size: 2 });
+    }
 
     // Damage current target
     const enemies = this.game.enemies;
@@ -402,6 +423,9 @@ class RepairProjectile extends Projectile {
   hitTarget() {
     this.isDead = true;
 
+    // Repair beam: green motes at the target tower
+    if (this.game.effects) this.game.effects.repairEffect(this.targetX, this.targetY);
+
     // Find tower at target position and repair it
     const towers = this.game.towers;
     for (let i = 0; i < towers.length; i++) {
@@ -411,16 +435,6 @@ class RepairProjectile extends Projectile {
       );
 
       if (distance < 15) {
-        // Repair tower over time
-        const repairInterval = setInterval(() => {
-          // Tower doesn't have health yet, so we'll just add a visual effect
-          // In a real implementation, this would repair tower health
-        }, 1000);
-
-        // Stop repairing after duration
-        setTimeout(() => {
-          clearInterval(repairInterval);
-        }, this.repairDuration * 1000);
         break;
       }
     }
