@@ -14,6 +14,9 @@ class InputHandler {
       const rect = this.game.canvas.getBoundingClientRect();
       this.mouseX = e.clientX - rect.left;
       this.mouseY = e.clientY - rect.top;
+      this.game.mouseX = this.mouseX;
+      this.game.mouseY = this.mouseY;
+      this.game.mouseOnCanvas = true;
     });
 
     this.game.canvas.addEventListener('mousedown', (e) => {
@@ -27,6 +30,7 @@ class InputHandler {
 
     this.game.canvas.addEventListener('mouseleave', () => {
       this.isMouseDown = false;
+      this.game.mouseOnCanvas = false;
     });
 
     // Keyboard tower selection
@@ -54,7 +58,7 @@ class InputHandler {
     const towerX = Math.floor(this.mouseX / gridSize) * gridSize + gridSize / 2;
     const towerY = Math.floor(this.mouseY / gridSize) * gridSize + gridSize / 2;
 
-    if (this.isValidTowerPosition(towerX, towerY)) {
+    if (this.game.isValidTowerPosition(towerX, towerY)) {
       const tower = this.createSelectedTower(towerX, towerY);
       if (tower && this.game.spendResources(tower.cost)) {
         this.game.addTower(tower);
@@ -67,42 +71,5 @@ class InputHandler {
     const info = TOWER_TYPES[type];
     if (!info) return null;
     return new info.class(this.game, x, y);
-  }
-
-  isValidTowerPosition(x, y) {
-    // Check bounds
-    if (x < 20 || x > this.game.canvas.width - 20 || y < 20 || y > this.game.canvas.height - 20) {
-      return false;
-    }
-
-    // Check not on path
-    const path = this.game.currentLevel?.path;
-    if (path) {
-      for (let i = 0; i < path.length - 1; i++) {
-        if (this.distanceToSegment(x, y, path[i], path[i + 1]) < 35) {
-          return false;
-        }
-      }
-    }
-
-    // Check not overlapping existing towers
-    for (const tower of this.game.towers) {
-      const dist = Math.sqrt(Math.pow(tower.x - x, 2) + Math.pow(tower.y - y, 2));
-      if (dist < 30) return false;
-    }
-
-    return true;
-  }
-
-  distanceToSegment(px, py, a, b) {
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
-    const lenSq = dx * dx + dy * dy;
-    if (lenSq === 0) return Math.sqrt(Math.pow(px - a.x, 2) + Math.pow(py - a.y, 2));
-    let t = ((px - a.x) * dx + (py - a.y) * dy) / lenSq;
-    t = Math.max(0, Math.min(1, t));
-    const closestX = a.x + t * dx;
-    const closestY = a.y + t * dy;
-    return Math.sqrt(Math.pow(px - closestX, 2) + Math.pow(py - closestY, 2));
   }
 }

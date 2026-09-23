@@ -14,6 +14,9 @@ class Game {
     this.health = 10; // Starting health
     this.waveManager = null;
     this.selectedTowerType = 'laser'; // Default tower type
+    this.mouseX = 0;
+    this.mouseY = 0;
+    this.mouseOnCanvas = false;
   }
 
   init(canvasId) {
@@ -75,8 +78,81 @@ class Game {
     this.enemies.forEach(enemy => enemy.render(ctx));
     this.projectiles.forEach(projectile => projectile.render(ctx));
 
+    // Render placement preview (ghost tower + range circle)
+    this.renderPlacementPreview(ctx);
+
     // Render UI
     this.renderUI();
+  }
+
+  renderPlacementPreview(ctx) {
+    if (!this.selectedTowerType || !this.mouseOnCanvas) return;
+    const info = TOWER_TYPES[this.selectedTowerType];
+    if (!info) return;
+
+    const gridSize = 40;
+    const x = Math.floor(this.mouseX / gridSize) * gridSize + gridSize / 2;
+    const y = Math.floor(this.mouseY / gridSize) * gridSize + gridSize / 2;
+    const valid = this.isValidTowerPosition(x, y);
+
+    const rangeColor = valid ? 'rgba(0, 255, 136, 0.6)' : 'rgba(255, 68, 68, 0.6)';
+    const fillAlpha = valid ? 'rgba(0, 255, 136, 0.07)' : 'rgba(255, 68, 68, 0.07)';
+
+    // Range circle
+    ctx.strokeStyle = rangeColor;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.arc(x, y, info.range, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = fillAlpha;
+    ctx.fill();
+
+    // Ghost tower body
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = info.color;
+    ctx.beginPath();
+    ctx.arc(x, y, 15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  isValidTowerPosition(x, y) {
+    // Check bounds
+    if (x < 20 || x > this.canvas.width - 20 || y < 20 || y > this.canvas.height - 20) {
+      return false;
+    }
+
+    // Check not on path
+    const path = this.currentLevel?.path;
+    if (path) {
+      for (let i = 0; i < path.length - 1; i++) {
+        if (this.distanceToSegment(x, y, path[i], path[i + 1]) < 35) {
+          return false;
+        }
+      }
+    }
+
+    // Check not overlapping existing towers
+    for (const tower of this.towers) {
+      const dist = Math.sqrt(Math.pow(tower.x - x, 2) + Math.pow(tower.y - y, 2));
+      if (dist < 30) return false;
+    }
+
+    return true;
+  }
+
+  distanceToSegment(px, py, a, b) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return Math.sqrt(Math.pow(px - a.x, 2) + Math.pow(py - a.y, 2));
+    let t = ((px - a.x) * dx + (py - a.y) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    const closestX = a.x + t * dx;
+    const closestY = a.y + t * dy;
+    return Math.sqrt(Math.pow(px - closestX, 2) + Math.pow(py - closestY, 2));
   }
 
   renderPath(ctx) {
