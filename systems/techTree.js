@@ -10,24 +10,18 @@ class TechTree {
     this.nodes = {
       // Energy branch (laser / plasma / railgun)
       'energy_1': {
-        name: '超充电池',
-        description: '能量系塔伤害 +15%',
         cost: 1,
         faction: 'energy',
         tier: 1,
         requires: null
       },
       'energy_2': {
-        name: '远程增幅',
-        description: '能量系塔射程 +20%',
         cost: 2,
         faction: 'energy',
         tier: 2,
         requires: 'energy_1'
       },
       'energy_3': {
-        name: '快速循环',
-        description: '能量系塔射速 +20%',
         cost: 3,
         faction: 'energy',
         tier: 3,
@@ -36,24 +30,18 @@ class TechTree {
 
       // Explosive branch (cannon / missile / bomb)
       'explosive_1': {
-        name: '高爆弹药',
-        description: '爆破系塔爆炸范围 +20%',
         cost: 1,
         faction: 'explosive',
         tier: 1,
         requires: null
       },
       'explosive_2': {
-        name: '破片弹头',
-        description: '爆破系塔伤害 +15%',
         cost: 2,
         faction: 'explosive',
         tier: 2,
         requires: 'explosive_1'
       },
       'explosive_3': {
-        name: '快速装填',
-        description: '爆破系塔射速 +20%',
         cost: 3,
         faction: 'explosive',
         tier: 3,
@@ -62,24 +50,18 @@ class TechTree {
 
       // Electromagnetic branch (emp / pulse / disruptor)
       'electromagnetic_1': {
-        name: '强化电磁脉冲',
-        description: '电磁系减速与眩晕效果持续 +25%',
         cost: 1,
         faction: 'electromagnetic',
         tier: 1,
         requires: null
       },
       'electromagnetic_2': {
-        name: '广域脉冲',
-        description: '电磁系塔射程 +15%',
         cost: 2,
         faction: 'electromagnetic',
         tier: 2,
         requires: 'electromagnetic_1'
       },
       'electromagnetic_3': {
-        name: '连锁反应',
-        description: '干扰器额外连锁 1 个目标',
         cost: 3,
         faction: 'electromagnetic',
         tier: 3,
@@ -88,24 +70,18 @@ class TechTree {
 
       // Support branch (repair + base)
       'support_1': {
-        name: '高效修复',
-        description: '修复塔修复量 +50%',
         cost: 1,
         faction: 'support',
         tier: 1,
         requires: null
       },
       'support_2': {
-        name: '强化核心',
-        description: `每关初始生命值 +${BALANCE.techBonusHealth}`,
         cost: 2,
         faction: 'support',
         tier: 2,
         requires: 'support_1'
       },
       'support_3': {
-        name: '资源优化',
-        description: `每关初始资源 +${BALANCE.techBonusResources}`,
         cost: 3,
         faction: 'support',
         tier: 3,
@@ -114,16 +90,12 @@ class TechTree {
 
       // Global branch
       'global_1': {
-        name: '高级训练',
-        description: '所有塔造价 -10%',
         cost: 2,
         faction: 'global',
         tier: 1,
         requires: null
       },
       'global_2': {
-        name: '超频系统',
-        description: '所有塔射速 +10%',
         cost: 3,
         faction: 'global',
         tier: 2,
@@ -131,12 +103,13 @@ class TechTree {
       }
     };
 
+    // Faction display names come from I18N (faction_<id>)
     this.factions = [
-      { id: 'energy', name: '能量系', color: '#00f0ff' },
-      { id: 'explosive', name: '爆破系', color: '#ff6600' },
-      { id: 'electromagnetic', name: '电磁系', color: '#9c27b0' },
-      { id: 'support', name: '支援系', color: '#4CAF50' },
-      { id: 'global', name: '全局', color: '#ffd700' }
+      { id: 'energy', color: '#00f0ff' },
+      { id: 'explosive', color: '#ff6600' },
+      { id: 'electromagnetic', color: '#9c27b0' },
+      { id: 'support', color: '#4CAF50' },
+      { id: 'global', color: '#ffd700' }
     ];
   }
 

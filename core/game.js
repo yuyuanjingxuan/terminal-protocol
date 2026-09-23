@@ -255,21 +255,21 @@ class Game {
     const waveEl = document.getElementById('waveInfo');
     const selEl = document.getElementById('selectedInfo');
 
-    if (resEl) resEl.textContent = `资源: ${Math.floor(this.resources)}`;
-    if (hpEl) hpEl.textContent = `生命值: ${this.health}`;
+    if (resEl) resEl.textContent = I18N.t('resources', { n: Math.floor(this.resources) });
+    if (hpEl) hpEl.textContent = I18N.t('health', { n: this.health });
     const techEl = document.getElementById('techPoints');
-    if (techEl) techEl.textContent = `科技点: ${this.techTree.points}`;
+    if (techEl) techEl.textContent = I18N.t('techPoints', { n: this.techTree.points });
     if (waveEl) {
       const wm = this.waveManager;
       if (this.gameState === 'ready') {
-        waveEl.textContent = `波次: 0/${wm.waves.length} — 建造防御，然后按「准备就绪」`;
+        waveEl.textContent = I18N.t('waveReady', { n: wm.waves.length });
       } else if (wm.isWaveActive) {
-        waveEl.textContent = `波次: ${wm.currentWave}/${wm.waves.length}`;
+        waveEl.textContent = I18N.t('waveActive', { cur: wm.currentWave, n: wm.waves.length });
       } else if (wm.currentWave < wm.waves.length) {
         const remaining = Math.ceil(wm.waveInterval - wm.waveTimer);
-        waveEl.textContent = `波次: ${wm.currentWave}/${wm.waves.length}（${remaining}秒后下一波）`;
+        waveEl.textContent = I18N.t('waveCountdown', { cur: wm.currentWave, n: wm.waves.length, s: remaining });
       } else {
-        waveEl.textContent = `波次: ${wm.currentWave}/${wm.waves.length}`;
+        waveEl.textContent = I18N.t('waveActive', { cur: wm.currentWave, n: wm.waves.length });
       }
     }
 
@@ -277,10 +277,10 @@ class Game {
     const nextWaveBtn = document.getElementById('nextWaveBtn');
     if (nextWaveBtn) {
       if (this.gameState === 'ready') {
-        nextWaveBtn.textContent = '准备就绪 ▶';
+        nextWaveBtn.textContent = I18N.t('readyBtn');
         nextWaveBtn.disabled = false;
       } else {
-        nextWaveBtn.textContent = '下一波 ▶';
+        nextWaveBtn.textContent = I18N.t('nextWaveBtn');
         nextWaveBtn.disabled = this.gameState !== 'playing' ||
           this.waveManager.isWaveActive ||
           this.waveManager.currentWave >= this.waveManager.waves.length;
@@ -290,7 +290,7 @@ class Game {
     if (selEl) {
       if (this.selectedTowerType) {
         const info = TOWER_TYPES[this.selectedTowerType];
-        selEl.textContent = `已选择: ${info.name}（${info.cost}）`;
+        selEl.textContent = I18N.t('selected', { name: I18N.towerName(this.selectedTowerType), cost: info.cost });
         selEl.style.color = info.color;
         selEl.style.display = 'block';
       } else {
@@ -318,14 +318,14 @@ class Game {
       const title = document.getElementById('resultTitle');
       const subtitle = document.getElementById('resultSubtitle');
       if (title) {
-        title.textContent = isWin ? '关卡完成' : '终端被入侵';
+        title.textContent = isWin ? I18N.t('winTitle') : I18N.t('loseTitle');
         title.style.color = isWin ? '#00ff88' : '#ff4444';
       }
       if (subtitle) {
         const waves = this.waveManager ? this.waveManager.waves.length : 0;
         subtitle.textContent = isWin
-          ? `已清除全部 ${waves} 波敌人！` + (this.lastTechReward ? `  +${this.lastTechReward} 科技点` : '')
-          : '终端已被入侵……';
+          ? I18N.t('winSubtitle', { n: waves }) + (this.lastTechReward ? I18N.t('techReward', { n: this.lastTechReward }) : '')
+          : I18N.t('loseSubtitle');
       }
       // "Next Level" only on victory when a next level exists
       const nextBtn = document.getElementById('resultNextBtn');

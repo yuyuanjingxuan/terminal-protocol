@@ -552,18 +552,20 @@ class BoostTower extends Tower {
 
 }
 
-// Tower type registry for selection UI (cost/range from BALANCE; names in Chinese)
+// Tower type registry for selection UI (cost/range from BALANCE).
+// Display names come from I18N (tower_<type>) via a getter, so they follow
+// the selected language and are evaluated at render time.
 const TOWER_TYPES = {
-  laser: { name: '激光', class: LaserTower, cost: BALANCE.towers.laser.cost, range: BALANCE.towers.laser.range, color: '#00f0ff', shape: 'triangle', faction: 'Energy' },
-  plasma: { name: '等离子', class: PlasmaTower, cost: BALANCE.towers.plasma.cost, range: BALANCE.towers.plasma.range, color: '#00a2ff', shape: 'diamond', faction: 'Energy' },
-  railgun: { name: '轨道炮', class: RailgunTower, cost: BALANCE.towers.railgun.cost, range: BALANCE.towers.railgun.range, color: '#0066ff', shape: 'hexagon', faction: 'Energy' },
-  cannon: { name: '加农炮', class: CannonTower, cost: BALANCE.towers.cannon.cost, range: BALANCE.towers.cannon.range, color: '#ff6600', shape: 'square', faction: 'Explosive' },
-  missile: { name: '导弹', class: MissileTower, cost: BALANCE.towers.missile.cost, range: BALANCE.towers.missile.range, color: '#ff3300', shape: 'pentagon', faction: 'Explosive' },
-  bomb: { name: '炸弹', class: BombTower, cost: BALANCE.towers.bomb.cost, range: BALANCE.towers.bomb.range, color: '#cc0000', shape: 'circle', faction: 'Explosive' },
-  emp: { name: '电磁脉冲', class: EMPTower, cost: BALANCE.towers.emp.cost, range: BALANCE.towers.emp.range, color: '#9c27b0', shape: 'ring', faction: 'EM' },
-  pulse: { name: '脉冲', class: PulseTower, cost: BALANCE.towers.pulse.cost, range: BALANCE.towers.pulse.range, color: '#673ab7', shape: 'double', faction: 'EM' },
-  disruptor: { name: '干扰器', class: DisruptorTower, cost: BALANCE.towers.disruptor.cost, range: BALANCE.towers.disruptor.range, color: '#3f51b5', shape: 'bolt', faction: 'EM' },
-  repair: { name: '修复', class: RepairTower, cost: BALANCE.towers.repair.cost, range: BALANCE.towers.repair.range, color: '#4CAF50', shape: 'cross', faction: 'Support' }
+  laser: { get name() { return I18N.towerName('laser'); }, class: LaserTower, cost: BALANCE.towers.laser.cost, range: BALANCE.towers.laser.range, color: '#00f0ff', shape: 'triangle', faction: 'Energy' },
+  plasma: { get name() { return I18N.towerName('plasma'); }, class: PlasmaTower, cost: BALANCE.towers.plasma.cost, range: BALANCE.towers.plasma.range, color: '#00a2ff', shape: 'diamond', faction: 'Energy' },
+  railgun: { get name() { return I18N.towerName('railgun'); }, class: RailgunTower, cost: BALANCE.towers.railgun.cost, range: BALANCE.towers.railgun.range, color: '#0066ff', shape: 'hexagon', faction: 'Energy' },
+  cannon: { get name() { return I18N.towerName('cannon'); }, class: CannonTower, cost: BALANCE.towers.cannon.cost, range: BALANCE.towers.cannon.range, color: '#ff6600', shape: 'square', faction: 'Explosive' },
+  missile: { get name() { return I18N.towerName('missile'); }, class: MissileTower, cost: BALANCE.towers.missile.cost, range: BALANCE.towers.missile.range, color: '#ff3300', shape: 'pentagon', faction: 'Explosive' },
+  bomb: { get name() { return I18N.towerName('bomb'); }, class: BombTower, cost: BALANCE.towers.bomb.cost, range: BALANCE.towers.bomb.range, color: '#cc0000', shape: 'circle', faction: 'Explosive' },
+  emp: { get name() { return I18N.towerName('emp'); }, class: EMPTower, cost: BALANCE.towers.emp.cost, range: BALANCE.towers.emp.range, color: '#9c27b0', shape: 'ring', faction: 'EM' },
+  pulse: { get name() { return I18N.towerName('pulse'); }, class: PulseTower, cost: BALANCE.towers.pulse.cost, range: BALANCE.towers.pulse.range, color: '#673ab7', shape: 'double', faction: 'EM' },
+  disruptor: { get name() { return I18N.towerName('disruptor'); }, class: DisruptorTower, cost: BALANCE.towers.disruptor.cost, range: BALANCE.towers.disruptor.range, color: '#3f51b5', shape: 'bolt', faction: 'EM' },
+  repair: { get name() { return I18N.towerName('repair'); }, class: RepairTower, cost: BALANCE.towers.repair.cost, range: BALANCE.towers.repair.range, color: '#4CAF50', shape: 'cross', faction: 'Support' }
 };
 
 class ResourceTower extends Tower {

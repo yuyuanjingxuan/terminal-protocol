@@ -149,35 +149,47 @@ class TerminalProtocol {
     document.getElementById('exportSaveBtn').addEventListener('click', () => {
       const text = this.game.saveSystem.exportSave(this.game);
       navigator.clipboard.writeText(text).then(() => {
-        this.flashSaveMsg('存档已复制到剪贴板');
+        this.flashSaveMsg(I18N.t('saveCopied'));
       }).catch(() => {
-        prompt('复制你的存档码：', text);
+        prompt(I18N.t('saveCopyPrompt'), text);
       });
     });
     document.getElementById('importSaveBtn').addEventListener('click', () => {
-      const text = prompt('粘贴你的存档码：');
+      const text = prompt(I18N.t('savePastePrompt'));
       if (!text) return;
       if (this.game.saveSystem.importSave(text, this.game)) {
         this.game.saveSystem.save(this.game);
         this.updateLevelButtons();
         this.renderTechPanel();
-        this.flashSaveMsg('存档已导入');
+        this.flashSaveMsg(I18N.t('saveImported'));
       } else {
-        this.flashSaveMsg('导入失败 - 无效存档码');
+        this.flashSaveMsg(I18N.t('saveImportFailed'));
       }
     });
     document.getElementById('resetSaveBtn').addEventListener('click', () => {
-      if (!confirm('确定重置全部进度（科技点、已解锁关卡）？')) return;
+      if (!confirm(I18N.t('saveResetConfirm'))) return;
       this.game.techTree.reset();
       this.game.completedLevels = [];
       this.game.unlockedLevels = ['level1'];
       this.game.saveSystem.clear();
       this.updateLevelButtons();
       this.renderTechPanel();
-      this.flashSaveMsg('进度已重置');
+      this.flashSaveMsg(I18N.t('saveResetDone'));
     });
 
-    // Show the main menu (level select) as the initial screen
+    // Language toggle (main menu button + in-game button)
+    const wireLangBtn = (id) => {
+      const btn = document.getElementById(id);
+      if (btn) btn.addEventListener('click', () => {
+        I18N.setLanguage(I18N.lang === 'zh' ? 'en' : 'zh');
+      });
+    };
+    wireLangBtn('langBtn');
+    wireLangBtn('langBtn2');
+    I18N.onLanguageChange(() => this.applyLanguageUI());
+
+    // Apply the current language to all static UI, then show the main menu
+    this.applyLanguageUI();
     this.showMainMenu();
 
     console.log('Terminal Protocol initialized');
@@ -205,15 +217,68 @@ class TerminalProtocol {
         btn.disabled = !unlocked;
         btn.dataset.level = key;
         const done = this.game.completedLevels.includes(key);
-        btn.innerHTML = unlocked
-          ? `<span class="menu-level-name">第 ${key.replace('level', '')} 关</span><span class="menu-level-status">${done ? '✓ 已通关' : '▶ 开始'}</span>`
-          : `<span class="menu-level-name">第 ${key.replace('level', '')} 关</span><span class="menu-level-status">🔒 未解锁</span>`;
+        const status = !unlocked ? I18N.t('levelLocked') : (done ? I18N.t('levelDone') : I18N.t('levelStart'));
+        btn.innerHTML = `<span class="menu-level-name">${I18N.levelName(key)}</span><span class="menu-level-status">${status}</span>`;
         container.appendChild(btn);
       });
     }
 
     const menu = document.getElementById('mainMenu');
     if (menu) menu.classList.add('show');
+  }
+
+  // Re-render all static UI text for the current language (called on init
+  // and on every language switch). Dynamic HUD text (resources/health/wave)
+  // is refreshed every frame by game.renderUI().
+  applyLanguageUI() {
+    const t = (k, args) => I18N.t(k, args);
+    document.title = t('docTitle');
+
+    const set = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+
+    // Main menu
+    set('menuTitle', t('menuTitle'));
+    set('menuSubtitle', t('menuSubtitle'));
+    set('menuStartBtn', t('startGame'));
+
+    // Result screen buttons
+    set('resultRetryBtn', t('retry'));
+    set('resultNextBtn', t('nextLevel'));
+    set('resultMenuBtn', t('mainMenu'));
+
+    // Tech panel
+    set('techBtn', t('techBtn'));
+    set('techPanelTitle', t('techPanelTitle'));
+    const closeBtn = document.getElementById('techCloseBtn');
+    if (closeBtn) closeBtn.title = t('close');
+    set('exportSaveBtn', t('export'));
+    set('importSaveBtn', t('import'));
+    set('resetSaveBtn', t('reset'));
+
+    // Audio button tooltips
+    const muteBtn = document.getElementById('muteBtn');
+    if (muteBtn) muteBtn.title = t('toggleSfx');
+    const musicBtn = document.getElementById('musicBtn');
+    if (musicBtn) musicBtn.title = t('toggleMusic');
+
+    // Tower buttons
+    document.querySelectorAll('.tower-btn').forEach(btn => {
+      const nameEl = btn.querySelector('.tname');
+      if (nameEl) nameEl.textContent = I18N.towerName(btn.dataset.type);
+    });
+
+    // Language toggle buttons always show the language they switch TO
+    const langBtn = document.getElementById('langBtn');
+    if (langBtn) langBtn.textContent = I18N.toggleLabel();
+    const langBtn2 = document.getElementById('langBtn2');
+    if (langBtn2) langBtn2.textContent = I18N.lang === 'zh' ? 'EN' : '中';
+
+    // Re-render dynamic lists (menu level list + tech panel)
+    if (this.game && this.game.gameState === 'menu') this.showMainMenu();
+    this.renderTechPanel();
   }
 
   flashSaveMsg(msg) {
@@ -244,7 +309,7 @@ class TerminalProtocol {
     tt.factions.forEach(faction => {
       const factionEl = document.createElement('div');
       factionEl.className = 'tech-faction';
-      factionEl.innerHTML = `<div class="tech-faction-name" style="color:${faction.color}">${faction.name}</div>`;
+      factionEl.innerHTML = `<div class="tech-faction-name" style="color:${faction.color}">${I18N.factionName(faction.id)}</div>`;
 
       Object.entries(tt.nodes)
         .filter(([id, node]) => node.faction === faction.id)
@@ -255,16 +320,20 @@ class TerminalProtocol {
           const btn = document.createElement('button');
           btn.className = 'tech-node' + (unlocked ? ' unlocked' : '') + (canBuy ? ' available' : '');
           btn.disabled = unlocked || !canBuy;
-          btn.innerHTML = `<span class="tech-node-name">${node.name}</span>` +
-            `<span class="tech-node-desc">${node.description}</span>` +
-            `<span class="tech-node-cost">${unlocked ? '✓' : node.cost + ' 点'}</span>`;
-          btn.title = node.description;
+          // support_2 / support_3 descriptions embed BALANCE bonus values
+          const descArgs = id === 'support_2' ? { n: BALANCE.techBonusHealth }
+            : id === 'support_3' ? { n: BALANCE.techBonusResources } : undefined;
+          const desc = I18N.techDesc(id, descArgs);
+          btn.innerHTML = `<span class="tech-node-name">${I18N.techName(id)}</span>` +
+            `<span class="tech-node-desc">${desc}</span>` +
+            `<span class="tech-node-cost">${unlocked ? '✓' : I18N.t('techCost', { n: node.cost })}</span>`;
+          btn.title = desc;
           btn.addEventListener('click', () => {
             if (tt.unlockNode(id)) {
               this.game.saveSystem.save(this.game);
               this.renderTechPanel();
               const techEl = document.getElementById('techPoints');
-              if (techEl) techEl.textContent = `科技点: ${tt.points}`;
+              if (techEl) techEl.textContent = I18N.t('techPoints', { n: tt.points });
               // Tech unlock sound + sparkle (Phase 6)
               if (this.game.audio) this.game.audio.playTechUnlock();
               if (this.game.effects) this.game.effects.techUnlock(this.game.canvas.width / 2, 60);

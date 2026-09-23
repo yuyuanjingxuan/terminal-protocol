@@ -1,0 +1,269 @@
+// content/i18n.js - UI language (zh / en)
+// All player-visible strings live here. Code reads them via I18N.t(key, ...args)
+// at render time, so switching language re-renders everything live.
+
+const I18N = {
+  lang: 'zh',
+  _listeners: [],
+
+  STRINGS: {
+    zh: {
+      // Page
+      docTitle: '终端协议',
+      // HUD
+      resources: '资源: {n}',
+      health: '生命值: {n}',
+      techPoints: '科技点: {n}',
+      waveReady: '波次: 0/{n} — 建造防御，然后按「准备就绪」',
+      waveActive: '波次: {cur}/{n}',
+      waveCountdown: '波次: {cur}/{n}（{s}秒后下一波）',
+      readyBtn: '准备就绪 ▶',
+      nextWaveBtn: '下一波 ▶',
+      selected: '已选择: {name}（{cost}）',
+      // Result screen
+      winTitle: '关卡完成',
+      loseTitle: '终端被入侵',
+      winSubtitle: '已清除全部 {n} 波敌人！',
+      techReward: '  +{n} 科技点',
+      loseSubtitle: '终端已被入侵……',
+      retry: '↻ 重试',
+      nextLevel: '下一关 ▶',
+      mainMenu: '⌂ 主菜单',
+      // Main menu
+      menuTitle: '终端协议',
+      menuSubtitle: '守护终端 · 抵御入侵',
+      startGame: '▶ 开始游戏',
+      levelName: '第 {n} 关',
+      levelDone: '✓ 已通关',
+      levelStart: '▶ 开始',
+      levelLocked: '🔒 未解锁',
+      // Tech panel
+      techBtn: '⚡ 科技',
+      techPanelTitle: '科技树',
+      close: '关闭',
+      export: '导出',
+      import: '导入',
+      reset: '重置',
+      techCost: '{n} 点',
+      // Save messages
+      saveCopied: '存档已复制到剪贴板',
+      saveCopyPrompt: '复制你的存档码：',
+      savePastePrompt: '粘贴你的存档码：',
+      saveImported: '存档已导入',
+      saveImportFailed: '导入失败 - 无效存档码',
+      saveResetConfirm: '确定重置全部进度（科技点、已解锁关卡）？',
+      saveResetDone: '进度已重置',
+      // Audio buttons
+      toggleSfx: '开关音效',
+      toggleMusic: '开关音乐',
+      // Boss
+      bossLabel: '核心进程',
+      // Towers
+      tower_laser: '激光',
+      tower_plasma: '等离子',
+      tower_railgun: '轨道炮',
+      tower_cannon: '加农炮',
+      tower_missile: '导弹',
+      tower_bomb: '炸弹',
+      tower_emp: '电磁脉冲',
+      tower_pulse: '脉冲',
+      tower_disruptor: '干扰器',
+      tower_repair: '修复',
+      // Tech tree factions
+      faction_energy: '能量系',
+      faction_explosive: '爆破系',
+      faction_electromagnetic: '电磁系',
+      faction_support: '支援系',
+      faction_global: '全局',
+      // Tech tree nodes
+      tech_energy_1: '超充电池',
+      tech_energy_1_desc: '能量系塔伤害 +15%',
+      tech_energy_2: '远程增幅',
+      tech_energy_2_desc: '能量系塔射程 +20%',
+      tech_energy_3: '快速循环',
+      tech_energy_3_desc: '能量系塔射速 +20%',
+      tech_explosive_1: '高爆弹药',
+      tech_explosive_1_desc: '爆破系塔爆炸范围 +20%',
+      tech_explosive_2: '破片弹头',
+      tech_explosive_2_desc: '爆破系塔伤害 +15%',
+      tech_explosive_3: '快速装填',
+      tech_explosive_3_desc: '爆破系塔射速 +20%',
+      tech_electromagnetic_1: '强化电磁脉冲',
+      tech_electromagnetic_1_desc: '电磁系减速与眩晕效果持续 +25%',
+      tech_electromagnetic_2: '广域脉冲',
+      tech_electromagnetic_2_desc: '电磁系塔射程 +15%',
+      tech_electromagnetic_3: '连锁反应',
+      tech_electromagnetic_3_desc: '干扰器额外连锁 1 个目标',
+      tech_support_1: '高效修复',
+      tech_support_1_desc: '修复塔修复量 +50%',
+      tech_support_2: '强化核心',
+      tech_support_2_desc: '每关初始生命值 +{n}',
+      tech_support_3: '资源优化',
+      tech_support_3_desc: '每关初始资源 +{n}',
+      tech_global_1: '高级训练',
+      tech_global_1_desc: '所有塔造价 -10%',
+      tech_global_2: '超频系统',
+      tech_global_2_desc: '所有塔射速 +10%'
+    },
+    en: {
+      // Page
+      docTitle: 'Terminal Protocol',
+      // HUD
+      resources: 'Resources: {n}',
+      health: 'Health: {n}',
+      techPoints: 'Tech: {n}',
+      waveReady: 'Wave: 0/{n} — build defenses, then press "Ready"',
+      waveActive: 'Wave: {cur}/{n}',
+      waveCountdown: 'Wave: {cur}/{n} (next in {s}s)',
+      readyBtn: 'Ready ▶',
+      nextWaveBtn: 'Next Wave ▶',
+      selected: 'Selected: {name} ({cost})',
+      // Result screen
+      winTitle: 'LEVEL COMPLETE',
+      loseTitle: 'TERMINAL BREACHED',
+      winSubtitle: 'All {n} waves cleared!',
+      techReward: '  +{n} tech',
+      loseSubtitle: 'The terminal has been breached...',
+      retry: '↻ Retry',
+      nextLevel: 'Next Level ▶',
+      mainMenu: '⌂ Main Menu',
+      // Main menu
+      menuTitle: 'TERMINAL PROTOCOL',
+      menuSubtitle: 'Defend the terminal · Repel the invasion',
+      startGame: '▶ Start Game',
+      levelName: 'Level {n}',
+      levelDone: '✓ Cleared',
+      levelStart: '▶ Start',
+      levelLocked: '🔒 Locked',
+      // Tech panel
+      techBtn: '⚡ Tech',
+      techPanelTitle: 'Tech Tree',
+      close: 'Close',
+      export: 'Export',
+      import: 'Import',
+      reset: 'Reset',
+      techCost: '{n} pts',
+      // Save messages
+      saveCopied: 'Save code copied to clipboard',
+      saveCopyPrompt: 'Copy your save code:',
+      savePastePrompt: 'Paste your save code:',
+      saveImported: 'Save imported',
+      saveImportFailed: 'Import failed - invalid save code',
+      saveResetConfirm: 'Reset all progress (tech points, unlocked levels)?',
+      saveResetDone: 'Progress reset',
+      // Audio buttons
+      toggleSfx: 'Toggle sound effects',
+      toggleMusic: 'Toggle music',
+      // Boss
+      bossLabel: 'CORE PROCESS',
+      // Towers
+      tower_laser: 'Laser',
+      tower_plasma: 'Plasma',
+      tower_railgun: 'Railgun',
+      tower_cannon: 'Cannon',
+      tower_missile: 'Missile',
+      tower_bomb: 'Bomb',
+      tower_emp: 'EMP',
+      tower_pulse: 'Pulse',
+      tower_disruptor: 'Disruptor',
+      tower_repair: 'Repair',
+      // Tech tree factions
+      faction_energy: 'Energy',
+      faction_explosive: 'Explosive',
+      faction_electromagnetic: 'Electromagnetic',
+      faction_support: 'Support',
+      faction_global: 'Global',
+      // Tech tree nodes
+      tech_energy_1: 'Overcharged Cells',
+      tech_energy_1_desc: 'Energy tower damage +15%',
+      tech_energy_2: 'Long Range',
+      tech_energy_2_desc: 'Energy tower range +20%',
+      tech_energy_3: 'Fast Cycle',
+      tech_energy_3_desc: 'Energy tower fire rate +20%',
+      tech_explosive_1: 'High-Explosive Rounds',
+      tech_explosive_1_desc: 'Explosive tower blast radius +20%',
+      tech_explosive_2: 'Fragmentation Warheads',
+      tech_explosive_2_desc: 'Explosive tower damage +15%',
+      tech_explosive_3: 'Quick Reload',
+      tech_explosive_3_desc: 'Explosive tower fire rate +20%',
+      tech_electromagnetic_1: 'Enhanced EMP',
+      tech_electromagnetic_1_desc: 'EM slow & stun duration +25%',
+      tech_electromagnetic_2: 'Wide Pulse',
+      tech_electromagnetic_2_desc: 'EM tower range +15%',
+      tech_electromagnetic_3: 'Chain Reaction',
+      tech_electromagnetic_3_desc: 'Disruptor chains to 1 extra target',
+      tech_support_1: 'Efficient Repair',
+      tech_support_1_desc: 'Repair tower output +50%',
+      tech_support_2: 'Reinforced Core',
+      tech_support_2_desc: 'Starting health +{n} per level',
+      tech_support_3: 'Resource Optimization',
+      tech_support_3_desc: 'Starting resources +{n} per level',
+      tech_global_1: 'Advanced Training',
+      tech_global_1_desc: 'All tower costs -10%',
+      tech_global_2: 'Overclock System',
+      tech_global_2_desc: 'All tower fire rate +10%'
+    }
+  },
+
+  // t('key', {n: 5}) → localized string with {n} placeholders filled
+  t(key, args) {
+    const table = this.STRINGS[this.lang] || this.STRINGS.zh;
+    let s = table[key] !== undefined ? table[key] : (this.STRINGS.zh[key] || key);
+    if (args) {
+      for (const k of Object.keys(args)) {
+        s = s.split('{' + k + '}').join(String(args[k]));
+      }
+    }
+    return s;
+  },
+
+  // Localized display name for a tower type ('laser' → 激光 / Laser)
+  towerName(type) {
+    return this.t('tower_' + type);
+  },
+
+  // Localized display name for a tech node ('energy_1' → 超充电池 / Overcharged Cells)
+  techName(id, args) {
+    return this.t('tech_' + id, args);
+  },
+
+  techDesc(id, args) {
+    return this.t('tech_' + id + '_desc', args);
+  },
+
+  // Localized display name for a tech faction ('energy' → 能量系 / Energy)
+  factionName(id) {
+    return this.t('faction_' + id);
+  },
+
+  // Localized level display name ('level2' → 第 2 关 / Level 2)
+  levelName(key) {
+    return this.t('levelName', { n: String(key).replace('level', '') });
+  },
+
+  setLanguage(lang) {
+    if (lang !== 'zh' && lang !== 'en') return;
+    this.lang = lang;
+    try { localStorage.setItem('terminalProtocolLang', lang); } catch (e) { /* ignore */ }
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    this._listeners.forEach(fn => { try { fn(lang); } catch (e) { /* ignore */ } });
+  },
+
+  onLanguageChange(fn) {
+    this._listeners.push(fn);
+  },
+
+  // Language label shown on the toggle button (the OTHER language, so the
+  // button always advertises what it will switch TO)
+  toggleLabel() {
+    return this.lang === 'zh' ? 'English' : '中文';
+  }
+};
+
+// Restore persisted language choice (before any UI renders)
+try {
+  const saved = localStorage.getItem('terminalProtocolLang');
+  if (saved === 'en' || saved === 'zh') I18N.lang = saved;
+} catch (e) { /* ignore */ }
+
+if (typeof module !== 'undefined' && module.exports) module.exports = I18N;

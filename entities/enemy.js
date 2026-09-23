@@ -289,7 +289,7 @@ class Enemy {
       ctx.fillStyle = '#ffffff';
       ctx.font = '11px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('核心进程', this.game.canvas.width / 2, 34);
+      ctx.fillText(I18N.t('bossLabel'), this.game.canvas.width / 2, 34);
     }
   }
 }

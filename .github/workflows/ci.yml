@@ -14,8 +14,7 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Install dependencies
-      run: npm install
+    # No npm install: the project has zero dependencies (no package.json).
 
     - name: Build project
       run: node scripts/build.js
