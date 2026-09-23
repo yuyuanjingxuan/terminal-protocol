@@ -28,8 +28,15 @@ function build() {
     return `<script>\n${content}\n</script>`;
   });
 
+  // Stamp a copyright banner into the built file (attribution for the
+  // single-file artifact that gets shared around)
+  const banner = '<!-- Terminal Protocol © yuyuanjingxuan — custom non-commercial license, see LICENSE in the repository -->\n';
+  const stamped = finalHtml.startsWith('<!DOCTYPE')
+    ? finalHtml.replace('<!DOCTYPE', banner + '<!DOCTYPE')
+    : banner + finalHtml;
+
   // Write to output file
-  fs.writeFileSync(path.join(PROJECT_ROOT, OUTPUT_FILE), finalHtml, 'utf8');
+  fs.writeFileSync(path.join(PROJECT_ROOT, OUTPUT_FILE), stamped, 'utf8');
 
   console.log(`Build complete! Output file: ${OUTPUT_FILE}`);
   console.log(`Total JavaScript size: ${totalSize} bytes`);

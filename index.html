@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="yuyuanjingxuan">
   <title>终端协议</title>
   <style>
     body {
@@ -131,8 +132,9 @@
     }
 
     .tower-btn {
-      width: 52px;
+      width: 56px;
       height: 52px;
+      padding: 0;
       border: 2px solid #444;
       border-radius: 6px;
       background: #1a1a2e;
@@ -144,6 +146,11 @@
       align-items: center;
       justify-content: center;
       gap: 2px;
+    }
+
+    .tower-btn .tname {
+      white-space: nowrap;
+      line-height: 1.1;
     }
 
     .tower-btn:hover {
@@ -481,6 +488,13 @@
       font-size: 12px;
       padding: 6px 10px;
     }
+
+    .credit {
+      margin: 2px 0 0 0;
+      color: #556677;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
   </style>
 </head>
 <body>
@@ -525,8 +539,8 @@
       <button class="tower-btn" data-type="cannon" style="border-color:#ff6600"><span class="key">4</span><span class="tname">加农炮</span><span class="cost">60</span></button>
       <button class="tower-btn" data-type="missile" style="border-color:#ff3300"><span class="key">5</span><span class="tname">导弹</span><span class="cost">55</span></button>
       <button class="tower-btn" data-type="bomb" style="border-color:#cc0000"><span class="key">6</span><span class="tname">炸弹</span><span class="cost">90</span></button>
-      <button class="tower-btn" data-type="emp" style="border-color:#9c27b0"><span class="key">7</span><span class="tname">电磁脉冲</span><span class="cost">45</span></button>
-      <button class="tower-btn" data-type="pulse" style="border-color:#673ab7"><span class="key">8</span><span class="tname">脉冲</span><span class="cost">70</span></button>
+      <button class="tower-btn" data-type="emp" style="border-color:#9c27b0"><span class="key">7</span><span class="tname">EMP</span><span class="cost">45</span></button>
+      <button class="tower-btn" data-type="pulse" style="border-color:#673ab7"><span class="key">8</span><span class="tname">眩晕脉冲</span><span class="cost">70</span></button>
       <button class="tower-btn" data-type="disruptor" style="border-color:#3f51b5"><span class="key">9</span><span class="tname">干扰器</span><span class="cost">65</span></button>
       <button class="tower-btn" data-type="repair" style="border-color:#4CAF50"><span class="key">0</span><span class="tname">修复</span><span class="cost">50</span></button>
     </div>
@@ -538,6 +552,7 @@
       <button id="menuStartBtn" class="big-btn">▶ 开始游戏</button>
       <div id="menuLevelList" class="menu-level-list"></div>
       <button id="langBtn" class="lang-btn">English</button>
+      <p class="credit">by yuyuanjingxuan</p>
     </div>
 
     <!-- Result screen (win / lose) -->
@@ -549,6 +564,7 @@
         <button id="resultNextBtn" class="result-btn primary">下一关 ▶</button>
         <button id="resultMenuBtn" class="result-btn">⌂ 主菜单</button>
       </div>
+      <p class="credit">by yuyuanjingxuan</p>
     </div>
   </div>
 

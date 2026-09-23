@@ -2,45 +2,67 @@
 
 [中文版 →](./README.md)
 
-![CI](https://github.com/YOUR_USERNAME/terminal-protocol/actions/workflows/ci.yml/badge.svg)
-![Status](https://img.shields.io/badge/status-planning-yellow)
-![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
+[![CI](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/status-in%20development-blue)](https://github.com/yuyuanjingxuan/terminal-protocol)
+[![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)](https://github.com/yuyuanjingxuan/terminal-protocol)
+[![Language](https://img.shields.io/badge/language-Vanilla%20JS%20%2B%20Canvas-blue)](https://github.com/yuyuanjingxuan/terminal-protocol)
+[![License](https://img.shields.io/badge/license-Custom%20Non--Commercial-lightgrey)](./LICENSE)
 
-A sci-fi tower defense game set in a virtual cyberspace battlefield, where a rogue AI is spreading and the player deploys defense protocols to intercept its processes and hold each network node.
-
-## Project status
-
-The project is in the planning stage. System design and the development roadmap are finished, but implementation hasn't started yet. The CI badge will turn meaningful as build and verification scripts are added; right now it only checks that the planning document exists.
+A sci-fi tower defense game: a rogue AI is invading virtual cyberspace, and the player deploys defense protocols to intercept its processes and hold the terminal.
 
 ## Features
 
-- A full campaign of 30+ levels across six chapters, each ending in a boss fight
-- 12+ towers across four schools: energy, blast, electromagnetic, and support
-- Enemies with special abilities including shields, healing, stealth, and splitting on death
-- A two-layer progression system: temporary in-level upgrades plus a permanent out-of-run tech tree
-- Three difficulty levels, with an endless mode unlocked after clearing the campaign
-- Bilingual Chinese and English interface and story, switchable in settings
-- Runs as a single HTML file with zero external dependencies; sound effects and music are synthesized live with Web Audio
+- 10 tower types across four schools: energy, explosive, electromagnetic, and support (Laser, Plasma, Railgun, Cannon, Missile, Bomb, EMP, Stun Pulse, Disruptor, Repair)
+- 7 enemy types: basic, fast, armored, healer, stealth, splitter, and the boss "Core Process" that summons minions
+- A permanent out-of-run tech tree: 5 factions, 14 nodes, progression that carries across levels
+- Save system: progress is saved automatically, with export/import save codes
+- Bilingual Chinese/English UI, switchable from the main menu
+- All sound effects and music synthesized live with Web Audio — no external assets
+- Runs as a single HTML file, zero dependencies, fully offline
 
-## Technical approach
+## Running the game
 
-Built with vanilla JavaScript and Canvas, no frontend framework or third-party libraries. During development the code is split across multiple source files, then merged by a build script into one HTML file that opens directly in a browser.
+```bash
+node scripts/build.js
+```
 
-## Development docs
+The build script inlines every JS source file referenced by `index.html` and produces `terminal-protocol.html` at the repository root. Open it in a browser to play — no install and no network connection required.
 
-The full system design and phased development roadmap live in [`docs/tower-defense-master-plan.md`](./docs/tower-defense-master-plan.md), covering map and tower mechanics, enemy design, the progression and save system, art and audio direction, and the twelve development phases from project setup through final acceptance.
+## Controls
+
+| Action | Key / Button |
+| --- | --- |
+| Select tower | Number keys `1`–`0` or the tower buttons at the bottom |
+| Place tower | Left-click a grid cell |
+| Deselect | Right-click / `Esc` |
+| Start wave / call next wave early | "Ready / Next Wave" button |
+| Game speed | `1x` / `2x` / `3x` |
+| Sound / music toggle | 🔊 / 🎵 buttons |
+| Language switch | "English / 中文" button on the main menu, or the `EN / 中` button in game |
 
 ## Repository layout
 
 ```
 .
-├── docs/
-│   └── tower-defense-master-plan.md   # Full design doc and development roadmap
-├── scripts/                            # Build and verification scripts (in progress)
-├── src/                                 # Game source, split by module (in progress)
-└── .github/workflows/ci.yml            # Automated build and verification
+├── index.html                  # Page template (build entry point)
+├── main.js                     # Entry: menu, tech panel, saves, language switch
+├── content/
+│   ├── balance.js              # Balance config (towers / enemies / economy)
+│   ├── i18n.js                 # Chinese & English UI strings
+│   └── levels.js               # Level & wave data
+├── core/                       # Game loop, input
+├── entities/                   # Towers, enemies, projectiles
+├── systems/                    # Wave manager, tech tree, save system
+├── render/                     # Rendering & particle effects
+├── audio/                      # Web Audio synthesized SFX / music
+├── scripts/build.js            # Build script
+└── .github/workflows/ci.yml    # CI: build & verify the output
 ```
 
-## Running the game
+## License & Attribution
 
-Once the build script is in place, running it produces a single HTML file at the repository root. Open it in a browser to play — no install and no network connection required.
+This project is released under a **custom non-commercial license** (see [LICENSE](./LICENSE)):
+
+- Free to play, study, and modify for personal use;
+- **All commercial use is prohibited** (selling, bundling into commercial products, for-profit streaming, etc.) without the copyright holder's written permission;
+- Non-commercial redistribution/derivatives must retain attribution: **Terminal Protocol © yuyuanjingxuan**.

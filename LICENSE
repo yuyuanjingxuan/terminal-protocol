@@ -1,0 +1,82 @@
+终端协议 Terminal Protocol
+Copyright (c) 2026 yuyuanjingxuan
+
+=====================================================================
+自定义非商业许可条款 / Custom Non-Commercial License
+=====================================================================
+
+【中文条款】
+
+1. 授权范围
+   你可以免费地：
+   - 游玩本游戏（包括构建后的单文件 HTML 版本）；
+   - 查看、学习本项目的源代码；
+   - 出于个人学习、研究、教学演示目的修改源代码（修改版仅限自用，
+     不得分发）。
+
+2. 禁止事项
+   未经版权人书面授权，任何人不得将本游戏或其任何部分（包括但不限于
+   代码、美术、音效、音乐、关卡设计、剧情文本）用于任何商业用途，
+   包括但不限于：
+   - 出售、出租、付费下载或以任何方式收费提供；
+   - 打包进商业产品、商业网站、商业 App 或付费课程；
+   - 用于商业广告、商业宣传或营利性直播/视频；
+   - 以本游戏或其衍生作品申请任何商业授权、融资或变现。
+
+3. 署名要求
+   任何非商业性质的转载、分享、二次创作（如教学示例、开源学习项目），
+   必须保留本文件中的版权声明，并显著标注原作者：
+   "终端协议 Terminal Protocol © yuyuanjingxuan"。
+
+4. 商业合作
+   如需将本游戏用于任何商业目的（含移植、改编、集成），请通过 GitHub
+   （yuyuanjingxuan）联系版权人获取书面授权。版权人有权拒绝，且无需
+   说明理由。
+
+5. 免责声明
+   本游戏按"现状"提供，不作任何明示或暗示的保证。版权人对因使用或
+   无法使用本游戏而产生的任何损失不承担责任。
+
+---------------------------------------------------------------------
+[English Terms]
+
+1. Grant
+   You may, at no cost:
+   - play this game (including the built single-file HTML version);
+   - view and study the source code of this project;
+   - modify the source code for personal learning, research, or
+     educational demonstration (modified versions are for personal
+     use only and may not be distributed).
+
+2. Prohibitions
+   Without the copyright holder's written permission, no one may use
+   this game or any part of it (including but not limited to code,
+   art, sound effects, music, level design, and story text) for any
+   commercial purpose, including but not limited to:
+   - selling, renting, paywalled distribution, or any form of
+     charging for access;
+   - bundling it into commercial products, commercial websites,
+     commercial apps, or paid courses;
+   - using it in commercial advertising, promotion, or for-profit
+     streaming/video;
+   - using it or its derivatives to seek commercial licensing,
+     funding, or monetization.
+
+3. Attribution
+   Any non-commercial redistribution, sharing, or derivative work
+   (e.g. teaching examples, open-source learning projects) must
+   retain the copyright notice in this file and clearly credit the
+   original author:
+   "Terminal Protocol © yuyuanjingxuan".
+
+4. Commercial Inquiries
+   For any commercial use (including porting, adaptation, or
+     integration), contact the copyright holder via GitHub
+   (yuyuanjingxuan) to request written permission. The copyright
+   holder may decline without explanation.
+
+5. Disclaimer
+   THE GAME IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED. THE COPYRIGHT HOLDER IS NOT LIABLE FOR ANY
+   CLAIMS OR DAMAGES ARISING FROM THE USE OR INABILITY TO USE THIS
+   GAME.

@@ -126,6 +126,15 @@ class Game {
 
     // Render UI
     this.renderUI();
+
+    // Copyright watermark (bottom-right, subtle; survives screenshots/recordings)
+    ctx.save();
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillStyle = 'rgba(140, 160, 180, 0.45)';
+    ctx.fillText('Terminal Protocol © yuyuanjingxuan', this.canvas.width - 8, this.canvas.height - 6);
+    ctx.restore();
   }
 
   renderPlacementPreview(ctx) {

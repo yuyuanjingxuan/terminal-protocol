@@ -65,8 +65,8 @@ const I18N = {
       tower_cannon: '加农炮',
       tower_missile: '导弹',
       tower_bomb: '炸弹',
-      tower_emp: '电磁脉冲',
-      tower_pulse: '脉冲',
+      tower_emp: 'EMP',
+      tower_pulse: '眩晕脉冲',
       tower_disruptor: '干扰器',
       tower_repair: '修复',
       // Tech tree factions
@@ -164,7 +164,7 @@ const I18N = {
       tower_missile: 'Missile',
       tower_bomb: 'Bomb',
       tower_emp: 'EMP',
-      tower_pulse: 'Pulse',
+      tower_pulse: 'Stun Pulse',
       tower_disruptor: 'Disruptor',
       tower_repair: 'Repair',
       // Tech tree factions
