@@ -1,4 +1,82 @@
 // entities/tower.js - Base Tower class
+
+// --- Shape drawing helpers ---
+function hexToRgba(hex, alpha) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function polygonPath(ctx, x, y, r, sides, rot) {
+  for (let i = 0; i < sides; i++) {
+    const a = rot + (i * 2 * Math.PI) / sides;
+    const px = x + r * Math.cos(a);
+    const py = y + r * Math.sin(a);
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
+function drawTowerShape(ctx, x, y, r, shape) {
+  ctx.beginPath();
+  switch (shape) {
+    case 'triangle':
+      polygonPath(ctx, x, y, r, 3, -Math.PI / 2);
+      break;
+    case 'diamond':
+      polygonPath(ctx, x, y, r, 4, -Math.PI / 2);
+      break;
+    case 'pentagon':
+      polygonPath(ctx, x, y, r, 5, -Math.PI / 2);
+      break;
+    case 'hexagon':
+      polygonPath(ctx, x, y, r, 6, -Math.PI / 2);
+      break;
+    case 'square':
+      ctx.rect(x - r * 0.8, y - r * 0.8, r * 1.6, r * 1.6);
+      break;
+    case 'ring':
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.moveTo(x + r * 0.45, y);
+      ctx.arc(x, y, r * 0.45, 0, Math.PI * 2, true);
+      break;
+    case 'double':
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.moveTo(x + r * 0.6, y);
+      ctx.arc(x, y, r * 0.6, 0, Math.PI * 2, true);
+      ctx.moveTo(x + r * 0.25, y);
+      ctx.arc(x, y, r * 0.25, 0, Math.PI * 2);
+      break;
+    case 'cross': {
+      const w = r * 0.45;
+      ctx.rect(x - w, y - r, w * 2, r * 2);
+      ctx.rect(x - r, y - w, r * 2, w * 2);
+      break;
+    }
+    case 'bolt':
+      ctx.moveTo(x + r * 0.2, y - r);
+      ctx.lineTo(x - r * 0.5, y + r * 0.15);
+      ctx.lineTo(x - r * 0.05, y + r * 0.15);
+      ctx.lineTo(x - r * 0.2, y + r);
+      ctx.lineTo(x + r * 0.5, y - r * 0.15);
+      ctx.lineTo(x + r * 0.05, y - r * 0.15);
+      ctx.closePath();
+      break;
+    case 'star':
+      for (let i = 0; i < 10; i++) {
+        const rad = i % 2 === 0 ? r : r * 0.5;
+        const a = -Math.PI / 2 + (i * Math.PI) / 5;
+        const px = x + rad * Math.cos(a);
+        const py = y + rad * Math.sin(a);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      break;
+    default: // circle
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+  }
+}
+
 class Tower {
   constructor(game, x, y) {
     this.game = game;
@@ -10,6 +88,8 @@ class Tower {
     this.currentCooldown = 0;
     this.target = null;
     this.cost = 50;
+    this.shape = 'circle';
+    this.size = 15;
   }
 
   update(deltaTime) {
@@ -59,28 +139,24 @@ class Tower {
   }
 
   render(ctx) {
-    // Draw tower base with neon effect
-    ctx.fillStyle = '#00a2ff';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
-    ctx.fill();
+    const r = this.size || 15;
+    const color = this.color || '#00a2ff';
 
-    // Add glow effect
-    ctx.shadowColor = '#00a2ff';
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = 'rgba(0, 162, 255, 0.3)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator (for debugging)
-    ctx.strokeStyle = 'rgba(0, 162, 255, 0.2)';
+    // Range indicator
+    ctx.strokeStyle = hexToRgba(color, 0.2);
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
     ctx.stroke();
+
+    // Tower body with neon glow (unique shape per type)
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = color;
+    ctx.fillRule = 'evenodd';
+    drawTowerShape(ctx, this.x, this.y, r, this.shape);
+    ctx.fill();
+    ctx.shadowBlur = 0;
   }
 }
 
@@ -93,31 +169,7 @@ class LaserTower extends Tower {
     this.range = 150;
     this.cost = 80;
     this.color = '#00f0ff';
-  }
-
-  render(ctx) {
-    // Draw laser tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = 'rgba(0, 240, 255, 0.3)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
+    this.shape = 'triangle';
   }
 }
 
@@ -129,31 +181,8 @@ class PlasmaTower extends Tower {
     this.range = 120;
     this.cost = 100;
     this.color = '#00a2ff';
-  }
-
-  render(ctx) {
-    // Draw plasma tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = 'rgba(0, 162, 255, 0.4)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(0, 162, 255, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
+    this.shape = 'diamond';
+    this.size = 18;
   }
 }
 
@@ -165,31 +194,8 @@ class RailgunTower extends Tower {
     this.range = 200;
     this.cost = 150;
     this.color = '#0066ff';
-  }
-
-  render(ctx) {
-    // Draw railgun tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 25;
-    ctx.fillStyle = 'rgba(0, 102, 255, 0.5)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(0, 102, 255, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
+    this.shape = 'hexagon';
+    this.size = 13;
   }
 }
 
@@ -203,6 +209,8 @@ class CannonTower extends Tower {
     this.cost = 90;
     this.color = '#ff6600';
     this.explosionRadius = 40;
+    this.shape = 'square';
+    this.size = 16;
   }
 
   attack() {
@@ -220,37 +228,6 @@ class CannonTower extends Tower {
       this.game.addProjectile(projectile);
     }
   }
-
-  render(ctx) {
-    // Draw cannon tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = 'rgba(255, 102, 0, 0.4)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(255, 102, 0, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Draw explosion radius indicator
-    ctx.strokeStyle = 'rgba(255, 102, 0, 0.1)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.explosionRadius, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 class MissileTower extends Tower {
@@ -262,6 +239,8 @@ class MissileTower extends Tower {
     this.cost = 75;
     this.color = '#ff3300';
     this.explosionRadius = 35;
+    this.shape = 'pentagon';
+    this.size = 14;
   }
 
   attack() {
@@ -279,37 +258,6 @@ class MissileTower extends Tower {
       this.game.addProjectile(projectile);
     }
   }
-
-  render(ctx) {
-    // Draw missile tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = 'rgba(255, 51, 0, 0.3)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(255, 51, 0, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Draw explosion radius indicator
-    ctx.strokeStyle = 'rgba(255, 51, 0, 0.1)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.explosionRadius, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 class BombTower extends Tower {
@@ -321,6 +269,8 @@ class BombTower extends Tower {
     this.cost = 110;
     this.color = '#cc0000';
     this.explosionRadius = 50;
+    this.shape = 'circle';
+    this.size = 18;
   }
 
   attack() {
@@ -338,37 +288,6 @@ class BombTower extends Tower {
       this.game.addProjectile(projectile);
     }
   }
-
-  render(ctx) {
-    // Draw bomb tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 18;
-    ctx.fillStyle = 'rgba(204, 0, 0, 0.5)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 18, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(204, 0, 0, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Draw explosion radius indicator
-    ctx.strokeStyle = 'rgba(204, 0, 0, 0.1)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.explosionRadius, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 // Electromagnetic Faction - Control and debuff
@@ -382,6 +301,8 @@ class EMPTower extends Tower {
     this.color = '#9c27b0';
     this.slowAmount = 0.5; // 50% slow
     this.slowDuration = 2.0; // seconds
+    this.shape = 'ring';
+    this.size = 14;
   }
 
   attack() {
@@ -401,30 +322,6 @@ class EMPTower extends Tower {
     }
   }
 
-  render(ctx) {
-    // Draw EMP tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = 'rgba(156, 39, 176, 0.4)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(156, 39, 176, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 class PulseTower extends Tower {
@@ -437,6 +334,8 @@ class PulseTower extends Tower {
     this.color = '#673ab7';
     this.pulseRadius = 100;
     this.stunDuration = 1.5; // seconds
+    this.shape = 'double';
+    this.size = 16;
   }
 
   attack() {
@@ -453,36 +352,6 @@ class PulseTower extends Tower {
     }
   }
 
-  render(ctx) {
-    // Draw pulse tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = 'rgba(103, 58, 183, 0.5)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(103, 58, 183, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Draw pulse radius indicator
-    ctx.strokeStyle = 'rgba(103, 58, 183, 0.15)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.pulseRadius, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 class DisruptorTower extends Tower {
@@ -495,6 +364,8 @@ class DisruptorTower extends Tower {
     this.color = '#3f51b5';
     this.chainTargets = 3; // Number of enemies to chain to
     this.chainDamage = 0.6; // 60% damage per chain
+    this.shape = 'bolt';
+    this.size = 15;
   }
 
   attack() {
@@ -515,30 +386,6 @@ class DisruptorTower extends Tower {
     }
   }
 
-  render(ctx) {
-    // Draw disruptor tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 15;
-    ctx.fillStyle = 'rgba(63, 81, 181, 0.4)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 15, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(63, 81, 181, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 // Support Faction - Buffs and utility
@@ -552,6 +399,8 @@ class RepairTower extends Tower {
     this.color = '#4CAF50';
     this.repairAmount = 5; // Health repaired per second
     this.repairDuration = 3.0; // seconds
+    this.shape = 'cross';
+    this.size = 14;
   }
 
   findTarget() {
@@ -591,30 +440,6 @@ class RepairTower extends Tower {
     }
   }
 
-  render(ctx) {
-    // Draw repair tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 14, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(76, 175, 80, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 class BoostTower extends Tower {
@@ -627,6 +452,8 @@ class BoostTower extends Tower {
     this.color = '#FFEB3B';
     this.boostAmount = 0.3; // 30% damage boost
     this.boostDuration = 5.0; // seconds
+    this.shape = 'star';
+    this.size = 16;
   }
 
   findTarget() {
@@ -673,44 +500,20 @@ class BoostTower extends Tower {
     }
   }
 
-  render(ctx) {
-    // Draw boost tower
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 18;
-    ctx.fillStyle = 'rgba(255, 235, 59, 0.4)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 16, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw range indicator
-    ctx.strokeStyle = 'rgba(255, 235, 59, 0.2)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-    ctx.stroke();
-  }
 }
 
 // Tower type registry for selection UI
 const TOWER_TYPES = {
-  laser: { name: 'Laser', class: LaserTower, cost: 80, range: 150, color: '#00f0ff', faction: 'Energy' },
-  plasma: { name: 'Plasma', class: PlasmaTower, cost: 100, range: 120, color: '#00a2ff', faction: 'Energy' },
-  railgun: { name: 'Railgun', class: RailgunTower, cost: 150, range: 200, color: '#0066ff', faction: 'Energy' },
-  cannon: { name: 'Cannon', class: CannonTower, cost: 90, range: 100, color: '#ff6600', faction: 'Explosive' },
-  missile: { name: 'Missile', class: MissileTower, cost: 75, range: 130, color: '#ff3300', faction: 'Explosive' },
-  bomb: { name: 'Bomb', class: BombTower, cost: 110, range: 90, color: '#cc0000', faction: 'Explosive' },
-  emp: { name: 'EMP', class: EMPTower, cost: 70, range: 140, color: '#9c27b0', faction: 'EM' },
-  pulse: { name: 'Pulse', class: PulseTower, cost: 90, range: 180, color: '#673ab7', faction: 'EM' },
-  disruptor: { name: 'Disruptor', class: DisruptorTower, cost: 85, range: 160, color: '#3f51b5', faction: 'EM' },
-  repair: { name: 'Repair', class: RepairTower, cost: 60, range: 120, color: '#4CAF50', faction: 'Support' }
+  laser: { name: 'Laser', class: LaserTower, cost: 80, range: 150, color: '#00f0ff', shape: 'triangle', faction: 'Energy' },
+  plasma: { name: 'Plasma', class: PlasmaTower, cost: 100, range: 120, color: '#00a2ff', shape: 'diamond', faction: 'Energy' },
+  railgun: { name: 'Railgun', class: RailgunTower, cost: 150, range: 200, color: '#0066ff', shape: 'hexagon', faction: 'Energy' },
+  cannon: { name: 'Cannon', class: CannonTower, cost: 90, range: 100, color: '#ff6600', shape: 'square', faction: 'Explosive' },
+  missile: { name: 'Missile', class: MissileTower, cost: 75, range: 130, color: '#ff3300', shape: 'pentagon', faction: 'Explosive' },
+  bomb: { name: 'Bomb', class: BombTower, cost: 110, range: 90, color: '#cc0000', shape: 'circle', faction: 'Explosive' },
+  emp: { name: 'EMP', class: EMPTower, cost: 70, range: 140, color: '#9c27b0', shape: 'ring', faction: 'EM' },
+  pulse: { name: 'Pulse', class: PulseTower, cost: 90, range: 180, color: '#673ab7', shape: 'double', faction: 'EM' },
+  disruptor: { name: 'Disruptor', class: DisruptorTower, cost: 85, range: 160, color: '#3f51b5', shape: 'bolt', faction: 'EM' },
+  repair: { name: 'Repair', class: RepairTower, cost: 60, range: 120, color: '#4CAF50', shape: 'cross', faction: 'Support' }
 };
 
 class ResourceTower extends Tower {

@@ -109,11 +109,11 @@ class Game {
     ctx.fillStyle = fillAlpha;
     ctx.fill();
 
-    // Ghost tower body
+    // Ghost tower body (same shape as the real tower)
     ctx.globalAlpha = 0.6;
     ctx.fillStyle = info.color;
-    ctx.beginPath();
-    ctx.arc(x, y, 15, 0, Math.PI * 2);
+    ctx.fillRule = 'evenodd';
+    drawTowerShape(ctx, x, y, 15, info.shape);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
@@ -194,15 +194,15 @@ class Game {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Draw end marker
+    // Draw end marker (terminal: magenta square, distinct from red enemies)
     const end = path[path.length - 1];
-    ctx.fillStyle = '#ff4444';
-    ctx.shadowColor = '#ff4444';
+    ctx.fillStyle = '#e040fb';
+    ctx.shadowColor = '#e040fb';
     ctx.shadowBlur = 15;
-    ctx.beginPath();
-    ctx.arc(end.x, end.y, 12, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(end.x - 12, end.y - 12, 24, 24);
     ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(224, 64, 251, 0.4)';
+    ctx.fillRect(end.x - 7, end.y - 7, 14, 14);
   }
 
   renderUI() {
