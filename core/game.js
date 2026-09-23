@@ -13,7 +13,7 @@ class Game {
     this.resources = 100; // Starting resources
     this.health = 10; // Starting health
     this.waveManager = null;
-    this.selectedTowerType = 'laser'; // Default tower type
+    this.selectedTowerType = null; // Nothing selected by default
     this.mouseX = 0;
     this.mouseY = 0;
     this.mouseOnCanvas = false;

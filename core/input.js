@@ -44,6 +44,11 @@ class InputHandler {
         this.game.selectedTowerType = keyMap[e.key];
         this.updateTowerButtons();
       }
+      // Escape deselects
+      if (e.key === 'Escape') {
+        this.game.selectedTowerType = null;
+        this.updateTowerButtons();
+      }
     });
   }
 
