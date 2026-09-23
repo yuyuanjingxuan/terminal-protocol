@@ -206,20 +206,25 @@ class Game {
   }
 
   renderUI() {
-    const ctx = this.ctx;
-    ctx.fillStyle = 'white';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(`Resources: ${Math.floor(this.resources)}`, 10, 10);
-    ctx.fillText(`Health: ${this.health}`, 10, 30);
-    ctx.fillText(`Wave: ${this.waveManager.currentWave}/${this.waveManager.waves.length}`, 10, 50);
+    // Update the HTML panel (avoids overlapping canvas text)
+    const resEl = document.getElementById('resources');
+    const hpEl = document.getElementById('health');
+    const waveEl = document.getElementById('waveInfo');
+    const selEl = document.getElementById('selectedInfo');
 
-    // Show selected tower info
-    if (this.selectedTowerType) {
-      const info = TOWER_TYPES[this.selectedTowerType];
-      ctx.fillStyle = info.color;
-      ctx.fillText(`Selected: ${info.name} (${info.cost})`, 10, 70);
+    if (resEl) resEl.textContent = `Resources: ${Math.floor(this.resources)}`;
+    if (hpEl) hpEl.textContent = `Health: ${this.health}`;
+    if (waveEl) waveEl.textContent = `Wave: ${this.waveManager.currentWave}/${this.waveManager.waves.length}`;
+
+    if (selEl) {
+      if (this.selectedTowerType) {
+        const info = TOWER_TYPES[this.selectedTowerType];
+        selEl.textContent = `Selected: ${info.name} (${info.cost})`;
+        selEl.style.color = info.color;
+        selEl.style.display = 'block';
+      } else {
+        selEl.style.display = 'none';
+      }
     }
   }
 

@@ -33,6 +33,15 @@
       background-color: rgba(0, 0, 0, 0.7);
       padding: 10px;
       border-radius: 5px;
+      font-size: 14px;
+      line-height: 1.6;
+      pointer-events: none;
+    }
+
+    #selectedInfo {
+      display: none;
+      margin-top: 4px;
+      font-weight: bold;
     }
 
     #towerBar {
@@ -90,6 +99,7 @@
       <div id="resources">Resources: 100</div>
       <div id="health">Health: 10</div>
       <div id="waveInfo">Wave: 0/0</div>
+      <div id="selectedInfo"></div>
     </div>
     <div id="towerBar">
       <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span>Laser<span class="cost">80</span></button>
