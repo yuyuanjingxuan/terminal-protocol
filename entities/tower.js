@@ -90,6 +90,7 @@ class Tower {
     this.cost = 50;
     this.shape = 'circle';
     this.size = 15;
+    this.canReveal = false; // EM faction can target stealthed enemies
   }
 
   update(deltaTime) {
@@ -105,11 +106,14 @@ class Tower {
   }
 
   findTarget() {
-    // Find closest enemy in range
+    // Find closest enemy in range (stealthed enemies are invisible unless this tower can reveal)
     let closestEnemy = null;
     let closestDistance = this.range;
 
     this.game.enemies.forEach(enemy => {
+      if (enemy.isDead) return;
+      if (!enemy.isTargetable() && !this.canReveal) return;
+
       const distance = Math.sqrt(
         Math.pow(enemy.x - this.x, 2) + Math.pow(enemy.y - this.y, 2)
       );
@@ -303,6 +307,7 @@ class EMPTower extends Tower {
     this.slowDuration = 2.0; // seconds
     this.shape = 'ring';
     this.size = 14;
+    this.canReveal = true;
   }
 
   attack() {
@@ -336,6 +341,7 @@ class PulseTower extends Tower {
     this.stunDuration = 1.5; // seconds
     this.shape = 'double';
     this.size = 16;
+    this.canReveal = true;
   }
 
   attack() {
@@ -366,6 +372,7 @@ class DisruptorTower extends Tower {
     this.chainDamage = 0.6; // 60% damage per chain
     this.shape = 'bolt';
     this.size = 15;
+    this.canReveal = true;
   }
 
   attack() {

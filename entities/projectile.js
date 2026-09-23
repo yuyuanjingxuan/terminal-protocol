@@ -177,12 +177,14 @@ class EMPProjectile extends Projectile {
 
       if (distance < 15) {
         enemy.takeDamage(this.damage);
-        enemy.speed *= (1 - this.slowAmount);
-
-        // Reset speed after duration
-        setTimeout(() => {
-          enemy.speed /= (1 - this.slowAmount);
-        }, this.slowDuration * 1000);
+        enemy.applySlow(this.slowAmount, this.slowDuration);
+        // EM faction reveals stealthed enemies near the impact
+        enemy.reveal(this.slowDuration + 1);
+        for (const other of enemies) {
+          if (other === enemy || other.isDead) continue;
+          const d = Math.sqrt(Math.pow(other.x - enemy.x, 2) + Math.pow(other.y - enemy.y, 2));
+          if (d < 60) other.reveal(this.slowDuration + 1);
+        }
         break;
       }
     }
@@ -241,13 +243,9 @@ class PulseProjectile extends Projectile {
       );
 
       if (distance < this.radius) {
-        const originalSpeed = enemy.speed;
-        enemy.speed = 0; // Stun
-
-        // Reset speed after duration
-        setTimeout(() => {
-          enemy.speed = originalSpeed;
-        }, this.stunDuration * 1000);
+        enemy.applyStun(this.stunDuration);
+        // Pulse also reveals stealthed enemies in the radius
+        enemy.reveal(this.stunDuration + 1);
       }
     }
   }
@@ -302,6 +300,8 @@ class ChainProjectile extends Projectile {
 
       if (distance < 15) {
         enemy.takeDamage(this.damage);
+        // Disruptor chains reveal stealthed enemies
+        enemy.reveal(2);
         break;
       }
     }

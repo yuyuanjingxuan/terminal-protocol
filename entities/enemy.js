@@ -1,4 +1,4 @@
-// entities/enemy.js - Base Enemy class
+// entities/enemy.js - Base Enemy class with special abilities (Phase 3)
 class Enemy {
   constructor(game, path) {
     this.game = game;
@@ -6,17 +6,78 @@ class Enemy {
     this.pathIndex = 0;
     this.x = path[0].x;
     this.y = path[0].y;
-    this.speed = 50; // pixels per second
+    this.baseSpeed = 50; // pixels per second
     this.health = 30;
     this.maxHealth = 30;
     this.isDead = false;
     this.reward = 10; // resources rewarded when killed
+    this.size = 12;
+    this.color = '#ff4444';
+    this.damageToBase = 1;
+
+    // Special abilities
+    this.shield = 0;
+    this.maxShield = 0;
+    this.isStealthed = false;
+    this.revealed = 0; // seconds of reveal remaining
+    this.slowTimer = 0;
+    this.slowFactor = 1;
+    this.stunTimer = 0;
+    this.healRate = 0; // hp per second
+    this.healRadius = 0; // 0 = self only
+    this.splitCount = 0;
+    this.splitType = null;
+    this.isBoss = false;
+    this.summonTimer = 0;
+    this.summonInterval = 0;
+    this.summonType = null;
+    this.summonCount = 0;
   }
 
   update(deltaTime) {
     if (this.isDead) return;
 
+    // Status effects
+    if (this.stunTimer > 0) {
+      this.stunTimer -= deltaTime;
+      return; // stunned: frozen in place
+    }
+    if (this.slowTimer > 0) {
+      this.slowTimer -= deltaTime;
+      if (this.slowTimer <= 0) this.slowFactor = 1;
+    }
+    if (this.revealed > 0) this.revealed -= deltaTime;
+
+    // Healing (self + nearby allies)
+    if (this.healRate > 0) {
+      this.heal(this.healRate * deltaTime);
+      if (this.healRadius > 0) {
+        for (const other of this.game.enemies) {
+          if (other === this || other.isDead) continue;
+          const d = Math.sqrt(Math.pow(other.x - this.x, 2) + Math.pow(other.y - this.y, 2));
+          if (d < this.healRadius) other.heal(this.healRate * 0.5 * deltaTime);
+        }
+      }
+    }
+
+    // Boss summon mechanic
+    if (this.isBoss && this.summonInterval > 0) {
+      this.summonTimer -= deltaTime;
+      if (this.summonTimer <= 0) {
+        this.summonTimer = this.summonInterval;
+        for (let i = 0; i < this.summonCount; i++) {
+          const cls = ENEMY_TYPES[this.summonType];
+          const minion = new cls(this.game, this.path);
+          minion.x = this.x + (i === 0 ? -18 : 18);
+          minion.y = this.y;
+          minion.pathIndex = this.pathIndex;
+          this.game.addEnemy(minion);
+        }
+      }
+    }
+
     // Move along path
+    const moveSpeed = this.baseSpeed * this.slowFactor;
     if (this.pathIndex < this.path.length - 1) {
       const targetPoint = this.path[this.pathIndex + 1];
       const dx = targetPoint.x - this.x;
@@ -24,96 +85,307 @@ class Enemy {
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance > 0) {
-        const moveX = (dx / distance) * this.speed * deltaTime;
-        const moveY = (dy / distance) * this.speed * deltaTime;
-
-        this.x += moveX;
-        this.y += moveY;
-
-        // Check if we've reached the next point
-        const newDistance = Math.sqrt(
-          Math.pow(targetPoint.x - this.x, 2) + Math.pow(targetPoint.y - this.y, 2)
-        );
-
-        if (newDistance < 5) { // Close enough to next point
+        const step = moveSpeed * deltaTime;
+        if (step >= distance) {
+          this.x = targetPoint.x;
+          this.y = targetPoint.y;
           this.pathIndex++;
+        } else {
+          this.x += (dx / distance) * step;
+          this.y += (dy / distance) * step;
         }
       }
     } else {
       // Reached the end - damage player
-      this.game.takeDamage(1);
+      this.game.takeDamage(this.damageToBase);
       this.isDead = true;
     }
   }
 
-  takeDamage(amount) {
-    this.health -= amount;
-    if (this.health <= 0) {
-      this.die();
+  applySlow(amount, duration) {
+    const factor = 1 - amount;
+    if (this.slowTimer <= 0 || factor < this.slowFactor) this.slowFactor = factor;
+    this.slowTimer = Math.max(this.slowTimer, duration);
+  }
+
+  applyStun(duration) {
+    this.stunTimer = Math.max(this.stunTimer, duration);
+  }
+
+  reveal(duration) {
+    this.revealed = Math.max(this.revealed, duration);
+  }
+
+  isTargetable() {
+    return !this.isStealthed || this.revealed > 0;
+  }
+
+  heal(amount) {
+    if (this.health < this.maxHealth) {
+      this.health = Math.min(this.maxHealth, this.health + amount);
     }
   }
 
+  takeDamage(amount) {
+    if (this.isDead) return;
+    if (this.shield > 0) {
+      this.shield -= amount;
+      if (this.shield < 0) this.shield = 0;
+      return; // shield absorbs the hit
+    }
+    this.health -= amount;
+    if (this.health <= 0) this.die();
+  }
+
   die() {
+    if (this.isDead) return;
     this.isDead = true;
     this.game.gainResources(this.reward);
+    if (this.splitCount > 0 && this.splitType) {
+      for (let i = 0; i < this.splitCount; i++) {
+        const cls = ENEMY_TYPES[this.splitType];
+        const child = new cls(this.game, this.path);
+        child.x = this.x + (i - (this.splitCount - 1) / 2) * 16;
+        child.y = this.y;
+        child.pathIndex = this.pathIndex;
+        this.game.addEnemy(child);
+      }
+    }
   }
 
   render(ctx) {
-    // Draw enemy with neon effect
-    ctx.fillStyle = '#ff4444';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
-    ctx.fill();
+    const stealthed = this.isStealthed && this.revealed <= 0;
+    ctx.save();
+    if (stealthed) ctx.globalAlpha = 0.18;
 
-    // Add glow effect
-    ctx.shadowColor = '#ff4444';
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = 'rgba(255, 68, 68, 0.3)';
+    // Body with neon glow
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = this.color;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fill();
-
-    // Reset shadow
     ctx.shadowBlur = 0;
 
-    // Draw health bar
-    const healthPercentage = this.health / this.maxHealth;
-    ctx.fillStyle = '#4CAF50';
-    ctx.fillRect(this.x - 10, this.y - 15, 20 * healthPercentage, 4);
+    // Type-specific markers
+    if (this.isBoss) {
+      // Hexagon ring around boss
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (i * Math.PI) / 3;
+        const px = this.x + (this.size + 8) * Math.cos(a);
+        const py = this.y + (this.size + 8) * Math.sin(a);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    } else if (this.healRate > 0) {
+      // Healer: white cross + faint aura
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(this.x - this.size * 0.5, this.y);
+      ctx.lineTo(this.x + this.size * 0.5, this.y);
+      ctx.moveTo(this.x, this.y - this.size * 0.5);
+      ctx.lineTo(this.x, this.y + this.size * 0.5);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(76, 175, 80, 0.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.healRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (this.splitCount > 0) {
+      // Splitter: inner diamond
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y - this.size * 0.5);
+      ctx.lineTo(this.x + this.size * 0.5, this.y);
+      ctx.lineTo(this.x, this.y + this.size * 0.5);
+      ctx.lineTo(this.x - this.size * 0.5, this.y);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (this.maxShield > 0) {
+      // Armored: inner square
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+      ctx.lineWidth = 1.5;
+      const s = this.size * 0.5;
+      ctx.strokeRect(this.x - s, this.y - s, s * 2, s * 2);
+    } else if (this.baseSpeed >= 100) {
+      // Fast: motion lines behind
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(this.x - this.size - 6, this.y - 3);
+      ctx.lineTo(this.x - this.size, this.y - 3);
+      ctx.moveTo(this.x - this.size - 8, this.y + 3);
+      ctx.lineTo(this.x - this.size, this.y + 3);
+      ctx.stroke();
+    }
+
+    // Status effect indicators
+    if (this.slowFactor < 1) {
+      ctx.fillStyle = 'rgba(156, 39, 176, 0.9)';
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('S', this.x + this.size + 7, this.y - this.size);
+    }
+    if (this.stunTimer > 0) {
+      ctx.fillStyle = '#FFEB3B';
+      ctx.font = '10px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('*', this.x, this.y - this.size - 14);
+    }
+
+    // Shield bar (above health bar)
+    if (this.maxShield > 0) {
+      const barWidth = this.size * 2;
+      const shieldPct = this.shield / this.maxShield;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.size - 10, barWidth, 3);
+      ctx.fillStyle = '#40c4ff';
+      ctx.fillRect(this.x - barWidth / 2, this.y - this.size - 10, barWidth * shieldPct, 3);
+    }
+
+    // Health bar
+    const barWidth = this.size * 2;
+    const healthPct = Math.max(0, this.health / this.maxHealth);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(this.x - barWidth / 2, this.y - this.size - 6, barWidth, 3);
+    ctx.fillStyle = healthPct > 0.5 ? '#4CAF50' : healthPct > 0.25 ? '#FFC107' : '#F44336';
+    ctx.fillRect(this.x - barWidth / 2, this.y - this.size - 6, barWidth * healthPct, 3);
+
+    ctx.restore();
+
+    // Boss: large health bar at top of screen
+    if (this.isBoss) {
+      const w = 400;
+      const x = (this.game.canvas.width - w) / 2;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(x - 2, 8, w + 4, 14);
+      ctx.fillStyle = '#b71c1c';
+      ctx.fillRect(x, 10, w * healthPct, 10);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '11px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('CORE PROCESS', this.game.canvas.width / 2, 34);
+    }
   }
 }
 
-// Basic enemy implementation
+// --- Enemy type implementations ---
+
 class BasicEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
-    this.speed = 60;
+    this.baseSpeed = 60;
     this.health = 25;
     this.maxHealth = 25;
     this.reward = 8;
-  }
-
-  render(ctx) {
-    // Draw basic enemy with neon effect
-    ctx.fillStyle = '#F44336';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Add glow effect
-    ctx.shadowColor = '#F44336';
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = 'rgba(244, 67, 54, 0.3)';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 12, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Reset shadow
-    ctx.shadowBlur = 0;
-
-    // Draw health bar
-    const healthPercentage = this.health / this.maxHealth;
-    ctx.fillStyle = '#4CAF50';
-    ctx.fillRect(this.x - 10, this.y - 15, 20 * healthPercentage, 4);
+    this.color = '#F44336';
   }
 }
+
+// Fast type: quick but fragile
+class FastEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    this.baseSpeed = 110;
+    this.health = 14;
+    this.maxHealth = 14;
+    this.reward = 7;
+    this.size = 9;
+    this.color = '#FF9800';
+  }
+}
+
+// Armored type: shield absorbs damage before health
+class ArmoredEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    this.baseSpeed = 40;
+    this.health = 40;
+    this.maxHealth = 40;
+    this.shield = 30;
+    this.maxShield = 30;
+    this.reward = 14;
+    this.size = 14;
+    this.color = '#607D8B';
+  }
+}
+
+// Healer type: regenerates own hp and heals nearby allies
+class HealerEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    this.baseSpeed = 50;
+    this.health = 30;
+    this.maxHealth = 30;
+    this.reward = 12;
+    this.size = 11;
+    this.color = '#4CAF50';
+    this.healRate = 4; // hp/s to self
+    this.healRadius = 90; // allies within this radius get half rate
+  }
+}
+
+// Stealth type: untargetable until revealed by EM faction
+class StealthEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    this.baseSpeed = 70;
+    this.health = 22;
+    this.maxHealth = 22;
+    this.reward = 12;
+    this.size = 10;
+    this.color = '#B39DDB';
+    this.isStealthed = true;
+  }
+}
+
+// Splitter type: spawns weaker children on death
+class SplitterEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    this.baseSpeed = 55;
+    this.health = 45;
+    this.maxHealth = 45;
+    this.reward = 15;
+    this.size = 15;
+    this.color = '#E040FB';
+    this.splitCount = 3;
+    this.splitType = 'basic';
+  }
+}
+
+// Boss: huge hp, summons minions periodically
+class BossEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    this.baseSpeed = 25;
+    this.health = 800;
+    this.maxHealth = 800;
+    this.reward = 150;
+    this.size = 26;
+    this.color = '#D50000';
+    this.damageToBase = 5;
+    this.isBoss = true;
+    this.summonInterval = 8; // seconds between summon bursts
+    this.summonTimer = 4; // first burst comes early
+    this.summonType = 'basic';
+    this.summonCount = 2;
+  }
+}
+
+// Enemy type registry (data-driven, like TOWER_TYPES)
+const ENEMY_TYPES = {
+  basic: BasicEnemy,
+  fast: FastEnemy,
+  armored: ArmoredEnemy,
+  healer: HealerEnemy,
+  stealth: StealthEnemy,
+  splitter: SplitterEnemy,
+  boss: BossEnemy
+};

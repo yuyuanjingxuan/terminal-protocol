@@ -7,6 +7,9 @@ class WaveManager {
     this.waveTimer = 0;
     this.waveInterval = 5; // seconds between waves
     this.isWaveActive = false;
+    this.spawnInterval = 0.8; // seconds between enemy spawns within a wave
+    this.spawnQueue = [];
+    this.spawnTimer = 0;
   }
 
   addWave(enemies) {
@@ -18,19 +21,37 @@ class WaveManager {
       this.isWaveActive = true;
       const waveEnemies = this.waves[this.currentWave];
 
-      // Spawn all enemies in this wave
-      waveEnemies.forEach(enemyData => {
-        const enemy = new BasicEnemy(this.game, enemyData.path);
-        this.game.addEnemy(enemy);
-      });
+      // Queue enemies with staggered spawn times
+      this.spawnQueue = waveEnemies.map((enemyData, i) => ({
+        data: enemyData,
+        time: i * this.spawnInterval
+      }));
+      this.spawnTimer = 0;
 
       this.currentWave++;
     }
   }
 
+  spawnFromQueue(deltaTime) {
+    if (!this.spawnQueue || this.spawnQueue.length === 0) return;
+    this.spawnTimer += deltaTime;
+
+    while (this.spawnQueue.length > 0 && this.spawnTimer >= this.spawnQueue[0].time) {
+      const { data } = this.spawnQueue.shift();
+      const cls = ENEMY_TYPES[data.type] || BasicEnemy;
+      const enemy = new cls(this.game, data.path);
+      this.game.addEnemy(enemy);
+    }
+  }
+
   update(deltaTime) {
-    // Wave is done when all its enemies are dead
-    if (this.isWaveActive && this.game.enemies.length === 0) {
+    // Spawn queued enemies for the active wave
+    if (this.isWaveActive) {
+      this.spawnFromQueue(deltaTime);
+    }
+
+    // Wave is done when all its enemies are dead (and queue is empty)
+    if (this.isWaveActive && this.game.enemies.length === 0 && this.spawnQueue.length === 0) {
       this.isWaveActive = false;
       this.waveTimer = 0;
     }
@@ -50,8 +71,11 @@ class WaveManager {
   }
 
   reset() {
+    this.waves = [];
     this.currentWave = 0;
     this.waveTimer = 0;
     this.isWaveActive = false;
+    this.spawnQueue = [];
+    this.spawnTimer = 0;
   }
 }

@@ -24,6 +24,15 @@ class TerminalProtocol {
       });
     });
 
+    // Level selector buttons
+    document.querySelectorAll('.level-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.loadLevel(btn.dataset.level);
+      });
+    });
+
     // Initialize audio manager
     this.audioManager = new AudioManager();
 
@@ -43,6 +52,22 @@ class TerminalProtocol {
     if (!levelData) {
       console.error(`Level ${levelName} not found`);
       return;
+    }
+
+    // Reset game state
+    this.game.towers = [];
+    this.game.enemies = [];
+    this.game.projectiles = [];
+    this.game.resources = 100;
+    this.game.health = 10;
+    this.game.selectedTowerType = null;
+    this.inputHandler.updateTowerButtons();
+
+    // Restart the loop if a previous game ended
+    if (!this.game.isRunning) {
+      this.game.isRunning = true;
+      this.game.lastTime = performance.now();
+      requestAnimationFrame(this.game.loop.bind(this.game));
     }
 
     // Set current level
