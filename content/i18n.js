@@ -287,9 +287,13 @@ const I18N = {
     return this.t('towerDesc_' + type);
   },
 
-  // Localized "strong against" hint for a tower type (tooltip)
+  // Localized "strong against" hint for a tower type (tooltip).
+  // Returns '' when the tower has no counter entry (e.g. resource tower).
   towerCounter(type) {
-    return this.t('towerCounter_' + type);
+    const key = 'towerCounter_' + type;
+    const table = this.STRINGS[this.lang] || this.STRINGS.zh;
+    if (table[key] !== undefined) return table[key];
+    return this.STRINGS.zh[key] !== undefined ? this.STRINGS.zh[key] : '';
   },
 
   // Localized display name for a tech node ('energy_1' → 超充电池 / Overcharged Cells)
