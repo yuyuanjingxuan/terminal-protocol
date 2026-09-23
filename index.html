@@ -80,6 +80,44 @@
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
+    #waveControls {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .wave-btn,
+    .speed-btn {
+      border: 2px solid #444;
+      border-radius: 6px;
+      background: #1a1a2e;
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    .wave-btn:hover,
+    .speed-btn:hover {
+      border-color: #00f0ff;
+    }
+
+    .wave-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .speed-btn.active {
+      border-color: #00f0ff;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
     #towerBar {
       position: absolute;
       bottom: 10px;
@@ -141,6 +179,12 @@
       <button class="level-btn active" data-level="level1">1</button>
       <button class="level-btn" data-level="level2">2</button>
       <button class="level-btn" data-level="level3">3</button>
+    </div>
+    <div id="waveControls">
+      <button id="nextWaveBtn" class="wave-btn">Next Wave</button>
+      <button class="speed-btn active" data-speed="1">1x</button>
+      <button class="speed-btn" data-speed="2">2x</button>
+      <button class="speed-btn" data-speed="3">3x</button>
     </div>
     <div id="towerBar">
       <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span>Laser<span class="cost">80</span></button>

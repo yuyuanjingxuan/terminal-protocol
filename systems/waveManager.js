@@ -32,6 +32,14 @@ class WaveManager {
     }
   }
 
+  callNextWave() {
+    // Manually call the next wave early (skips the countdown)
+    if (!this.isWaveActive && this.currentWave < this.waves.length) {
+      this.waveTimer = 0;
+      this.startNextWave();
+    }
+  }
+
   spawnFromQueue(deltaTime) {
     if (!this.spawnQueue || this.spawnQueue.length === 0) return;
     this.spawnTimer += deltaTime;

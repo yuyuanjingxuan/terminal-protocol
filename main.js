@@ -33,6 +33,18 @@ class TerminalProtocol {
       });
     });
 
+    // Wave controls: call next wave early + game speed
+    document.getElementById('nextWaveBtn').addEventListener('click', () => {
+      this.game.waveManager.callNextWave();
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.game.speed = parseInt(btn.dataset.speed, 10);
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', b === btn));
+      });
+    });
+
     // Initialize audio manager
     this.audioManager = new AudioManager();
 

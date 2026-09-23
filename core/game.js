@@ -6,6 +6,7 @@ class Game {
     this.lastTime = 0;
     this.deltaTime = 0;
     this.isRunning = false;
+    this.speed = 1; // game speed multiplier (1x/2x/3x)
     this.currentLevel = null;
     this.towers = [];
     this.enemies = [];
@@ -32,7 +33,9 @@ class Game {
     this.deltaTime = (currentTime - this.lastTime) / 1000;
     this.lastTime = currentTime;
 
-    this.update(this.deltaTime);
+    // Clamp large frame gaps (e.g. tab switch) and apply game speed
+    const dt = Math.min(this.deltaTime, 0.05) * this.speed;
+    this.update(dt);
     this.render();
 
     if (this.isRunning) {
@@ -214,7 +217,24 @@ class Game {
 
     if (resEl) resEl.textContent = `Resources: ${Math.floor(this.resources)}`;
     if (hpEl) hpEl.textContent = `Health: ${this.health}`;
-    if (waveEl) waveEl.textContent = `Wave: ${this.waveManager.currentWave}/${this.waveManager.waves.length}`;
+    if (waveEl) {
+      const wm = this.waveManager;
+      if (wm.isWaveActive) {
+        waveEl.textContent = `Wave: ${wm.currentWave}/${wm.waves.length}`;
+      } else if (wm.currentWave < wm.waves.length) {
+        const remaining = Math.ceil(wm.waveInterval - wm.waveTimer);
+        waveEl.textContent = `Wave: ${wm.currentWave}/${wm.waves.length} (next in ${remaining}s)`;
+      } else {
+        waveEl.textContent = `Wave: ${wm.currentWave}/${wm.waves.length}`;
+      }
+    }
+
+    // Next Wave button: enabled only between waves
+    const nextWaveBtn = document.getElementById('nextWaveBtn');
+    if (nextWaveBtn) {
+      nextWaveBtn.disabled = this.waveManager.isWaveActive ||
+        this.waveManager.currentWave >= this.waveManager.waves.length;
+    }
 
     if (selEl) {
       if (this.selectedTowerType) {
