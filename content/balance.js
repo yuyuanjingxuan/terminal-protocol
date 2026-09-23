@@ -15,18 +15,18 @@ const BALANCE = {
   waveInterval: 5,    // seconds between waves (auto countdown)
 
   // --- Towers: cost + combat stats ---
-  // Ranges tuned for the 800x600 map: a mid-range tower covers roughly
-  // one path segment, the railgun covers most of a long straight.
+  // Ranges tuned for the 800x600 map: a mid-range tower covers a portion of
+  // one path segment, so no single tower can hold the whole route.
   towers: {
-    laser:     { cost: 50,  damage: 25, cooldown: 1.2, range: 160 },
-    plasma:    { cost: 75,  damage: 35, cooldown: 1.8, range: 120 },
-    railgun:   { cost: 120, damage: 50, cooldown: 3.0, range: 240 },
-    cannon:    { cost: 60,  damage: 20, cooldown: 2.0, range: 110, explosionRadius: 40 },
-    missile:   { cost: 55,  damage: 18, cooldown: 1.5, range: 140, explosionRadius: 35 },
-    bomb:      { cost: 90,  damage: 22, cooldown: 2.5, range: 90,  explosionRadius: 50 },
-    emp:       { cost: 45,  damage: 5,  cooldown: 0.5, range: 150, slowAmount: 0.5, slowDuration: 2.0 },
-    pulse:     { cost: 70,  damage: 0,  cooldown: 3.0, range: 190, pulseRadius: 100, stunDuration: 1.5 },
-    disruptor: { cost: 65,  damage: 8,  cooldown: 1.0, range: 170, chainTargets: 3, chainDamage: 0.6 },
+    laser:     { cost: 50,  damage: 25, cooldown: 1.2, range: 130 },
+    plasma:    { cost: 75,  damage: 35, cooldown: 1.8, range: 105 },
+    railgun:   { cost: 120, damage: 50, cooldown: 3.0, range: 185 },
+    cannon:    { cost: 60,  damage: 20, cooldown: 2.0, range: 95,  explosionRadius: 40 },
+    missile:   { cost: 55,  damage: 18, cooldown: 1.5, range: 120, explosionRadius: 35 },
+    bomb:      { cost: 90,  damage: 22, cooldown: 2.5, range: 80,  explosionRadius: 50 },
+    emp:       { cost: 45,  damage: 5,  cooldown: 0.5, range: 125, slowAmount: 0.5, slowDuration: 2.0 },
+    pulse:     { cost: 70,  damage: 0,  cooldown: 3.0, range: 155, pulseRadius: 100, stunDuration: 1.5 },
+    disruptor: { cost: 65,  damage: 8,  cooldown: 1.0, range: 145, chainTargets: 3, chainDamage: 0.6 },
     repair:    { cost: 120, damage: 0,  cooldown: 2.0, range: 0,   repairAmount: 5 }
   },
 
