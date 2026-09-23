@@ -442,54 +442,46 @@ class RepairTower extends Tower {
     const s = BALANCE.towers.repair;
     this.type = 'repair';
     this.faction = 'support';
-    this.damage = s.damage; // No direct damage
+    this.damage = 0; // No direct damage
     this.cooldown = s.cooldown;
-    this.range = s.range;
+    this.range = 0; // No targeting: generates resources directly
     this.cost = s.cost;
     this.color = '#4CAF50';
-    this.repairAmount = s.repairAmount; // Health repaired per pulse
-    this.repairDuration = s.repairDuration; // seconds
+    this.resourceAmount = s.repairAmount; // Resources generated per cycle
     this.shape = 'cross';
     this.size = 14;
   }
 
-  findTarget() {
-    // Find closest damaged tower in range
-    let closestTower = null;
-    let closestDistance = this.range;
-
-    this.game.towers.forEach(tower => {
-      if (tower === this) return; // Don't target self
-
-      const distance = Math.sqrt(
-        Math.pow(tower.x - this.x, 2) + Math.pow(tower.y - this.y, 2)
-      );
-
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestTower = tower;
-      }
-    });
-
-    this.target = closestTower;
-  }
-
-  attack() {
-    if (this.target) {
-      // Create repair beam
-      const projectile = new RepairProjectile(
-        this.game,
-        this.x,
-        this.y,
-        this.target.x,
-        this.target.y,
-        this.repairAmount,
-        this.repairDuration
-      );
-      this.game.addProjectile(projectile);
+  update(deltaTime) {
+    // No targeting: fire on a fixed timer and generate resources
+    this.currentCooldown -= deltaTime;
+    if (this.currentCooldown <= 0) {
+      this.attack();
+      this.currentCooldown = this.cooldown;
     }
   }
 
+  findTarget() {
+    this.target = null; // Never attacks
+  }
+
+  attack() {
+    // Generate resources directly
+    this.game.gainResources(this.resourceAmount);
+    if (this.game.effects) {
+      this.game.effects.burst(this.x, this.y, this.color, 6, { speed: 60, life: 0.4 });
+    }
+  }
+
+  render(ctx) {
+    super.render(ctx);
+    // Show the per-cycle output above the tower
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('+' + this.resourceAmount, this.x, this.y - this.size - 6);
+    ctx.textAlign = 'left';
+  }
 }
 
 class BoostTower extends Tower {

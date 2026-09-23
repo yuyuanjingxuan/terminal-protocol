@@ -24,6 +24,32 @@ class TerminalProtocol {
       });
     });
 
+    // Tower button tooltips: hover to see stats + role description
+    const tooltip = document.getElementById('towerTooltip');
+    if (tooltip) {
+      const container = document.getElementById('gameContainer');
+      document.querySelectorAll('.tower-btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+          const type = btn.dataset.type;
+          const info = TOWER_TYPES[type];
+          const s = BALANCE.towers[type];
+          const stats = [];
+          if (s.damage > 0) stats.push(I18N.t('ttDamage', { n: s.damage }));
+          if (s.range > 0) stats.push(I18N.t('ttRange', { n: s.range }));
+          tooltip.innerHTML =
+            `<b>${I18N.towerName(type)}</b> <span class="tt-cost">${info.cost}</span><br>` +
+            (stats.length ? stats.join(' · ') + '<br>' : '') +
+            `<span class="tt-desc">${I18N.towerDesc(type)}</span><br>` +
+            `<span class="tt-hint">${I18N.t('sellHint')}</span>`;
+          const rect = btn.getBoundingClientRect();
+          const contRect = container.getBoundingClientRect();
+          tooltip.style.left = (rect.left - contRect.left + rect.width / 2) + 'px';
+          tooltip.classList.add('show');
+        });
+        btn.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+      });
+    }
+
     // Level selector buttons (in-game quick switch)
     document.querySelectorAll('.level-btn').forEach(btn => {
       btn.addEventListener('click', () => {

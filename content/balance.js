@@ -25,7 +25,7 @@ const BALANCE = {
     emp:       { cost: 45,  damage: 5,  cooldown: 0.5, range: 140, slowAmount: 0.5, slowDuration: 2.0 },
     pulse:     { cost: 70,  damage: 0,  cooldown: 3.0, range: 180, pulseRadius: 100, stunDuration: 1.5 },
     disruptor: { cost: 65,  damage: 8,  cooldown: 1.0, range: 160, chainTargets: 3, chainDamage: 0.6 },
-    repair:    { cost: 50,  damage: 0,  cooldown: 2.0, range: 120, repairAmount: 5, repairDuration: 3.0 }
+    repair:    { cost: 50,  damage: 0,  cooldown: 2.0, range: 0,   repairAmount: 5 }
   },
 
   // --- Enemies: stats + kill rewards ---

@@ -176,7 +176,7 @@ class TechTree {
     if (tower.slowDuration) tower.slowDuration *= m.slowDuration;
     if (tower.stunDuration) tower.stunDuration *= m.stunDuration;
     if (tower.chainTargets) tower.chainTargets += m.chainTargets;
-    if (tower.repairAmount) tower.repairAmount *= m.repairAmount;
+    if (tower.resourceAmount) tower.resourceAmount *= m.repairAmount;
     // Global: advanced training (all towers cost 10% less)
     if (this.unlocked['global_1']) tower.cost = Math.round(tower.cost * 0.9);
   }

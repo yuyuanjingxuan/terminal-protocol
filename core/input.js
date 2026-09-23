@@ -37,9 +37,28 @@ class InputHandler {
       this.game.mouseOnCanvas = false;
     });
 
-    // Right-click cancels tower selection
+    // Right-click: sell the tower under the cursor (50% refund),
+    // otherwise cancel tower selection
     this.game.canvas.addEventListener('contextmenu', (e) => {
       e.preventDefault();
+      const rect = this.game.canvas.getBoundingClientRect();
+      const scaleX = this.game.canvas.width / rect.width;
+      const scaleY = this.game.canvas.height / rect.height;
+      const mx = (e.clientX - rect.left) * scaleX;
+      const my = (e.clientY - rect.top) * scaleY;
+      const gridSize = 40;
+      const gx = Math.floor(mx / gridSize) * gridSize + gridSize / 2;
+      const gy = Math.floor(my / gridSize) * gridSize + gridSize / 2;
+      const tower = this.game.towers.find(t => Math.hypot(t.x - gx, t.y - gy) < 20);
+      if (tower) {
+        const refund = Math.floor(tower.cost * 0.5);
+        this.game.towers = this.game.towers.filter(t => t !== tower);
+        this.game.gainResources(refund);
+        if (this.game.effects) this.game.effects.burst(tower.x, tower.y, tower.color, 12);
+        if (this.game.audio) this.game.audio.playTowerBuilt();
+        this.showToast(I18N.t('soldMsg', { name: I18N.towerName(tower.type), n: refund }));
+        return;
+      }
       this.game.selectedTowerType = null;
       this.updateTowerButtons();
     });
@@ -68,6 +87,16 @@ class InputHandler {
     document.querySelectorAll('.tower-btn').forEach(btn => {
       btn.classList.toggle('selected', btn.dataset.type === this.game.selectedTowerType);
     });
+  }
+
+  // Brief on-screen message (e.g. sell refund)
+  showToast(text) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
   }
 
   handleMouseDown(e) {

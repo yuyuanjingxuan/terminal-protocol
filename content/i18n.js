@@ -20,6 +20,10 @@ const I18N = {
       readyBtn: '准备就绪 ▶',
       nextWaveBtn: '下一波 ▶',
       selected: '已选择: {name}（{cost}）',
+      sellHint: '右键出售（回收 50%）',
+      soldMsg: '已出售 {name}，回收 {n} 资源',
+      ttDamage: '伤害 {n}',
+      ttRange: '射程 {n}',
       // Result screen
       winTitle: '关卡完成',
       loseTitle: '终端被入侵',
@@ -68,7 +72,18 @@ const I18N = {
       tower_emp: 'EMP',
       tower_pulse: '眩晕脉冲',
       tower_disruptor: '干扰器',
-      tower_repair: '修复',
+      tower_repair: '资源塔',
+      // Tower descriptions (tooltip)
+      towerDesc_laser: '单体高伤，射速快',
+      towerDesc_plasma: '单体中伤，射速较慢',
+      towerDesc_railgun: '超远射程，极高单体伤害',
+      towerDesc_cannon: '小范围溅射伤害',
+      towerDesc_missile: '中范围溅射，射速快',
+      towerDesc_bomb: '大范围溅射，射速慢',
+      towerDesc_emp: '减速敌人 50%，持续 2 秒',
+      towerDesc_pulse: '范围眩晕 1.5 秒，无伤害',
+      towerDesc_disruptor: '连锁闪电，最多 3 个目标',
+      towerDesc_repair: '每 2 秒生成 5 资源',
       // Tech tree factions
       faction_energy: '能量系',
       faction_explosive: '爆破系',
@@ -94,8 +109,8 @@ const I18N = {
       tech_electromagnetic_2_desc: '电磁系塔射程 +15%',
       tech_electromagnetic_3: '连锁反应',
       tech_electromagnetic_3_desc: '干扰器额外连锁 1 个目标',
-      tech_support_1: '高效修复',
-      tech_support_1_desc: '修复塔修复量 +50%',
+      tech_support_1: '高效产出',
+      tech_support_1_desc: '资源塔产出 +50%',
       tech_support_2: '强化核心',
       tech_support_2_desc: '每关初始生命值 +{n}',
       tech_support_3: '资源优化',
@@ -118,6 +133,10 @@ const I18N = {
       readyBtn: 'Ready ▶',
       nextWaveBtn: 'Next Wave ▶',
       selected: 'Selected: {name} ({cost})',
+      sellHint: 'Right-click to sell (50% refund)',
+      soldMsg: 'Sold {name}, refunded {n} resources',
+      ttDamage: 'DMG {n}',
+      ttRange: 'Range {n}',
       // Result screen
       winTitle: 'LEVEL COMPLETE',
       loseTitle: 'TERMINAL BREACHED',
@@ -166,7 +185,18 @@ const I18N = {
       tower_emp: 'EMP',
       tower_pulse: 'Stun Pulse',
       tower_disruptor: 'Disruptor',
-      tower_repair: 'Repair',
+      tower_repair: 'Resource',
+      // Tower descriptions (tooltip)
+      towerDesc_laser: 'Single target, high damage, fast fire rate',
+      towerDesc_plasma: 'Single target, medium damage, slower fire rate',
+      towerDesc_railgun: 'Ultra long range, very high single-target damage',
+      towerDesc_cannon: 'Small area splash damage',
+      towerDesc_missile: 'Medium area splash, fast fire rate',
+      towerDesc_bomb: 'Large area splash, slow fire rate',
+      towerDesc_emp: 'Slows enemies by 50% for 2 seconds',
+      towerDesc_pulse: 'Area stun for 1.5s, no damage',
+      towerDesc_disruptor: 'Chain lightning to up to 3 targets',
+      towerDesc_repair: 'Generates 5 resources every 2 seconds',
       // Tech tree factions
       faction_energy: 'Energy',
       faction_explosive: 'Explosive',
@@ -192,8 +222,8 @@ const I18N = {
       tech_electromagnetic_2_desc: 'EM tower range +15%',
       tech_electromagnetic_3: 'Chain Reaction',
       tech_electromagnetic_3_desc: 'Disruptor chains to 1 extra target',
-      tech_support_1: 'Efficient Repair',
-      tech_support_1_desc: 'Repair tower output +50%',
+      tech_support_1: 'Efficient Output',
+      tech_support_1_desc: 'Resource tower output +50%',
       tech_support_2: 'Reinforced Core',
       tech_support_2_desc: 'Starting health +{n} per level',
       tech_support_3: 'Resource Optimization',
@@ -220,6 +250,11 @@ const I18N = {
   // Localized display name for a tower type ('laser' → 激光 / Laser)
   towerName(type) {
     return this.t('tower_' + type);
+  },
+
+  // Localized short description for a tower type (tooltip)
+  towerDesc(type) {
+    return this.t('towerDesc_' + type);
   },
 
   // Localized display name for a tech node ('energy_1' → 超充电池 / Overcharged Cells)
