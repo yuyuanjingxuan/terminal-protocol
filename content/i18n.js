@@ -41,6 +41,27 @@ const I18N = {
       levelDone: '✓ 已通关',
       levelStart: '▶ 开始',
       levelLocked: '🔒 未解锁',
+      chapterLabel: '第 {n} 章',
+      chapterDone: '✓ 已通关',
+      // Briefing / dialogue
+      briefingTitle: '任务简报',
+      briefingContinue: '继续 ▶',
+      dialogueContinue: '继续',
+      dialogueEnd: '结束',
+      logFragmentTitle: '日志碎片',
+      ambientNote: '检测到环境广播',
+      // Tower upgrade
+      upgradeBtn: '升级（{n}）',
+      upgradeMax: '已满级',
+      towerLevel: 'Lv.{n}',
+      upgradeHint: '点击已建造的塔可升级',
+      upgradedMsg: '{name} 升级到 Lv.{n}',
+      // Time limit (6-4)
+      timerLabel: '重置倒计时 {n}s',
+      timeUpTitle: '重置倒计时结束',
+      timeUpSubtitle: '重置程序已执行……',
+      // Boss defeated
+      bossDefeated: '核心进程已摧毁',
       // Tech panel
       techBtn: '⚡ 科技',
       techPanelTitle: '科技树',
@@ -169,6 +190,27 @@ const I18N = {
       levelDone: '✓ Cleared',
       levelStart: '▶ Start',
       levelLocked: '🔒 Locked',
+      chapterLabel: 'Chapter {n}',
+      chapterDone: '✓ Cleared',
+      // Briefing / dialogue
+      briefingTitle: 'MISSION BRIEFING',
+      briefingContinue: 'Continue ▶',
+      dialogueContinue: 'Continue',
+      dialogueEnd: 'End',
+      logFragmentTitle: 'LOG FRAGMENT',
+      ambientNote: 'Ambient broadcast detected',
+      // Tower upgrade
+      upgradeBtn: 'Upgrade ({n})',
+      upgradeMax: 'MAX LEVEL',
+      towerLevel: 'Lv.{n}',
+      upgradeHint: 'Click a built tower to upgrade',
+      upgradedMsg: '{name} upgraded to Lv.{n}',
+      // Time limit (6-4)
+      timerLabel: 'Reset countdown {n}s',
+      timeUpTitle: 'RESET COUNTDOWN EXPIRED',
+      timeUpSubtitle: 'The reset program has been executed...',
+      // Boss defeated
+      bossDefeated: 'Core process destroyed',
       // Tech panel
       techBtn: '⚡ Tech',
       techPanelTitle: 'Tech Tree',
@@ -310,9 +352,22 @@ const I18N = {
     return this.t('faction_' + id);
   },
 
-  // Localized level display name ('level2' → 第 2 关 / Level 2)
+  // Localized level display name. Uses the level's own name/nameEn when the
+  // level exists in content/levels.js (36 named levels); falls back to the
+  // generic '第 N 关' for legacy keys.
   levelName(key) {
+    if (typeof levels !== 'undefined' && levels[key]) {
+      return this.lang === 'en' ? levels[key].nameEn : levels[key].name;
+    }
     return this.t('levelName', { n: String(key).replace('level', '') });
+  },
+
+  // Localized chapter display name (0-5 → 边缘缓冲区 / The Edge Buffer)
+  chapterName(idx) {
+    if (typeof chapters !== 'undefined' && chapters[idx]) {
+      return this.lang === 'en' ? chapters[idx].nameEn : chapters[idx].name;
+    }
+    return this.t('chapterLabel', { n: idx + 1 });
   },
 
   setLanguage(lang) {

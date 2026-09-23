@@ -28,8 +28,13 @@ class Game {
     this.techTree = new TechTree(this);
     this.saveSystem = new SaveSystem();
     this.completedLevels = []; // level keys completed at least once
-    this.unlockedLevels = ['level1']; // level keys the player can start
+    this.unlockedLevels = ['c1l1']; // level keys the player can start
     this.onLevelComplete = null; // callback: fired after a level is completed
+
+    // Phase 7: tower selection (upgrade) + time limit (level 6-4)
+    this.selectedTower = null; // built tower the player has selected
+    this.timeLimit = 0;        // seconds; 0 = no limit
+    this.timeRemaining = 0;
   }
 
   init(canvasId) {
@@ -75,6 +80,16 @@ class Game {
     if (this.health <= 0) {
       this.gameOver(false);
       return;
+    }
+
+    // Phase 7: time limit (level 6-4 "重置倒计时")
+    if (this.timeLimit > 0) {
+      this.timeRemaining -= deltaTime;
+      if (this.timeRemaining <= 0) {
+        this.timeRemaining = 0;
+        this.gameOver(false, 'timeup');
+        return;
+      }
     }
 
     // Check wave completion
@@ -305,8 +320,49 @@ class Game {
         selEl.textContent = I18N.t('selected', { name: I18N.towerName(this.selectedTowerType), cost: info.cost });
         selEl.style.color = info.color;
         selEl.style.display = 'block';
+      } else if (this.selectedTower) {
+        selEl.textContent = I18N.t('upgradeHint');
+        selEl.style.color = '#ffd54f';
+        selEl.style.display = 'block';
       } else {
         selEl.style.display = 'none';
+      }
+    }
+
+    // Phase 7: time limit display (level 6-4)
+    const timerEl = document.getElementById('timerDisplay');
+    if (timerEl) {
+      if (this.timeLimit > 0) {
+        timerEl.textContent = I18N.t('timerLabel', { n: Math.ceil(this.timeRemaining) });
+        timerEl.style.display = 'block';
+        timerEl.style.color = this.timeRemaining < 30 ? '#ff4444' : '#ffd54f';
+      } else {
+        timerEl.style.display = 'none';
+      }
+    }
+
+    // Phase 7: upgrade panel (shown when a built tower is selected)
+    const upEl = document.getElementById('upgradePanel');
+    if (upEl) {
+      const tower = this.selectedTower;
+      if (tower && (this.gameState === 'ready' || this.gameState === 'playing')) {
+        const nameEl = upEl.querySelector('.up-name');
+        const lvlEl = upEl.querySelector('.up-level');
+        const btnEl = upEl.querySelector('.up-btn');
+        if (nameEl) nameEl.textContent = I18N.towerName(tower.type);
+        if (lvlEl) lvlEl.textContent = I18N.t('towerLevel', { n: tower.level });
+        if (btnEl) {
+          if (tower.level >= tower.maxLevel) {
+            btnEl.textContent = I18N.t('upgradeMax');
+            btnEl.disabled = true;
+          } else {
+            btnEl.textContent = I18N.t('upgradeBtn', { n: tower.upgradeCost() });
+            btnEl.disabled = this.resources < tower.upgradeCost();
+          }
+        }
+        upEl.style.display = 'block';
+      } else {
+        upEl.style.display = 'none';
       }
     }
   }
@@ -338,7 +394,7 @@ class Game {
     ctx.restore();
   }
 
-  gameOver(isWin) {
+  gameOver(isWin, reason) {
     this.gameState = 'gameover';
     this.isRunning = false;
 
@@ -351,20 +407,31 @@ class Game {
     // Award meta-progression on victory
     if (isWin) this.completeLevel();
 
+    // Phase 7: on victory, play post-level dialogue first (if any), then result screen
+    if (isWin && this.onVictoryDialogue) {
+      this.onVictoryDialogue();
+      return;
+    }
+
+    this.showResultScreen(isWin, reason);
+  }
+
+  // Show the result screen overlay (win / lose)
+  showResultScreen(isWin, reason) {
     // Show result screen (HTML overlay)
     const overlay = document.getElementById('resultScreen');
     if (overlay) {
       const title = document.getElementById('resultTitle');
       const subtitle = document.getElementById('resultSubtitle');
       if (title) {
-        title.textContent = isWin ? I18N.t('winTitle') : I18N.t('loseTitle');
+        title.textContent = isWin ? I18N.t('winTitle') : (reason === 'timeup' ? I18N.t('timeUpTitle') : I18N.t('loseTitle'));
         title.style.color = isWin ? '#00ff88' : '#ff4444';
       }
       if (subtitle) {
         const waves = this.waveManager ? this.waveManager.waves.length : 0;
         subtitle.textContent = isWin
           ? I18N.t('winSubtitle', { n: waves }) + (this.lastTechReward ? I18N.t('techReward', { n: this.lastTechReward }) : '')
-          : I18N.t('loseSubtitle');
+          : (reason === 'timeup' ? I18N.t('timeUpSubtitle') : I18N.t('loseSubtitle'));
       }
       // "Next Level" only on victory when a next level exists
       const nextBtn = document.getElementById('resultNextBtn');
@@ -386,9 +453,10 @@ class Game {
     const levelKey = this.currentLevel ? this.currentLevel.key : null;
     if (!levelKey) return;
 
-    // Tech reward: 1 for level1, 2 for level2, 3 for level3 (by index)
+    // Tech reward (Phase 7): 1 per normal level, 2 per boss level (42 total)
     const levelIndex = Object.keys(levels).indexOf(levelKey);
-    const reward = levelIndex >= 0 ? levelIndex + 1 : 1;
+    const levelData = levels[levelKey];
+    const reward = (levelData && levelData.boss) ? 2 : 1;
     this.lastTechReward = reward;
 
     if (!this.completedLevels.includes(levelKey)) {
@@ -437,5 +505,28 @@ class Game {
 
   isLevelUnlocked(levelName) {
     return this.unlockedLevels.includes(levelName);
+  }
+
+  // Phase 7: find the tower under a canvas point (for click-to-select)
+  towerAt(x, y) {
+    for (const tower of this.towers) {
+      const r = (tower.size || 15) + 8;
+      if (Math.sqrt(Math.pow(tower.x - x, 2) + Math.pow(tower.y - y, 2)) <= r) {
+        return tower;
+      }
+    }
+    return null;
+  }
+
+  // Phase 7: upgrade the selected tower. Returns true on success.
+  upgradeSelectedTower() {
+    const tower = this.selectedTower;
+    if (!tower) return false;
+    const cost = tower.upgradeCost();
+    if (tower.level >= tower.maxLevel) return false;
+    if (!this.spendResources(cost)) return false;
+    tower.upgrade();
+    if (this.inputHandler) this.inputHandler.showToast(I18N.t('upgradedMsg', { name: I18N.towerName(tower.type), n: tower.level }));
+    return true;
   }
 }

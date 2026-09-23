@@ -53,16 +53,6 @@ class TerminalProtocol {
       });
     }
 
-    // Level selector buttons (in-game quick switch)
-    document.querySelectorAll('.level-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!this.game.isLevelUnlocked(btn.dataset.level)) return;
-        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        this.loadLevel(btn.dataset.level);
-      });
-    });
-
     // Wave controls: "准备就绪" starts the first wave; "Next Wave" calls the next early
     document.getElementById('nextWaveBtn').addEventListener('click', () => {
       if (this.game.gameState === 'ready') {
@@ -76,22 +66,20 @@ class TerminalProtocol {
     // Main menu buttons
     const menuStartBtn = document.getElementById('menuStartBtn');
     if (menuStartBtn) {
-      menuStartBtn.addEventListener('click', () => this.loadLevel('level1'));
+      menuStartBtn.addEventListener('click', () => this.loadLevel('c1l1'));
     }
-    const menuLevelContainer = document.getElementById('menuLevelList');
-    if (menuLevelContainer) {
-      menuLevelContainer.addEventListener('click', (e) => {
-        const btn = e.target.closest('.menu-level-btn');
-        if (!btn || btn.disabled) return;
-        this.loadLevel(btn.dataset.level);
-      });
+
+    // Phase 7: tower upgrade button
+    const upBtn = document.querySelector('#upgradePanel .up-btn');
+    if (upBtn) {
+      upBtn.addEventListener('click', () => this.game.upgradeSelectedTower());
     }
 
     // Result screen buttons
     const resultRetryBtn = document.getElementById('resultRetryBtn');
     if (resultRetryBtn) {
       resultRetryBtn.addEventListener('click', () => {
-        const key = this.game.currentLevel ? this.game.currentLevel.key : 'level1';
+        const key = this.game.currentLevel ? this.game.currentLevel.key : 'c1l1';
         this.loadLevel(key);
       });
     }
@@ -125,8 +113,8 @@ class TerminalProtocol {
     const unlockAudio = () => {
       this.audioManager.unlock();
       if (this.game.currentLevel) {
-        const chapter = Object.keys(levels).indexOf(this.game.currentLevel.key);
-        this.audioManager.startMusic(chapter >= 0 ? chapter : 0);
+        const chapter = chapterIndexForLevel(this.game.currentLevel.key);
+        this.audioManager.startMusic(chapter);
       }
       window.removeEventListener('pointerdown', unlockAudio);
       window.removeEventListener('keydown', unlockAudio);
@@ -149,8 +137,8 @@ class TerminalProtocol {
         this.audioManager.setMusicEnabled(!this.audioManager.musicEnabled);
         musicBtn.classList.toggle('off', !this.audioManager.musicEnabled);
         if (this.audioManager.musicEnabled && this.game.currentLevel) {
-          const chapter = Object.keys(levels).indexOf(this.game.currentLevel.key);
-          this.audioManager.startMusic(chapter >= 0 ? chapter : 0);
+          const chapter = chapterIndexForLevel(this.game.currentLevel.key);
+          this.audioManager.startMusic(chapter);
         }
       });
     }
@@ -161,6 +149,8 @@ class TerminalProtocol {
     // Load saved meta-progression (Phase 5)
     this.game.saveSystem.load(this.game);
     this.game.onLevelComplete = () => this.updateLevelButtons();
+    // Phase 7: on victory, play post-level dialogue (if any) before the result screen
+    this.game.onVictoryDialogue = () => this.playVictoryDialogue();
     this.updateLevelButtons();
     this.renderTechPanel();
 
@@ -199,7 +189,7 @@ class TerminalProtocol {
       if (!confirm(I18N.t('saveResetConfirm'))) return;
       this.game.techTree.reset();
       this.game.completedLevels = [];
-      this.game.unlockedLevels = ['level1'];
+      this.game.unlockedLevels = ['c1l1'];
       this.game.saveSystem.clear();
       this.updateLevelButtons();
       this.renderTechPanel();
@@ -235,21 +225,39 @@ class TerminalProtocol {
     const resultScreen = document.getElementById('resultScreen');
     if (resultScreen) resultScreen.classList.remove('show');
 
-    // Build the level list (locked levels shown but disabled)
+    // Build the chapter grid (6 chapters × 6 level slots)
     const container = document.getElementById('menuLevelList');
     if (container) {
       container.innerHTML = '';
-      Object.keys(levels).forEach(key => {
-        const unlocked = this.game.isLevelUnlocked(key);
-        const btn = document.createElement('button');
-        btn.className = 'menu-level-btn' + (unlocked ? '' : ' locked');
-        btn.disabled = !unlocked;
-        btn.dataset.level = key;
-        const done = this.game.completedLevels.includes(key);
-        const status = !unlocked ? I18N.t('levelLocked') : (done ? I18N.t('levelDone') : I18N.t('levelStart'));
-        btn.innerHTML = `<span class="menu-level-name">${I18N.levelName(key)}</span><span class="menu-level-status">${status}</span>`;
-        container.appendChild(btn);
+      const grid = document.createElement('div');
+      grid.className = 'menu-chapters';
+      chapters.forEach((chapter, ci) => {
+        const chapterEl = document.createElement('div');
+        chapterEl.className = 'menu-chapter';
+        const header = document.createElement('div');
+        header.className = 'menu-chapter-header';
+        header.textContent = I18N.chapterName(ci);
+        chapterEl.appendChild(header);
+
+        const slots = document.createElement('div');
+        slots.className = 'menu-chapter-slots';
+        chapter.levels.forEach((lv, li) => {
+          const key = lv.key;
+          const unlocked = this.game.isLevelUnlocked(key);
+          const done = this.game.completedLevels.includes(key);
+          const slot = document.createElement('button');
+          slot.className = 'menu-slot' + (unlocked ? '' : ' locked') + (done ? ' done' : '');
+          slot.disabled = !unlocked;
+          slot.dataset.level = key;
+          const status = !unlocked ? I18N.t('levelLocked') : (done ? I18N.t('levelDone') : I18N.t('levelStart'));
+          slot.innerHTML = `<span class="slot-name">${I18N.levelName(key)}</span><span class="slot-status">${status}</span>`;
+          slot.addEventListener('click', () => this.loadLevel(key));
+          slots.appendChild(slot);
+        });
+        chapterEl.appendChild(slots);
+        grid.appendChild(chapterEl);
       });
+      container.appendChild(grid);
     }
 
     const menu = document.getElementById('mainMenu');
@@ -320,13 +328,130 @@ class TerminalProtocol {
   }
 
   updateLevelButtons() {
-    document.querySelectorAll('.level-btn').forEach(btn => {
-      const name = btn.dataset.level;
-      const unlocked = this.game.isLevelUnlocked(name);
-      btn.disabled = !unlocked;
-      btn.classList.toggle('locked', !unlocked);
-      btn.textContent = unlocked ? name.replace('level', '') : '🔒';
-    });
+    // (In-game quick-switch level buttons were removed in Phase 7; level
+    // selection now lives in the main menu chapter grid. Kept as a no-op
+    // because onLevelComplete and save import/reset still call it.)
+  }
+
+  // ---- Phase 7: story / dialogue flow -------------------------------------
+
+  // Show a sequence of dialogue lines in the dialogue box. Each line is
+  // { who, zh, en, [title, titleEn] }. Calls onDone when the last line is
+  // dismissed.
+  showDialogue(lines, onDone) {
+    const box = document.getElementById('dialogueBox');
+    if (!box) { if (onDone) onDone(); return; }
+    const speakerEl = box.querySelector('.dlg-speaker');
+    const textEl = box.querySelector('.dlg-text');
+    const btnEl = box.querySelector('.dlg-btn');
+    const isEn = I18N.lang === 'en';
+    let idx = 0;
+
+    const renderLine = () => {
+      const line = lines[idx];
+      let ch;
+      if (line.who === 'system') {
+        ch = { name: '章节过场', nameEn: 'CHAPTER', color: '#00f0ff' };
+      } else {
+        ch = (STORY && STORY.characters && STORY.characters[line.who]) ||
+          { name: '系统', nameEn: 'SYSTEM', color: '#00f0ff' };
+      }
+      speakerEl.textContent = isEn ? ch.nameEn : ch.name;
+      speakerEl.style.color = ch.color;
+      const body = isEn ? line.en : line.zh;
+      if (line.title || line.titleEn) {
+        const title = isEn ? (line.titleEn || line.title) : (line.title || line.titleEn);
+        textEl.innerHTML = `<div class="dlg-title">${title}</div><div>${body}</div>`;
+      } else {
+        textEl.textContent = body;
+      }
+      btnEl.textContent = (idx < lines.length - 1) ? I18N.t('dialogueContinue') : I18N.t('dialogueEnd');
+    };
+
+    const advance = () => {
+      idx++;
+      if (idx >= lines.length) {
+        box.classList.remove('show');
+        if (onDone) onDone();
+      } else {
+        renderLine();
+      }
+    };
+
+    btnEl.onclick = advance;
+    renderLine();
+    box.classList.add('show');
+  }
+
+  // Show the mission briefing panel (Cen Zhao) for a level.
+  showBriefing(key, lines) {
+    const panel = document.getElementById('briefingPanel');
+    if (!panel) return;
+    if (!lines || lines.length === 0) return;
+    const isEn = I18N.lang === 'en';
+    const titleEl = panel.querySelector('.bf-title');
+    const speakerEl = panel.querySelector('.bf-speaker');
+    const textEl = panel.querySelector('.bf-text');
+    const btnEl = panel.querySelector('.bf-btn');
+    titleEl.textContent = I18N.t('briefingTitle');
+    const cen = STORY.characters.cen;
+    speakerEl.textContent = isEn ? cen.nameEn : cen.name;
+    speakerEl.style.color = cen.color;
+    textEl.innerHTML = lines.map(l => `<div>${isEn ? l.en : l.zh}</div>`).join('');
+    btnEl.textContent = I18N.t('briefingContinue');
+    btnEl.onclick = () => panel.classList.remove('show');
+    panel.classList.add('show');
+  }
+
+  // On level load: show the chapter intro (first level of a chapter) and/or
+  // the mission briefing.
+  showLevelIntro(key) {
+    if (!STORY) return;
+    const ci = chapterIndexForLevel(key);
+    const chapter = chapters[ci];
+    const isFirstLevel = chapter && chapter.levels[0].key === key;
+    const briefingLines = (STORY.briefings && STORY.briefings[key]) || [];
+
+    if (isFirstLevel && STORY.chapters[ci]) {
+      const intro = STORY.chapters[ci];
+      const introLine = {
+        who: 'system',
+        title: intro.title,
+        titleEn: intro.titleEn,
+        zh: intro.intro,
+        en: intro.introEn
+      };
+      this.showDialogue([introLine], () => this.showBriefing(key, briefingLines));
+    } else {
+      this.showBriefing(key, briefingLines);
+    }
+  }
+
+  // On victory: play the post-level dialogue (log fragment + events), then
+  // show the result screen.
+  playVictoryDialogue() {
+    const key = this.game.currentLevel ? this.game.currentLevel.key : null;
+    if (!key || !STORY) { this.game.showResultScreen(true, 'win'); return; }
+    const isEn = I18N.lang === 'en';
+    const queue = [];
+
+    // Log fragment (Lu Mingyuan) first, if this level has one
+    const frag = STORY.logFragments && STORY.logFragments[key];
+    if (frag) {
+      let text = isEn ? frag.en : frag.zh;
+      if (frag.note) text += '\n' + (isEn ? (frag.noteEn || frag.note) : frag.note);
+      queue.push({ who: 'lu', zh: text, en: text });
+    }
+
+    // Post-victory events
+    const events = STORY.events && STORY.events[key];
+    if (events && events.length) queue.push(...events);
+
+    if (queue.length === 0) {
+      this.game.showResultScreen(true, 'win');
+    } else {
+      this.showDialogue(queue, () => this.game.showResultScreen(true, 'win'));
+    }
   }
 
   renderTechPanel() {
@@ -376,12 +501,15 @@ class TerminalProtocol {
   }
 
   loadLevel(levelName) {
-    // Load level data
+    // Load level data (Phase 7: 36 levels across 6 chapters)
     const levelData = levels[levelName];
     if (!levelData) {
       console.error(`Level ${levelName} not found`);
       return;
     }
+    const chapterIdx = chapterIndexForLevel(levelName);
+    const chapter = chapters[chapterIdx];
+    const path = chapter ? chapter.path : levelData.path;
 
     // Reset game state (starting resources/health respect tech tree, Phase 5)
     this.game.towers = [];
@@ -390,14 +518,23 @@ class TerminalProtocol {
     this.game.resources = this.game.techTree.getStartingResources();
     this.game.health = this.game.techTree.getStartingHealth();
     this.game.selectedTowerType = null;
+    this.game.selectedTower = null;
     this.inputHandler.updateTowerButtons();
     if (this.game.effects) this.game.effects.clear();
+
+    // Phase 7: time limit (level 6-4 reset countdown)
+    this.game.timeLimit = levelData.timeLimit || 0;
+    this.game.timeRemaining = this.game.timeLimit;
 
     // Hide overlays
     const menu = document.getElementById('mainMenu');
     if (menu) menu.classList.remove('show');
     const resultScreen = document.getElementById('resultScreen');
     if (resultScreen) resultScreen.classList.remove('show');
+    const briefingPanel = document.getElementById('briefingPanel');
+    if (briefingPanel) briefingPanel.classList.remove('show');
+    const dialogueBox = document.getElementById('dialogueBox');
+    if (dialogueBox) dialogueBox.classList.remove('show');
 
     // Restart the loop if a previous game ended
     if (!this.game.isRunning) {
@@ -406,11 +543,13 @@ class TerminalProtocol {
       requestAnimationFrame(this.game.loop.bind(this.game));
     }
 
-    // Set current level (key = object key like 'level1', name = display name)
+    // Set current level (key = 'c1l1'..., name = display name, path from chapter)
     this.game.currentLevel = {
       key: levelName,
       name: levelData.name,
-      path: levelData.path
+      path: path,
+      boss: levelData.boss || null,
+      ambient: !!levelData.ambient
     };
 
     // Setup wave manager
@@ -421,7 +560,7 @@ class TerminalProtocol {
     levelData.waves.forEach(wave => {
       const waveEnemies = wave.map(enemyData => ({
         type: enemyData.type,
-        path: levelData.path
+        path: path
       }));
       waveManager.addWave(waveEnemies);
     });
@@ -429,11 +568,18 @@ class TerminalProtocol {
     // Enter "ready" state: player builds defenses, then presses 准备就绪 to start wave 1
     this.game.setReady();
 
+    // Phase 7: ambient broadcast note (level 6-2)
+    if (levelData.ambient) {
+      this.inputHandler.showToast(I18N.t('ambientNote'));
+    }
+
     // Restart BGM for this chapter if audio is already unlocked (Phase 6)
     if (this.audioManager.ctx) {
-      const chapter = Object.keys(levels).indexOf(levelName);
-      this.audioManager.startMusic(chapter >= 0 ? chapter : 0);
+      this.audioManager.startMusic(chapterIdx);
     }
+
+    // Phase 7: chapter intro (first level of a chapter) + mission briefing
+    this.showLevelIntro(levelName);
   }
 }
 

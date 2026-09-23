@@ -39,8 +39,24 @@ class SaveSystem {
   applySave(data, game) {
     if (!data || data.version !== 1) return false;
     if (data.tech) game.techTree.deserialize(data.tech);
-    if (Array.isArray(data.completedLevels)) game.completedLevels = data.completedLevels.slice();
-    if (Array.isArray(data.unlockedLevels)) game.unlockedLevels = data.unlockedLevels.slice();
+
+    // Phase 7 migration: old saves used legacy keys ('level1'..'level3') that
+    // no longer exist in the 36-level structure. Keep only keys that map to a
+    // real level, and always guarantee the first level (c1l1) is unlocked.
+    const validKeys = (typeof levels !== 'undefined') ? Object.keys(levels) : null;
+    if (Array.isArray(data.completedLevels)) {
+      game.completedLevels = validKeys
+        ? data.completedLevels.filter(k => validKeys.includes(k))
+        : data.completedLevels.slice();
+    }
+    if (Array.isArray(data.unlockedLevels)) {
+      game.unlockedLevels = validKeys
+        ? data.unlockedLevels.filter(k => validKeys.includes(k))
+        : data.unlockedLevels.slice();
+    }
+    if (validKeys && validKeys.length && !game.unlockedLevels.includes(validKeys[0])) {
+      game.unlockedLevels.unshift(validKeys[0]);
+    }
     return true;
   }
 

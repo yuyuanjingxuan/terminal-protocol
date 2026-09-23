@@ -32,6 +32,38 @@ class Enemy {
     this.summonInterval = 0;
     this.summonType = null;
     this.summonCount = 0;
+
+    // Phase 7: wave-entry overrides (applied by WaveManager at spawn)
+    this.revealAtFrac = 0;   // 0 = disabled; reveal permanently at this health fraction
+    this.splitAtFrac = 0;    // 0 = disabled; split once at this health fraction
+    this.splitAtFracDone = false;
+    this.bossName = null;    // localized boss name (zh)
+    this.bossNameEn = null;  // localized boss name (en)
+  }
+
+  // Apply per-wave overrides from the level's wave data (Phase 7).
+  // Called by WaveManager right after construction.
+  applyOverrides(data) {
+    if (!data) return;
+    if (data.hp) { this.health = data.hp; this.maxHealth = data.hp; }
+    if (data.shield) { this.shield = data.shield; this.maxShield = data.shield; }
+    if (data.speed) this.baseSpeed = data.speed;
+    if (data.size) this.size = data.size;
+    if (data.reward) this.reward = data.reward;
+    if (data.damageToBase) this.damageToBase = data.damageToBase;
+    if (data.summonType) this.summonType = data.summonType;
+    if (data.summonCount) this.summonCount = data.summonCount;
+    if (data.summonInterval) this.summonInterval = data.summonInterval;
+    if (data.summonTimer) this.summonTimer = data.summonTimer;
+    if (data.healRate) this.healRate = data.healRate;
+    if (data.healRadius) this.healRadius = data.healRadius;
+    if (data.stealth) this.isStealthed = true;
+    if (data.revealAtFrac) this.revealAtFrac = data.revealAtFrac;
+    if (data.splitAtFrac) this.splitAtFrac = data.splitAtFrac;
+    if (data.splitCount) this.splitCount = data.splitCount;
+    if (data.splitType) this.splitType = data.splitType;
+    if (data.bossName) this.bossName = data.bossName;
+    if (data.bossNameEn) this.bossNameEn = data.bossNameEn;
   }
 
   update(deltaTime) {
@@ -148,7 +180,34 @@ class Enemy {
       return; // shield absorbs the hit
     }
     this.health -= amount;
+
+    // Phase 7: reveal at a health fraction (e.g. Mirror Merchant, 2-6)
+    if (this.isStealthed && this.revealAtFrac > 0 &&
+        this.health / this.maxHealth <= this.revealAtFrac) {
+      this.reveal(99999); // permanent reveal
+    }
+
+    // Phase 7: one-shot split at a health fraction (e.g. Multiphase Body, 5-6)
+    if (this.splitAtFrac > 0 && !this.splitAtFracDone &&
+        this.health > 0 && this.health / this.maxHealth <= this.splitAtFrac) {
+      this.splitAtFracDone = true;
+      this.doSplit();
+    }
+
     if (this.health <= 0) this.die();
+  }
+
+  // Spawn split children (shared by death-split and threshold-split)
+  doSplit() {
+    if (this.splitCount <= 0 || !this.splitType) return;
+    for (let i = 0; i < this.splitCount; i++) {
+      const cls = ENEMY_TYPES[this.splitType];
+      const child = new cls(this.game, this.path);
+      child.x = this.x + (i - (this.splitCount - 1) / 2) * 16;
+      child.y = this.y;
+      child.pathIndex = this.pathIndex;
+      this.game.addEnemy(child);
+    }
   }
 
   die() {
@@ -160,16 +219,7 @@ class Enemy {
     if (this.game.audio) this.game.audio.playEnemyDie(this.size);
 
     this.game.gainResources(this.reward);
-    if (this.splitCount > 0 && this.splitType) {
-      for (let i = 0; i < this.splitCount; i++) {
-        const cls = ENEMY_TYPES[this.splitType];
-        const child = new cls(this.game, this.path);
-        child.x = this.x + (i - (this.splitCount - 1) / 2) * 16;
-        child.y = this.y;
-        child.pathIndex = this.pathIndex;
-        this.game.addEnemy(child);
-      }
-    }
+    this.doSplit();
   }
 
   render(ctx) {
@@ -289,7 +339,10 @@ class Enemy {
       ctx.fillStyle = '#ffffff';
       ctx.font = '11px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(I18N.t('bossLabel'), this.game.canvas.width / 2, 34);
+      const label = (typeof I18N !== 'undefined' && I18N.lang === 'en')
+        ? (this.bossNameEn || I18N.t('bossLabel'))
+        : (this.bossName || I18N.t('bossLabel'));
+      ctx.fillText(label, this.game.canvas.width / 2, 34);
     }
   }
 }

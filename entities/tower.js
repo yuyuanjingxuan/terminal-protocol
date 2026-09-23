@@ -91,6 +91,30 @@ class Tower {
     this.shape = 'circle';
     this.size = 15;
     this.canReveal = false; // EM faction can target stealthed enemies
+    // Upgrade system (Phase 7, introduced in level 1-2)
+    this.level = 1;
+    this.maxLevel = 3;
+  }
+
+  // Cost to upgrade to the next level (scales with current level)
+  upgradeCost() {
+    return Math.round(this.cost * 0.8 * this.level);
+  }
+
+  // Apply one upgrade. Returns true if upgraded, false if at max level.
+  upgrade() {
+    if (this.level >= this.maxLevel) return false;
+    this.level++;
+    this.damage = Math.round(this.damage * 1.5);
+    this.range = Math.round(this.range * 1.1);
+    this.cooldown = Math.max(0.2, this.cooldown * 0.9);
+    if (this.explosionRadius) this.explosionRadius = Math.round(this.explosionRadius * 1.15);
+    if (this.resourceAmount) this.resourceAmount += 1;
+    if (this.slowFactor) this.slowFactor = Math.max(0.2, this.slowFactor - 0.1);
+    if (this.stunDuration) this.stunDuration += 0.3;
+    if (this.chainCount) this.chainCount += 1;
+    if (this.pulseRadius) this.pulseRadius = Math.round(this.pulseRadius * 1.1);
+    return true;
   }
 
   update(deltaTime) {
@@ -169,6 +193,24 @@ class Tower {
     drawTowerShape(ctx, this.x, this.y, r, this.shape);
     ctx.fill();
     ctx.shadowBlur = 0;
+
+    // Level pips (Phase 7): small dots below the tower, one per level
+    if (this.level > 1) {
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 6;
+      const pipR = 2;
+      const gap = 6;
+      const totalW = (this.level - 1) * gap;
+      const startX = this.x - totalW / 2;
+      const pipY = this.y + r + 6;
+      for (let i = 0; i < this.level - 1; i++) {
+        ctx.beginPath();
+        ctx.arc(startX + i * gap, pipY, pipR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+    }
   }
 }
 

@@ -53,6 +53,7 @@ class InputHandler {
       if (tower) {
         const refund = Math.floor(tower.cost * 0.5);
         this.game.towers = this.game.towers.filter(t => t !== tower);
+        if (this.game.selectedTower === tower) this.game.selectedTower = null;
         this.game.gainResources(refund);
         if (this.game.effects) this.game.effects.burst(tower.x, tower.y, tower.color, 12);
         if (this.game.audio) this.game.audio.playTowerBuilt();
@@ -60,6 +61,7 @@ class InputHandler {
         return;
       }
       this.game.selectedTowerType = null;
+      this.game.selectedTower = null;
       this.updateTowerButtons();
     });
 
@@ -104,6 +106,14 @@ class InputHandler {
   }
 
   handleMouseDown(e) {
+    // Phase 7: no tower type selected → clicking a built tower selects it (upgrade)
+    if (!this.game.selectedTowerType) {
+      const tower = this.game.towerAt(this.mouseX, this.mouseY);
+      this.game.selectedTower = tower;
+      if (tower && this.game.audio) this.game.audio.playTowerBuilt();
+      return;
+    }
+
     const gridSize = 40;
     const towerX = Math.floor(this.mouseX / gridSize) * gridSize + gridSize / 2;
     const towerY = Math.floor(this.mouseY / gridSize) * gridSize + gridSize / 2;

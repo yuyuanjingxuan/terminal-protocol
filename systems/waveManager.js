@@ -71,6 +71,15 @@ class WaveManager {
       const { data } = this.spawnQueue.shift();
       const cls = ENEMY_TYPES[data.type] || BasicEnemy;
       const enemy = new cls(this.game, data.path);
+
+      // Phase 7: inject the level's boss name so the boss bar shows it
+      if (data.type === 'boss' && this.game.currentLevel && this.game.currentLevel.boss) {
+        data.bossName = this.game.currentLevel.boss.name;
+        data.bossNameEn = this.game.currentLevel.boss.nameEn;
+      }
+
+      // Phase 7: apply per-wave stat overrides (hp/shield/stealth/split/summon/...)
+      enemy.applyOverrides(data);
       this.game.addEnemy(enemy);
     }
   }
