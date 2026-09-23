@@ -84,6 +84,21 @@ const I18N = {
       towerDesc_pulse: '范围眩晕 1.5 秒，无伤害',
       towerDesc_disruptor: '连锁闪电，最多 3 个目标',
       towerDesc_repair: '每 2 秒生成 5 资源',
+      // Tower counters (tooltip: which enemies a tower is strong against)
+      ttCounter: '克制 {n}',
+      towerCounter_laser: '快速敌人',
+      towerCounter_plasma: '普通敌人',
+      towerCounter_railgun: '装甲 / Boss',
+      towerCounter_cannon: '成群敌人',
+      towerCounter_missile: '成群敌人',
+      towerCounter_bomb: '成群 / 分裂体',
+      towerCounter_emp: '隐身 / 快速',
+      towerCounter_pulse: '隐身 / 成群',
+      towerCounter_disruptor: '成群 / 隐身',
+      // Early wave call reward
+      earlyCallMsg: '提前召唤下一波，奖励 {n} 资源',
+      // Boss warning banner
+      bossWarning: '⚠ 警告：核心进程接近 ⚠',
       // Tech tree factions
       faction_energy: '能量系',
       faction_explosive: '爆破系',
@@ -197,6 +212,21 @@ const I18N = {
       towerDesc_pulse: 'Area stun for 1.5s, no damage',
       towerDesc_disruptor: 'Chain lightning to up to 3 targets',
       towerDesc_repair: 'Generates 5 resources every 2 seconds',
+      // Tower counters (tooltip: which enemies a tower is strong against)
+      ttCounter: 'Strong vs {n}',
+      towerCounter_laser: 'Fast enemies',
+      towerCounter_plasma: 'Basic enemies',
+      towerCounter_railgun: 'Armored / Boss',
+      towerCounter_cannon: 'Swarm enemies',
+      towerCounter_missile: 'Swarm enemies',
+      towerCounter_bomb: 'Swarm / Splitters',
+      towerCounter_emp: 'Stealth / Fast',
+      towerCounter_pulse: 'Stealth / Swarm',
+      towerCounter_disruptor: 'Swarm / Stealth',
+      // Early wave call reward
+      earlyCallMsg: 'Early call: +{n} resources',
+      // Boss warning banner
+      bossWarning: '⚠ WARNING: CORE PROCESS APPROACHING ⚠',
       // Tech tree factions
       faction_energy: 'Energy',
       faction_explosive: 'Explosive',
@@ -255,6 +285,11 @@ const I18N = {
   // Localized short description for a tower type (tooltip)
   towerDesc(type) {
     return this.t('towerDesc_' + type);
+  },
+
+  // Localized "strong against" hint for a tower type (tooltip)
+  towerCounter(type) {
+    return this.t('towerCounter_' + type);
   },
 
   // Localized display name for a tech node ('energy_1' → 超充电池 / Overcharged Cells)

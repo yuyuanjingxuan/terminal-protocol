@@ -176,6 +176,14 @@ class AudioManager {
     this.tone(660, 0.18, { type: 'square', vol: 0.14, delay: 0.2 });
   }
 
+  // Boss alarm: two descending klaxon blasts
+  playBossWarning() {
+    if (!this.ensureContext()) return;
+    this.tone(520, 0.35, { type: 'sawtooth', vol: 0.18, slideTo: 180 });
+    this.tone(520, 0.35, { type: 'sawtooth', vol: 0.18, slideTo: 180, delay: 0.5 });
+    this.tone(110, 0.8, { type: 'sine', vol: 0.15, delay: 0.1 });
+  }
+
   playWin() {
     if (!this.ensureContext()) return;
     const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6

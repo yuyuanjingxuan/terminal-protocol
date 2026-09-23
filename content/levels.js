@@ -17,10 +17,14 @@ const levels = {
         { type: 'basic' },
         { type: 'basic' },
         { type: 'basic' },
+        { type: 'basic' },
+        { type: 'basic' },
         { type: 'basic' }
       ],
       // Wave 2: more basics
       [
+        { type: 'basic' },
+        { type: 'basic' },
         { type: 'basic' },
         { type: 'basic' },
         { type: 'basic' },
@@ -35,6 +39,8 @@ const levels = {
         { type: 'fast' },
         { type: 'basic' },
         { type: 'fast' },
+        { type: 'basic' },
+        { type: 'fast' },
         { type: 'basic' }
       ],
       // Wave 4: armored tanks
@@ -44,6 +50,8 @@ const levels = {
         { type: 'basic' },
         { type: 'armored' },
         { type: 'basic' },
+        { type: 'basic' },
+        { type: 'armored' },
         { type: 'basic' }
       ],
       // Wave 5: mixed pressure
@@ -54,6 +62,9 @@ const levels = {
         { type: 'basic' },
         { type: 'armored' },
         { type: 'fast' },
+        { type: 'basic' },
+        { type: 'fast' },
+        { type: 'armored' },
         { type: 'basic' }
       ]
     ]
@@ -78,6 +89,8 @@ const levels = {
         { type: 'fast' },
         { type: 'fast' },
         { type: 'fast' },
+        { type: 'fast' },
+        { type: 'fast' },
         { type: 'fast' }
       ],
       // Wave 2: armored
@@ -85,6 +98,8 @@ const levels = {
         { type: 'armored' },
         { type: 'armored' },
         { type: 'basic' },
+        { type: 'basic' },
+        { type: 'armored' },
         { type: 'basic' }
       ],
       // Wave 3: healers with basic escorts
@@ -93,7 +108,9 @@ const levels = {
         { type: 'basic' },
         { type: 'basic' },
         { type: 'basic' },
-        { type: 'healer' }
+        { type: 'healer' },
+        { type: 'basic' },
+        { type: 'basic' }
       ],
       // Wave 4: stealth (needs EM towers to reveal)
       [
@@ -101,6 +118,8 @@ const levels = {
         { type: 'stealth' },
         { type: 'stealth' },
         { type: 'basic' },
+        { type: 'basic' },
+        { type: 'stealth' },
         { type: 'basic' }
       ],
       // Wave 5: splitters
@@ -108,12 +127,19 @@ const levels = {
         { type: 'splitter' },
         { type: 'splitter' },
         { type: 'fast' },
+        { type: 'fast' },
+        { type: 'splitter' },
         { type: 'fast' }
       ],
       // Wave 6: mixed
       [
         { type: 'armored' },
         { type: 'fast' },
+        { type: 'fast' },
+        { type: 'stealth' },
+        { type: 'splitter' },
+        { type: 'healer' },
+        { type: 'armored' },
         { type: 'fast' },
         { type: 'stealth' },
         { type: 'splitter' },
@@ -139,6 +165,8 @@ const levels = {
         { type: 'basic' },
         { type: 'basic' },
         { type: 'fast' },
+        { type: 'fast' },
+        { type: 'basic' },
         { type: 'fast' }
       ],
       [
@@ -146,6 +174,9 @@ const levels = {
         { type: 'armored' },
         { type: 'healer' },
         { type: 'basic' },
+        { type: 'basic' },
+        { type: 'armored' },
+        { type: 'healer' },
         { type: 'basic' }
       ],
       // The boss

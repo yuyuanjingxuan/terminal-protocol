@@ -14,6 +14,7 @@ class TerminalProtocol {
 
     // Initialize input handler
     this.inputHandler = new InputHandler(this.game);
+    this.inputHandler.updateTowerButtons(); // sync button costs from BALANCE
 
     // Tower selection buttons (click again to deselect)
     document.querySelectorAll('.tower-btn').forEach(btn => {
@@ -40,6 +41,7 @@ class TerminalProtocol {
             `<b>${I18N.towerName(type)}</b> <span class="tt-cost">${info.cost}</span><br>` +
             (stats.length ? stats.join(' · ') + '<br>' : '') +
             `<span class="tt-desc">${I18N.towerDesc(type)}</span><br>` +
+            `<span class="tt-counter">${I18N.t('ttCounter', { n: I18N.towerCounter(type) })}</span><br>` +
             `<span class="tt-hint">${I18N.t('sellHint')}</span>`;
           const rect = btn.getBoundingClientRect();
           const contRect = container.getBoundingClientRect();

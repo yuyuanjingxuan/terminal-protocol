@@ -10,6 +10,7 @@ class WaveManager {
     this.spawnInterval = BALANCE.spawnInterval; // seconds between enemy spawns within a wave
     this.spawnQueue = [];
     this.spawnTimer = 0;
+    this.bossWarningTimer = 0; // seconds remaining of the boss warning banner
   }
 
   addWave(enemies) {
@@ -30,6 +31,12 @@ class WaveManager {
 
       this.currentWave++;
 
+      // Boss wave: raise the warning banner + alarm before enemies spawn
+      if (waveEnemies.some(e => e.type === 'boss')) {
+        this.bossWarningTimer = 4;
+        if (this.game.audio) this.game.audio.playBossWarning();
+      }
+
       // Wave start effect + sound at the path start (Phase 6)
       const path = this.game.currentLevel ? this.game.currentLevel.path : null;
       if (path && path.length > 0 && this.game.effects) {
@@ -42,6 +49,15 @@ class WaveManager {
   callNextWave() {
     // Manually call the next wave early (skips the countdown)
     if (!this.isWaveActive && this.currentWave < this.waves.length) {
+      // Reward for calling early: proportional to the countdown skipped
+      const skipped = Math.max(0, this.waveInterval - this.waveTimer);
+      const bonus = Math.floor(skipped * 2); // ~2 resources per second skipped
+      if (bonus > 0) {
+        this.game.gainResources(bonus);
+        if (this.game.inputHandler) {
+          this.game.inputHandler.showToast(I18N.t('earlyCallMsg', { n: bonus }));
+        }
+      }
       this.waveTimer = 0;
       this.startNextWave();
     }
@@ -60,6 +76,11 @@ class WaveManager {
   }
 
   update(deltaTime) {
+    // Boss warning banner countdown
+    if (this.bossWarningTimer > 0) {
+      this.bossWarningTimer = Math.max(0, this.bossWarningTimer - deltaTime);
+    }
+
     // Spawn queued enemies for the active wave
     if (this.isWaveActive) {
       this.spawnFromQueue(deltaTime);
@@ -92,5 +113,6 @@ class WaveManager {
     this.isWaveActive = false;
     this.spawnQueue = [];
     this.spawnTimer = 0;
+    this.bossWarningTimer = 0;
   }
 }

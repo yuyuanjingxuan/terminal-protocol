@@ -86,6 +86,10 @@ class InputHandler {
   updateTowerButtons() {
     document.querySelectorAll('.tower-btn').forEach(btn => {
       btn.classList.toggle('selected', btn.dataset.type === this.game.selectedTowerType);
+      // Keep the displayed cost in sync with BALANCE (single source of truth)
+      const costEl = btn.querySelector('.cost');
+      const s = BALANCE.towers[btn.dataset.type];
+      if (costEl && s) costEl.textContent = s.cost;
     });
   }
 

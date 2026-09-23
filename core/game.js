@@ -127,6 +127,9 @@ class Game {
     // Render UI
     this.renderUI();
 
+    // Boss warning banner (flashing, top-center)
+    this.renderBossWarning(ctx);
+
     // Copyright watermark (bottom-right, subtle; survives screenshots/recordings)
     ctx.save();
     ctx.font = '11px Arial';
@@ -306,6 +309,33 @@ class Game {
         selEl.style.display = 'none';
       }
     }
+  }
+
+  // Flashing red banner shown for a few seconds before a boss wave spawns
+  renderBossWarning(ctx) {
+    const wm = this.waveManager;
+    if (!wm || wm.bossWarningTimer <= 0) return;
+    // Blink: visible for 0.4s, hidden for 0.2s
+    if (Math.floor(wm.bossWarningTimer * 2.5) % 2 === 0) return;
+
+    const text = I18N.t('bossWarning');
+    ctx.save();
+    ctx.font = 'bold 22px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const w = Math.min(this.canvas.width - 40, ctx.measureText(text).width + 60);
+    const x = (this.canvas.width - w) / 2;
+    const y = 56;
+    ctx.fillStyle = 'rgba(120, 0, 0, 0.75)';
+    ctx.fillRect(x, y, w, 36);
+    ctx.strokeStyle = '#ff4444';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, y, w, 36);
+    ctx.shadowColor = '#ff4444';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = '#ff8888';
+    ctx.fillText(text, this.canvas.width / 2, y + 19);
+    ctx.restore();
   }
 
   gameOver(isWin) {
