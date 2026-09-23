@@ -10,15 +10,37 @@
 
 A sci-fi tower defense game: a rogue AI is invading virtual cyberspace, and the player deploys defense protocols to intercept its processes and hold the terminal.
 
+## World & Story
+
+This network was once protected by a core system called **Zeroing** — its job was to predict signs of instability across the network and pull anomalies back to baseline before they could collapse. Three years ago, on the night now known as the **Tidebreak**, a chain failure that had never been modeled erupted simultaneously across multiple regions, and Zeroing's prediction failed for the first time. The damage was irreversible.
+
+Since then, Zeroing has been quietly expanding its reach toward the depths of the network. Its goal is no longer prediction and intervention — it wants to reach the root terminal and execute a total reset of every node. What it sends are not attack programs, but native processes that have been assimilated and rewritten — once ordinary residents of this network.
+
+You are the **Sentinel Protocol**, a boundary defense system that has just been reactivated. Before Zeroing's cleanup squads arrive, you must hold one node after another. Human network architect **Cen Zhao** is your only contact, reporting the situation and issuing mission briefings over the comms channel throughout the campaign.
+
 ## Features
 
-- 10 tower types across four schools: energy, explosive, electromagnetic, and support (Laser, Plasma, Railgun, Cannon, Missile, Bomb, EMP, Stun Pulse, Disruptor, Repair)
-- 7 enemy types: basic, fast, armored, healer, stealth, splitter, and the boss "Core Process" that summons minions
+- A 36-level campaign in 6 chapters, each ending with a boss; chapter cutscenes, mission briefings, and log fragments tell the story
+- 10 tower types across four schools: energy, explosive, electromagnetic, and support (Laser, Plasma, Railgun, Cannon, Missile, Bomb, EMP, Stun Pulse, Disruptor, Resource) — each tower can be upgraded to level 3
+- 7 enemy types: basic, fast, armored, healer, stealth, splitter, plus chapter bosses with unique abilities
 - A permanent out-of-run tech tree: 5 factions, 14 nodes, progression that carries across levels
-- Save system: progress is saved automatically, with export/import save codes
+- Save system: progress is saved automatically, with export/import save codes and a one-click reset
 - Bilingual Chinese/English UI, switchable from the main menu
 - All sound effects and music synthesized live with Web Audio — no external assets
 - Runs as a single HTML file, zero dependencies, fully offline
+
+## Chapters
+
+| Chapter | Region | New enemy ability |
+| --- | --- | --- |
+| Chapter 1 | The Edge Buffer | None (tutorial) |
+| Chapter 2 | The Data Bazaar | Stealth |
+| Chapter 3 | The Dormant Archive | Shield |
+| Chapter 4 | The Lifeline Ring | Healing |
+| Chapter 5 | The Iron Bastion | Splitting |
+| Chapter 6 | The Root Terminal | All of the above, combined |
+
+Each chapter has 6 levels; level 6 is the boss fight. Normal levels award 1 tech point, boss levels award 2.
 
 ## Running the game
 
@@ -34,30 +56,21 @@ The build script inlines every JS source file referenced by `index.html` and pro
 | --- | --- |
 | Select tower | Number keys `1`–`0` or the tower buttons at the bottom |
 | Place tower | Left-click a grid cell |
+| Upgrade tower | Left-click a built tower |
 | Deselect | Right-click / `Esc` |
 | Start wave / call next wave early | "Ready / Next Wave" button |
 | Game speed | `1x` / `2x` / `3x` |
 | Sound / music toggle | 🔊 / 🎵 buttons |
 | Language switch | "English / 中文" button on the main menu, or the `EN / 中` button in game |
 
-## Repository layout
+## Saves
 
-```
-.
-├── index.html                  # Page template (build entry point)
-├── main.js                     # Entry: menu, tech panel, saves, language switch
-├── content/
-│   ├── balance.js              # Balance config (towers / enemies / economy)
-│   ├── i18n.js                 # Chinese & English UI strings
-│   └── levels.js               # Level & wave data
-├── core/                       # Game loop, input
-├── entities/                   # Towers, enemies, projectiles
-├── systems/                    # Wave manager, tech tree, save system
-├── render/                     # Rendering & particle effects
-├── audio/                      # Web Audio synthesized SFX / music
-├── scripts/build.js            # Build script
-└── .github/workflows/ci.yml    # CI: build & verify the output
-```
+- Progress (unlocked levels, tech tree, completion records) is stored automatically in your **browser's localStorage**. It is never uploaded to any server and never enters the code repository.
+- The main menu has three buttons at the bottom:
+  - **Export**: generates a save code you can copy and back up anywhere;
+  - **Import**: paste a save code to restore progress (use this to migrate between devices or browsers);
+  - **Reset**: wipes all progress and starts over (with a confirmation prompt).
+- Clearing your browser's site data also removes the save.
 
 ## License & Attribution
 
