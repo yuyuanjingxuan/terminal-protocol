@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Configuration
+const PROJECT_ROOT = path.join(__dirname, '..');
 const OUTPUT_FILE = 'terminal-protocol.html';
 const SOURCE_DIRS = [
   'core',
@@ -77,12 +78,12 @@ function build() {
   let javascriptContent = '';
 
   // Add main.js first
-  const mainJsPath = path.join(__dirname, 'main.js');
+  const mainJsPath = path.join(PROJECT_ROOT, 'main.js');
   javascriptContent += fs.readFileSync(mainJsPath, 'utf8') + '\n\n';
 
   // Add files from source directories
   SOURCE_DIRS.forEach(dir => {
-    const dirPath = path.join(__dirname, dir);
+    const dirPath = path.join(PROJECT_ROOT, dir);
     if (fs.existsSync(dirPath)) {
       const files = fs.readdirSync(dirPath);
       files.forEach(file => {
@@ -99,7 +100,7 @@ function build() {
   const finalHtml = HTML_TEMPLATE.replace('{{JAVASCRIPT_CONTENT}}', javascriptContent);
 
   // Write to output file
-  fs.writeFileSync(path.join(__dirname, OUTPUT_FILE), finalHtml, 'utf8');
+  fs.writeFileSync(path.join(PROJECT_ROOT, OUTPUT_FILE), finalHtml, 'utf8');
 
   console.log(`Build complete! Output file: ${OUTPUT_FILE}`);
   console.log(`Total JavaScript size: ${javascriptContent.length} bytes`);
