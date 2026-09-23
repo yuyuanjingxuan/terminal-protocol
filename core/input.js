@@ -85,6 +85,9 @@ class InputHandler {
     const type = this.game.selectedTowerType;
     const info = TOWER_TYPES[type];
     if (!info) return null;
-    return new info.class(this.game, x, y);
+    const tower = new info.class(this.game, x, y);
+    // Apply permanent tech tree modifiers (Phase 5)
+    this.game.techTree.applyToTower(tower);
+    return tower;
   }
 }

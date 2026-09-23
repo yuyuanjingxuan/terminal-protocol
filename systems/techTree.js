@@ -1,271 +1,243 @@
-// systems/techTree.js - Technology tree system
+// systems/techTree.js - Permanent meta-progression tech tree (Phase 5)
+// Tech points are earned by completing levels. Unlocked nodes persist via SaveSystem.
 class TechTree {
   constructor(game) {
     this.game = game;
+    this.points = 0;
+    this.unlocked = {}; // nodeId -> true
+
+    // Node definitions. Cost is in tech points.
     this.nodes = {
-      // Energy faction tech tree
+      // Energy branch (laser / plasma / railgun)
       'energy_1': {
-        name: 'Advanced Targeting',
-        description: 'Energy towers gain +10% damage',
-        cost: 50,
-        unlocked: false,
+        name: 'Overcharged Cells',
+        description: 'Energy towers deal +15% damage',
+        cost: 1,
         faction: 'energy',
-        effect: (tower) => {
-          if (tower instanceof LaserTower || tower instanceof PlasmaTower || tower instanceof RailgunTower) {
-            tower.damage *= 1.1;
-          }
-        }
+        tier: 1,
+        requires: null
       },
       'energy_2': {
-        name: 'Overcharge Capacitors',
-        description: 'Energy towers gain +15% attack speed',
-        cost: 100,
-        unlocked: false,
-        faction: 'energy',
-        effect: (tower) => {
-          if (tower instanceof LaserTower || tower instanceof PlasmaTower || tower instanceof RailgunTower) {
-            tower.cooldown *= 0.85;
-          }
-        }
-      },
-      'energy_3': {
         name: 'Extended Range',
         description: 'Energy towers gain +20% range',
-        cost: 150,
-        unlocked: false,
+        cost: 2,
         faction: 'energy',
-        effect: (tower) => {
-          if (tower instanceof LaserTower || tower instanceof PlasmaTower || tower instanceof RailgunTower) {
-            tower.range *= 1.2;
-          }
-        }
+        tier: 2,
+        requires: 'energy_1'
       },
-      
-      // Explosive faction tech tree
+      'energy_3': {
+        name: 'Rapid Cycles',
+        description: 'Energy towers fire 20% faster',
+        cost: 3,
+        faction: 'energy',
+        tier: 3,
+        requires: 'energy_2'
+      },
+
+      // Explosive branch (cannon / missile / bomb)
       'explosive_1': {
         name: 'High Explosives',
-        description: 'Explosive towers gain +15% explosion radius',
-        cost: 50,
-        unlocked: false,
+        description: 'Explosive towers gain +20% blast radius',
+        cost: 1,
         faction: 'explosive',
-        effect: (tower) => {
-          if (tower instanceof CannonTower || tower instanceof MissileTower || tower instanceof BombTower) {
-            tower.explosionRadius *= 1.15;
-          }
-        }
+        tier: 1,
+        requires: null
       },
       'explosive_2': {
         name: 'Shrapnel Rounds',
-        description: 'Explosive towers gain +10% damage',
-        cost: 100,
-        unlocked: false,
+        description: 'Explosive towers deal +15% damage',
+        cost: 2,
         faction: 'explosive',
-        effect: (tower) => {
-          if (tower instanceof CannonTower || tower instanceof MissileTower || tower instanceof BombTower) {
-            tower.damage *= 1.1;
-          }
-        }
+        tier: 2,
+        requires: 'explosive_1'
       },
       'explosive_3': {
         name: 'Rapid Reload',
-        description: 'Explosive towers gain +20% attack speed',
-        cost: 150,
-        unlocked: false,
+        description: 'Explosive towers fire 20% faster',
+        cost: 3,
         faction: 'explosive',
-        effect: (tower) => {
-          if (tower instanceof CannonTower || tower instanceof MissileTower || tower instanceof BombTower) {
-            tower.cooldown *= 0.8;
-          }
-        }
+        tier: 3,
+        requires: 'explosive_2'
       },
-      
-      // Electromagnetic faction tech tree
+
+      // Electromagnetic branch (emp / pulse / disruptor)
       'electromagnetic_1': {
         name: 'Enhanced EMP',
-        description: 'EMP effects last 20% longer',
-        cost: 50,
-        unlocked: false,
+        description: 'EMP slow & stun effects last 25% longer',
+        cost: 1,
         faction: 'electromagnetic',
-        effect: (tower) => {
-          if (tower instanceof EMPTower || tower instanceof PulseTower || tower instanceof DisruptorTower) {
-            if (tower.slowDuration) tower.slowDuration *= 1.2;
-            if (tower.stunDuration) tower.stunDuration *= 1.2;
-          }
-        }
+        tier: 1,
+        requires: null
       },
       'electromagnetic_2': {
         name: 'Wider Pulse',
-        description: 'Pulse and chain effects reach 15% further',
-        cost: 100,
-        unlocked: false,
+        description: 'EM towers gain +15% range',
+        cost: 2,
         faction: 'electromagnetic',
-        effect: (tower) => {
-          if (tower instanceof EMPTower || tower instanceof PulseTower || tower instanceof DisruptorTower) {
-            if (tower.pulseRadius) tower.pulseRadius *= 1.15;
-            if (tower.range) tower.range *= 1.15;
-          }
-        }
+        tier: 2,
+        requires: 'electromagnetic_1'
       },
       'electromagnetic_3': {
         name: 'Chain Reaction',
-        description: 'Chain lightning can jump to 1 additional target',
-        cost: 150,
-        unlocked: false,
+        description: 'Disruptor chains to 1 additional target',
+        cost: 3,
         faction: 'electromagnetic',
-        effect: (tower) => {
-          if (tower instanceof DisruptorTower) {
-            tower.chainTargets += 1;
-          }
-        }
+        tier: 3,
+        requires: 'electromagnetic_2'
       },
-      
-      // Support faction tech tree
+
+      // Support branch (repair + base)
       'support_1': {
         name: 'Efficient Repair',
-        description: 'Repair towers heal 20% more health',
-        cost: 50,
-        unlocked: false,
+        description: 'Repair towers heal 50% more',
+        cost: 1,
         faction: 'support',
-        effect: (tower) => {
-          if (tower instanceof RepairTower) {
-            tower.repairAmount *= 1.2;
-          }
-        }
+        tier: 1,
+        requires: null
       },
       'support_2': {
-        name: 'Resource Optimization',
-        description: 'Resource towers generate 25% more resources',
-        cost: 100,
-        unlocked: false,
+        name: 'Reinforced Core',
+        description: 'Start each level with +3 health',
+        cost: 2,
         faction: 'support',
-        effect: (tower) => {
-          if (tower instanceof ResourceTower) {
-            tower.resourceAmount *= 1.25;
-          }
-        }
+        tier: 2,
+        requires: 'support_1'
       },
       'support_3': {
-        name: 'Boost Amplification',
-        description: 'Boost effects are 30% stronger',
-        cost: 150,
-        unlocked: false,
+        name: 'Resource Optimization',
+        description: 'Start each level with +50 resources',
+        cost: 3,
         faction: 'support',
-        effect: (tower) => {
-          if (tower instanceof BoostTower) {
-            tower.boostAmount *= 1.3;
-          }
-        }
+        tier: 3,
+        requires: 'support_2'
       },
-      
-      // Global upgrades
+
+      // Global branch
       'global_1': {
         name: 'Advanced Training',
-        description: 'All towers cost 10% less to build',
-        cost: 200,
-        unlocked: false,
+        description: 'All towers cost 10% less',
+        cost: 2,
         faction: 'global',
-        effect: (tower) => {
-          // This would be applied when building towers
-        }
+        tier: 1,
+        requires: null
       },
       'global_2': {
-        name: 'Reinforced Structures',
-        description: 'All towers gain +10% health (when implemented)',
-        cost: 200,
-        unlocked: false,
+        name: 'Overclocked Systems',
+        description: 'All towers fire 10% faster',
+        cost: 3,
         faction: 'global',
-        effect: (tower) => {
-          // This would be applied when building towers
-        }
+        tier: 2,
+        requires: 'global_1'
       }
     };
 
-    this.dependencies = {
-      'energy_2': ['energy_1'],
-      'energy_3': ['energy_2'],
-      'explosive_2': ['explosive_1'],
-      'explosive_3': ['explosive_2'],
-      'electromagnetic_2': ['electromagnetic_1'],
-      'electromagnetic_3': ['electromagnetic_2'],
-      'support_2': ['support_1'],
-      'support_3': ['support_2']
-    };
+    this.factions = [
+      { id: 'energy', name: 'Energy', color: '#00f0ff' },
+      { id: 'explosive', name: 'Explosive', color: '#ff6600' },
+      { id: 'electromagnetic', name: 'Electromagnetic', color: '#9c27b0' },
+      { id: 'support', name: 'Support', color: '#4CAF50' },
+      { id: 'global', name: 'Global', color: '#ffd700' }
+    ];
+  }
+
+  isUnlocked(nodeId) {
+    return !!this.unlocked[nodeId];
+  }
+
+  canUnlock(nodeId) {
+    const node = this.nodes[nodeId];
+    if (!node || this.unlocked[nodeId]) return false;
+    if (node.requires && !this.unlocked[node.requires]) return false;
+    return this.points >= node.cost;
   }
 
   unlockNode(nodeId) {
-    const node = this.nodes[nodeId];
-    
-    if (!node) return false;
-    
-    // Check if node is already unlocked
-    if (node.unlocked) return true;
-    
-    // Check dependencies
-    if (this.dependencies[nodeId]) {
-      for (const depId of this.dependencies[nodeId]) {
-        if (!this.nodes[depId] || !this.nodes[depId].unlocked) {
-          console.log(`Dependency ${depId} not unlocked`);
-          return false;
-        }
-      }
-    }
-    
-    // Check if player can afford it
-    if (!this.game.spendResources(node.cost)) {
-      return false;
-    }
-    
-    // Unlock the node
-    node.unlocked = true;
-    
-    // Apply effect to existing towers
-    this.game.towers.forEach(tower => {
-      node.effect(tower);
-    });
-    
+    if (!this.canUnlock(nodeId)) return false;
+    this.points -= this.nodes[nodeId].cost;
+    this.unlocked[nodeId] = true;
     return true;
   }
 
-  isNodeUnlocked(nodeId) {
-    const node = this.nodes[nodeId];
-    return node ? node.unlocked : false;
+  addPoints(n) {
+    this.points += n;
   }
 
-  canUnlockNode(nodeId) {
-    const node = this.nodes[nodeId];
-    
-    if (!node || node.unlocked) return false;
-    
-    // Check dependencies
-    if (this.dependencies[nodeId]) {
-      for (const depId of this.dependencies[nodeId]) {
-        if (!this.nodes[depId] || !this.nodes[depId].unlocked) {
-          return false;
-        }
-      }
+  // --- Modifiers applied to newly built towers ---
+
+  getTowerModifiers(tower) {
+    const m = {
+      damage: 1, range: 1, cooldown: 1,
+      explosionRadius: 1, slowDuration: 1, stunDuration: 1,
+      chainTargets: 0, repairAmount: 1
+    };
+    const f = tower.faction;
+
+    if (f === 'energy') {
+      if (this.unlocked['energy_1']) m.damage *= 1.15;
+      if (this.unlocked['energy_2']) m.range *= 1.2;
+      if (this.unlocked['energy_3']) m.cooldown *= 0.8;
+    } else if (f === 'explosive') {
+      if (this.unlocked['explosive_1']) m.explosionRadius *= 1.2;
+      if (this.unlocked['explosive_2']) m.damage *= 1.15;
+      if (this.unlocked['explosive_3']) m.cooldown *= 0.8;
+    } else if (f === 'electromagnetic') {
+      if (this.unlocked['electromagnetic_1']) { m.slowDuration *= 1.25; m.stunDuration *= 1.25; }
+      if (this.unlocked['electromagnetic_2']) m.range *= 1.15;
+      if (this.unlocked['electromagnetic_3'] && tower.type === 'disruptor') m.chainTargets += 1;
+    } else if (f === 'support') {
+      if (this.unlocked['support_1'] && tower.type === 'repair') m.repairAmount *= 1.5;
     }
-    
-    // Check if player can afford it
-    return this.game.resources >= node.cost;
+
+    // Global: overclocked systems (all towers fire 10% faster)
+    if (this.unlocked['global_2']) m.cooldown *= 0.9;
+
+    return m;
   }
 
-  getNodeInfo(nodeId) {
-    return this.nodes[nodeId];
+  applyToTower(tower) {
+    const m = this.getTowerModifiers(tower);
+    tower.damage *= m.damage;
+    tower.range *= m.range;
+    tower.cooldown *= m.cooldown;
+    if (tower.explosionRadius) tower.explosionRadius *= m.explosionRadius;
+    if (tower.slowDuration) tower.slowDuration *= m.slowDuration;
+    if (tower.stunDuration) tower.stunDuration *= m.stunDuration;
+    if (tower.chainTargets) tower.chainTargets += m.chainTargets;
+    if (tower.repairAmount) tower.repairAmount *= m.repairAmount;
+    // Global: advanced training (all towers cost 10% less)
+    if (this.unlocked['global_1']) tower.cost = Math.round(tower.cost * 0.9);
   }
 
-  getAllNodes() {
-    return this.nodes;
+  // --- Global modifiers for level setup ---
+
+  getStartingResources() {
+    return 100 + (this.unlocked['support_3'] ? 50 : 0);
   }
 
-  getNodesByFaction(faction) {
-    return Object.fromEntries(
-      Object.entries(this.nodes).filter(([id, node]) => node.faction === faction)
-    );
+  getStartingHealth() {
+    return 10 + (this.unlocked['support_2'] ? 3 : 0);
+  }
+
+  // --- Persistence ---
+
+  serialize() {
+    return {
+      points: this.points,
+      unlocked: Object.keys(this.unlocked)
+    };
+  }
+
+  deserialize(data) {
+    if (!data) return;
+    this.points = data.points || 0;
+    this.unlocked = {};
+    (data.unlocked || []).forEach(id => {
+      if (this.nodes[id]) this.unlocked[id] = true;
+    });
   }
 
   reset() {
-    Object.values(this.nodes).forEach(node => {
-      node.unlocked = false;
-    });
+    this.points = 0;
+    this.unlocked = {};
   }
 }

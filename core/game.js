@@ -18,6 +18,13 @@ class Game {
     this.mouseX = 0;
     this.mouseY = 0;
     this.mouseOnCanvas = false;
+
+    // Meta-progression (Phase 5)
+    this.techTree = new TechTree(this);
+    this.saveSystem = new SaveSystem();
+    this.completedLevels = []; // level keys completed at least once
+    this.unlockedLevels = ['level1']; // level keys the player can start
+    this.onLevelComplete = null; // callback: fired after a level is completed
   }
 
   init(canvasId) {
@@ -217,6 +224,8 @@ class Game {
 
     if (resEl) resEl.textContent = `Resources: ${Math.floor(this.resources)}`;
     if (hpEl) hpEl.textContent = `Health: ${this.health}`;
+    const techEl = document.getElementById('techPoints');
+    if (techEl) techEl.textContent = `Tech: ${this.techTree.points} pts`;
     if (waveEl) {
       const wm = this.waveManager;
       if (wm.isWaveActive) {
@@ -250,7 +259,10 @@ class Game {
 
   gameOver(isWin) {
     this.isRunning = false;
-    
+
+    // Award meta-progression on victory
+    if (isWin) this.completeLevel();
+
     // Show game over message on canvas
     const ctx = this.ctx;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -273,8 +285,44 @@ class Game {
       this.canvas.width / 2,
       this.canvas.height / 2 + 40
     );
-    
+
+    if (isWin) {
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '18px Arial';
+      ctx.fillText(
+        `+${this.lastTechReward} tech point${this.lastTechReward === 1 ? '' : 's'} earned`,
+        this.canvas.width / 2,
+        this.canvas.height / 2 + 70
+      );
+    }
+
     console.log(isWin ? 'Level Complete!' : 'Game Over!');
+  }
+
+  // Award tech points for completing a level and unlock the next one
+  completeLevel() {
+    const levelKey = this.currentLevel ? this.currentLevel.key : null;
+    if (!levelKey) return;
+
+    // Tech reward: 1 for level1, 2 for level2, 3 for level3 (by index)
+    const levelIndex = Object.keys(levels).indexOf(levelKey);
+    const reward = levelIndex >= 0 ? levelIndex + 1 : 1;
+    this.lastTechReward = reward;
+
+    if (!this.completedLevels.includes(levelKey)) {
+      this.completedLevels.push(levelKey);
+      this.techTree.addPoints(reward);
+    }
+
+    // Unlock the next level in sequence
+    const allLevels = Object.keys(levels);
+    const nextKey = allLevels[levelIndex + 1];
+    if (nextKey && !this.unlockedLevels.includes(nextKey)) {
+      this.unlockedLevels.push(nextKey);
+    }
+
+    this.saveSystem.save(this);
+    if (this.onLevelComplete) this.onLevelComplete();
   }
 
   addTower(tower) {
@@ -303,5 +351,9 @@ class Game {
 
   takeDamage(amount) {
     this.health -= amount;
+  }
+
+  isLevelUnlocked(levelName) {
+    return this.unlockedLevels.includes(levelName);
   }
 }

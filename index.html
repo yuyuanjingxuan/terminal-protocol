@@ -164,6 +164,164 @@
       font-size: 10px;
       color: #ffd700;
     }
+
+    .level-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    #techBtn {
+      position: absolute;
+      top: 62px;
+      right: 10px;
+      border: 2px solid #ffd700;
+      border-radius: 6px;
+      background: #1a1a2e;
+      color: #ffd700;
+      cursor: pointer;
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+
+    #techBtn:hover {
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    #techPanel {
+      position: absolute;
+      top: 96px;
+      right: 10px;
+      width: 300px;
+      max-height: 460px;
+      overflow-y: auto;
+      background: rgba(10, 10, 26, 0.95);
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+      padding: 12px;
+      display: none;
+      z-index: 10;
+    }
+
+    #techPanel.open {
+      display: block;
+    }
+
+    #techPanel h3 {
+      margin: 0 0 8px 0;
+      color: #ffd700;
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #techCloseBtn {
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .tech-faction {
+      margin-bottom: 10px;
+    }
+
+    .tech-faction-name {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tech-node {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      width: 100%;
+      text-align: left;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #1a1a2e;
+      color: white;
+      cursor: pointer;
+      font-size: 11px;
+      padding: 6px 8px;
+      margin-bottom: 4px;
+    }
+
+    .tech-node:hover:not(:disabled) {
+      border-color: #ffd700;
+    }
+
+    .tech-node.available {
+      border-color: #ffd700;
+      box-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
+    }
+
+    .tech-node.unlocked {
+      border-color: #00ff88;
+      background: rgba(0, 255, 136, 0.08);
+      cursor: default;
+    }
+
+    .tech-node:disabled:not(.unlocked) {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .tech-node-name {
+      font-weight: bold;
+    }
+
+    .tech-node-desc {
+      color: #aaa;
+      font-size: 10px;
+    }
+
+    .tech-node-cost {
+      color: #ffd700;
+      font-size: 10px;
+    }
+
+    .tech-node.unlocked .tech-node-cost {
+      color: #00ff88;
+    }
+
+    #saveControls {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      border-top: 1px solid #333;
+      padding-top: 8px;
+    }
+
+    #saveControls button {
+      flex: 1;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #1a1a2e;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 10px;
+      padding: 4px;
+    }
+
+    #saveControls button:hover {
+      border-color: #00f0ff;
+      color: white;
+    }
+
+    #saveMsg {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #00ff88;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
   </style>
 </head>
 <body>
@@ -173,12 +331,24 @@
       <div id="resources">Resources: 100</div>
       <div id="health">Health: 10</div>
       <div id="waveInfo">Wave: 0/0</div>
+      <div id="techPoints">Tech: 0 pts</div>
       <div id="selectedInfo"></div>
     </div>
     <div id="levelBar">
       <button class="level-btn active" data-level="level1">1</button>
       <button class="level-btn" data-level="level2">2</button>
       <button class="level-btn" data-level="level3">3</button>
+    </div>
+    <button id="techBtn">⚡ Tech</button>
+    <div id="techPanel">
+      <h3>Tech Tree <button id="techCloseBtn" title="Close">✕</button></h3>
+      <div id="techNodes"></div>
+      <div id="saveControls">
+        <button id="exportSaveBtn">Export</button>
+        <button id="importSaveBtn">Import</button>
+        <button id="resetSaveBtn">Reset</button>
+      </div>
+      <div id="saveMsg"></div>
     </div>
     <div id="waveControls">
       <button id="nextWaveBtn" class="wave-btn">Next Wave</button>
@@ -207,6 +377,8 @@
   <script src="entities/enemy.js"></script>
   <script src="entities/projectile.js"></script>
   <script src="systems/waveManager.js"></script>
+  <script src="systems/techTree.js"></script>
+  <script src="systems/saveSystem.js"></script>
   <script src="content/levels.js"></script>
   <script src="render/renderer.js"></script>
   <script src="audio/audioManager.js"></script>

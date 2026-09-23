@@ -168,6 +168,8 @@ class Tower {
 class LaserTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'laser';
+    this.faction = 'energy';
     this.damage = 25;
     this.cooldown = 1.2;
     this.range = 150;
@@ -180,6 +182,8 @@ class LaserTower extends Tower {
 class PlasmaTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'plasma';
+    this.faction = 'energy';
     this.damage = 35;
     this.cooldown = 1.8;
     this.range = 120;
@@ -193,6 +197,8 @@ class PlasmaTower extends Tower {
 class RailgunTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'railgun';
+    this.faction = 'energy';
     this.damage = 50;
     this.cooldown = 3.0;
     this.range = 200;
@@ -207,6 +213,8 @@ class RailgunTower extends Tower {
 class CannonTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'cannon';
+    this.faction = 'explosive';
     this.damage = 20;
     this.cooldown = 2.0;
     this.range = 100;
@@ -237,6 +245,8 @@ class CannonTower extends Tower {
 class MissileTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'missile';
+    this.faction = 'explosive';
     this.damage = 18;
     this.cooldown = 1.5;
     this.range = 130;
@@ -267,6 +277,8 @@ class MissileTower extends Tower {
 class BombTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'bomb';
+    this.faction = 'explosive';
     this.damage = 22;
     this.cooldown = 2.5;
     this.range = 90;
@@ -298,6 +310,8 @@ class BombTower extends Tower {
 class EMPTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'emp';
+    this.faction = 'electromagnetic';
     this.damage = 5;
     this.cooldown = 0.5;
     this.range = 140;
@@ -332,6 +346,8 @@ class EMPTower extends Tower {
 class PulseTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'pulse';
+    this.faction = 'electromagnetic';
     this.damage = 0; // No direct damage
     this.cooldown = 3.0;
     this.range = 180;
@@ -363,6 +379,8 @@ class PulseTower extends Tower {
 class DisruptorTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'disruptor';
+    this.faction = 'electromagnetic';
     this.damage = 8;
     this.cooldown = 1.0;
     this.range = 160;
@@ -399,6 +417,8 @@ class DisruptorTower extends Tower {
 class RepairTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    this.type = 'repair';
+    this.faction = 'support';
     this.damage = 0; // No direct damage
     this.cooldown = 2.0;
     this.range = 120;
