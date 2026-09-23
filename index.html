@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terminal Protocol</title>
+  <title>终端协议</title>
   <style>
     body {
       margin: 0;
@@ -464,10 +464,10 @@
   <div id="gameContainer">
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <div id="uiPanel">
-      <div id="resources">Resources: 150</div>
-      <div id="health">Health: 10</div>
-      <div id="waveInfo">Wave: 0/0</div>
-      <div id="techPoints">Tech: 0 pts</div>
+      <div id="resources">资源: 150</div>
+      <div id="health">生命值: 10</div>
+      <div id="waveInfo">波次: 0/0</div>
+      <div id="techPoints">科技点: 0</div>
       <div id="selectedInfo"></div>
     </div>
     <div id="levelBar">
@@ -475,59 +475,60 @@
       <button class="level-btn" data-level="level2">2</button>
       <button class="level-btn" data-level="level3">3</button>
     </div>
-    <button id="techBtn">⚡ Tech</button>
+    <button id="techBtn">⚡ 科技</button>
     <div id="techPanel">
-      <h3>Tech Tree <button id="techCloseBtn" title="Close">✕</button></h3>
+      <h3>科技树 <button id="techCloseBtn" title="关闭">✕</button></h3>
       <div id="techNodes"></div>
       <div id="saveControls">
-        <button id="exportSaveBtn">Export</button>
-        <button id="importSaveBtn">Import</button>
-        <button id="resetSaveBtn">Reset</button>
+        <button id="exportSaveBtn">导出</button>
+        <button id="importSaveBtn">导入</button>
+        <button id="resetSaveBtn">重置</button>
       </div>
       <div id="saveMsg"></div>
     </div>
     <div id="waveControls">
-      <button id="nextWaveBtn" class="wave-btn">Next Wave</button>
+      <button id="nextWaveBtn" class="wave-btn">下一波</button>
       <button class="speed-btn active" data-speed="1">1x</button>
       <button class="speed-btn" data-speed="2">2x</button>
       <button class="speed-btn" data-speed="3">3x</button>
-      <button id="muteBtn" class="wave-btn" title="Toggle sound effects">🔊</button>
-      <button id="musicBtn" class="wave-btn" title="Toggle music">🎵</button>
+      <button id="muteBtn" class="wave-btn" title="开关音效">🔊</button>
+      <button id="musicBtn" class="wave-btn" title="开关音乐">🎵</button>
     </div>
     <div id="towerBar">
-      <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span>Laser<span class="cost">50</span></button>
-      <button class="tower-btn" data-type="plasma" style="border-color:#00a2ff"><span class="key">2</span>Plasma<span class="cost">75</span></button>
-      <button class="tower-btn" data-type="railgun" style="border-color:#0066ff"><span class="key">3</span>Railgun<span class="cost">120</span></button>
-      <button class="tower-btn" data-type="cannon" style="border-color:#ff6600"><span class="key">4</span>Cannon<span class="cost">60</span></button>
-      <button class="tower-btn" data-type="missile" style="border-color:#ff3300"><span class="key">5</span>Missile<span class="cost">55</span></button>
-      <button class="tower-btn" data-type="bomb" style="border-color:#cc0000"><span class="key">6</span>Bomb<span class="cost">90</span></button>
-      <button class="tower-btn" data-type="emp" style="border-color:#9c27b0"><span class="key">7</span>EMP<span class="cost">45</span></button>
-      <button class="tower-btn" data-type="pulse" style="border-color:#673ab7"><span class="key">8</span>Pulse<span class="cost">70</span></button>
-      <button class="tower-btn" data-type="disruptor" style="border-color:#3f51b5"><span class="key">9</span>Disruptor<span class="cost">65</span></button>
-      <button class="tower-btn" data-type="repair" style="border-color:#4CAF50"><span class="key">0</span>Repair<span class="cost">50</span></button>
+      <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span>激光<span class="cost">50</span></button>
+      <button class="tower-btn" data-type="plasma" style="border-color:#00a2ff"><span class="key">2</span>等离子<span class="cost">75</span></button>
+      <button class="tower-btn" data-type="railgun" style="border-color:#0066ff"><span class="key">3</span>轨道炮<span class="cost">120</span></button>
+      <button class="tower-btn" data-type="cannon" style="border-color:#ff6600"><span class="key">4</span>加农炮<span class="cost">60</span></button>
+      <button class="tower-btn" data-type="missile" style="border-color:#ff3300"><span class="key">5</span>导弹<span class="cost">55</span></button>
+      <button class="tower-btn" data-type="bomb" style="border-color:#cc0000"><span class="key">6</span>炸弹<span class="cost">90</span></button>
+      <button class="tower-btn" data-type="emp" style="border-color:#9c27b0"><span class="key">7</span>电磁脉冲<span class="cost">45</span></button>
+      <button class="tower-btn" data-type="pulse" style="border-color:#673ab7"><span class="key">8</span>脉冲<span class="cost">70</span></button>
+      <button class="tower-btn" data-type="disruptor" style="border-color:#3f51b5"><span class="key">9</span>干扰器<span class="cost">65</span></button>
+      <button class="tower-btn" data-type="repair" style="border-color:#4CAF50"><span class="key">0</span>修复<span class="cost">50</span></button>
     </div>
 
     <!-- Main menu (level select) -->
     <div id="mainMenu" class="overlay">
-      <h1>TERMINAL PROTOCOL</h1>
-      <p class="subtitle">DEFEND THE TERMINAL · 终端协议</p>
-      <button id="menuStartBtn" class="big-btn">▶ START</button>
+      <h1>终端协议</h1>
+      <p class="subtitle">守护终端 · 抵御入侵</p>
+      <button id="menuStartBtn" class="big-btn">▶ 开始游戏</button>
       <div id="menuLevelList" class="menu-level-list"></div>
     </div>
 
     <!-- Result screen (win / lose) -->
     <div id="resultScreen" class="overlay">
-      <h1 id="resultTitle">LEVEL COMPLETE</h1>
+      <h1 id="resultTitle">关卡完成</h1>
       <p id="resultSubtitle"></p>
       <div class="result-buttons">
-        <button id="resultRetryBtn" class="result-btn">↻ Retry</button>
-        <button id="resultNextBtn" class="result-btn primary">Next Level ▶</button>
-        <button id="resultMenuBtn" class="result-btn">⌂ Menu</button>
+        <button id="resultRetryBtn" class="result-btn">↻ 重试</button>
+        <button id="resultNextBtn" class="result-btn primary">下一关 ▶</button>
+        <button id="resultMenuBtn" class="result-btn">⌂ 主菜单</button>
       </div>
     </div>
   </div>
 
-  <!-- Include all JavaScript files -->
+  <!-- Include all JavaScript files (balance.js first: other scripts read BALANCE) -->
+  <script src="content/balance.js"></script>
   <script src="core/game.js"></script>
   <script src="core/input.js"></script>
   <script src="entities/tower.js"></script>

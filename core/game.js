@@ -12,8 +12,8 @@ class Game {
     this.towers = [];
     this.enemies = [];
     this.projectiles = [];
-    this.resources = 150; // Starting resources (overridden by techTree in loadLevel)
-    this.health = 10; // Starting health
+    this.resources = BALANCE.startingResources; // Starting resources (overridden by techTree in loadLevel)
+    this.health = BALANCE.startingHealth; // Starting health
     this.waveManager = null;
     this.selectedTowerType = null; // Nothing selected by default
     this.mouseX = 0;
@@ -255,32 +255,32 @@ class Game {
     const waveEl = document.getElementById('waveInfo');
     const selEl = document.getElementById('selectedInfo');
 
-    if (resEl) resEl.textContent = `Resources: ${Math.floor(this.resources)}`;
-    if (hpEl) hpEl.textContent = `Health: ${this.health}`;
+    if (resEl) resEl.textContent = `资源: ${Math.floor(this.resources)}`;
+    if (hpEl) hpEl.textContent = `生命值: ${this.health}`;
     const techEl = document.getElementById('techPoints');
-    if (techEl) techEl.textContent = `Tech: ${this.techTree.points} pts`;
+    if (techEl) techEl.textContent = `科技点: ${this.techTree.points}`;
     if (waveEl) {
       const wm = this.waveManager;
       if (this.gameState === 'ready') {
-        waveEl.textContent = `Wave: 0/${wm.waves.length} — build defenses, then press 准备就绪`;
+        waveEl.textContent = `波次: 0/${wm.waves.length} — 建造防御，然后按「准备就绪」`;
       } else if (wm.isWaveActive) {
-        waveEl.textContent = `Wave: ${wm.currentWave}/${wm.waves.length}`;
+        waveEl.textContent = `波次: ${wm.currentWave}/${wm.waves.length}`;
       } else if (wm.currentWave < wm.waves.length) {
         const remaining = Math.ceil(wm.waveInterval - wm.waveTimer);
-        waveEl.textContent = `Wave: ${wm.currentWave}/${wm.waves.length} (next in ${remaining}s)`;
+        waveEl.textContent = `波次: ${wm.currentWave}/${wm.waves.length}（${remaining}秒后下一波）`;
       } else {
-        waveEl.textContent = `Wave: ${wm.currentWave}/${wm.waves.length}`;
+        waveEl.textContent = `波次: ${wm.currentWave}/${wm.waves.length}`;
       }
     }
 
-    // Wave button: "准备就绪" in ready state, "Next Wave" between waves
+    // Wave button: "准备就绪" in ready state, "下一波" between waves
     const nextWaveBtn = document.getElementById('nextWaveBtn');
     if (nextWaveBtn) {
       if (this.gameState === 'ready') {
         nextWaveBtn.textContent = '准备就绪 ▶';
         nextWaveBtn.disabled = false;
       } else {
-        nextWaveBtn.textContent = 'Next Wave ▶';
+        nextWaveBtn.textContent = '下一波 ▶';
         nextWaveBtn.disabled = this.gameState !== 'playing' ||
           this.waveManager.isWaveActive ||
           this.waveManager.currentWave >= this.waveManager.waves.length;
@@ -290,7 +290,7 @@ class Game {
     if (selEl) {
       if (this.selectedTowerType) {
         const info = TOWER_TYPES[this.selectedTowerType];
-        selEl.textContent = `Selected: ${info.name} (${info.cost})`;
+        selEl.textContent = `已选择: ${info.name}（${info.cost}）`;
         selEl.style.color = info.color;
         selEl.style.display = 'block';
       } else {
@@ -318,14 +318,14 @@ class Game {
       const title = document.getElementById('resultTitle');
       const subtitle = document.getElementById('resultSubtitle');
       if (title) {
-        title.textContent = isWin ? 'LEVEL COMPLETE' : 'TERMINAL BREACHED';
+        title.textContent = isWin ? '关卡完成' : '终端被入侵';
         title.style.color = isWin ? '#00ff88' : '#ff4444';
       }
       if (subtitle) {
         const waves = this.waveManager ? this.waveManager.waves.length : 0;
         subtitle.textContent = isWin
-          ? `All ${waves} waves cleared!` + (this.lastTechReward ? `  +${this.lastTechReward} tech point${this.lastTechReward === 1 ? '' : 's'}` : '')
-          : 'The terminal was breached...';
+          ? `已清除全部 ${waves} 波敌人！` + (this.lastTechReward ? `  +${this.lastTechReward} 科技点` : '')
+          : '终端已被入侵……';
       }
       // "Next Level" only on victory when a next level exists
       const nextBtn = document.getElementById('resultNextBtn');

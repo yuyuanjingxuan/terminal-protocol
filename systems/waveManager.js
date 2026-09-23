@@ -5,9 +5,9 @@ class WaveManager {
     this.waves = [];
     this.currentWave = 0;
     this.waveTimer = 0;
-    this.waveInterval = 5; // seconds between waves
+    this.waveInterval = BALANCE.waveInterval; // seconds between waves
     this.isWaveActive = false;
-    this.spawnInterval = 0.8; // seconds between enemy spawns within a wave
+    this.spawnInterval = BALANCE.spawnInterval; // seconds between enemy spawns within a wave
     this.spawnQueue = [];
     this.spawnTimer = 0;
   }

@@ -289,7 +289,7 @@ class Enemy {
       ctx.fillStyle = '#ffffff';
       ctx.font = '11px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('CORE PROCESS', this.game.canvas.width / 2, 34);
+      ctx.fillText('核心进程', this.game.canvas.width / 2, 34);
     }
   }
 }
@@ -299,10 +299,13 @@ class Enemy {
 class BasicEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
-    this.baseSpeed = 60;
-    this.health = 25;
-    this.maxHealth = 25;
-    this.reward = 10;
+    const s = BALANCE.enemies.basic;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
     this.color = '#F44336';
   }
 }
@@ -311,11 +314,13 @@ class BasicEnemy extends Enemy {
 class FastEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
-    this.baseSpeed = 110;
-    this.health = 14;
-    this.maxHealth = 14;
-    this.reward = 9;
-    this.size = 9;
+    const s = BALANCE.enemies.fast;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
     this.color = '#FF9800';
   }
 }
@@ -324,13 +329,15 @@ class FastEnemy extends Enemy {
 class ArmoredEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
-    this.baseSpeed = 40;
-    this.health = 40;
-    this.maxHealth = 40;
-    this.shield = 30;
-    this.maxShield = 30;
-    this.reward = 16;
-    this.size = 14;
+    const s = BALANCE.enemies.armored;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.shield = s.shield;
+    this.maxShield = s.shield;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
     this.color = '#607D8B';
   }
 }
@@ -339,14 +346,16 @@ class ArmoredEnemy extends Enemy {
 class HealerEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
-    this.baseSpeed = 50;
-    this.health = 30;
-    this.maxHealth = 30;
-    this.reward = 14;
-    this.size = 11;
+    const s = BALANCE.enemies.healer;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
     this.color = '#4CAF50';
-    this.healRate = 4; // hp/s to self
-    this.healRadius = 90; // allies within this radius get half rate
+    this.healRate = s.healRate; // hp/s to self
+    this.healRadius = s.healRadius; // allies within this radius get half rate
   }
 }
 
@@ -354,11 +363,13 @@ class HealerEnemy extends Enemy {
 class StealthEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
-    this.baseSpeed = 70;
-    this.health = 22;
-    this.maxHealth = 22;
-    this.reward = 14;
-    this.size = 10;
+    const s = BALANCE.enemies.stealth;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
     this.color = '#B39DDB';
     this.isStealthed = true;
   }
@@ -368,14 +379,16 @@ class StealthEnemy extends Enemy {
 class SplitterEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
-    this.baseSpeed = 55;
-    this.health = 45;
-    this.maxHealth = 45;
-    this.reward = 18;
-    this.size = 15;
+    const s = BALANCE.enemies.splitter;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
     this.color = '#E040FB';
-    this.splitCount = 3;
-    this.splitType = 'basic';
+    this.splitCount = s.splitCount;
+    this.splitType = s.splitType;
   }
 }
 
@@ -383,18 +396,19 @@ class SplitterEnemy extends Enemy {
 class BossEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
-    this.baseSpeed = 25;
-    this.health = 800;
-    this.maxHealth = 800;
-    this.reward = 200;
-    this.size = 26;
+    const s = BALANCE.enemies.boss;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
     this.color = '#D50000';
-    this.damageToBase = 5;
+    this.damageToBase = s.damageToBase;
     this.isBoss = true;
-    this.summonInterval = 8; // seconds between summon bursts
-    this.summonTimer = 4; // first burst comes early
-    this.summonType = 'basic';
-    this.summonCount = 2;
+    this.summonInterval = s.summonInterval; // seconds between summon bursts
+    this.summonTimer = s.summonTimer; // first burst comes early
+    this.summonType = s.summonType;
+    this.summonCount = s.summonCount;
   }
 }
 

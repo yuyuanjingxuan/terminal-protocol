@@ -45,7 +45,6 @@ class AudioManager {
 
   setEnabled(on) {
     this.enabled = on;
-    if (!on) this.stopMusic();
   }
 
   setMusicEnabled(on) {
@@ -57,7 +56,7 @@ class AudioManager {
 
   // Play a single oscillator tone
   tone(freq, dur, opts = {}) {
-    if (!this.ctx || !this.enabled) return;
+    if (!this.ctx) return;
     const {
       type = 'sine',
       vol = 0.2,
@@ -65,6 +64,9 @@ class AudioManager {
       slideTo = null,
       dest = null
     } = opts;
+    // Music tones (routed to musicGain) respect the music toggle; SFX respect the SFX toggle
+    const isMusic = dest === this.musicGain;
+    if (isMusic ? !this.musicEnabled : !this.enabled) return;
     const t0 = this.ctx.currentTime + delay;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();

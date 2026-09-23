@@ -1,7 +1,7 @@
 // content/levels.js - Level definitions
 const levels = {
   level1: {
-    name: "Level 1",
+    name: "第 1 关",
     description: "Basic level to test core mechanics",
     path: [
       { x: 50, y: 120 },
@@ -60,7 +60,7 @@ const levels = {
   },
 
   level2: {
-    name: "Level 2",
+    name: "第 2 关",
     description: "Special enemy types: fast, armored, healer, stealth, splitter",
     path: [
       { x: 50, y: 80 },
@@ -123,7 +123,7 @@ const levels = {
   },
 
   level3: {
-    name: "Level 3",
+    name: "第 3 关",
     description: "Boss fight: the Core Process",
     path: [
       { x: 50, y: 300 },

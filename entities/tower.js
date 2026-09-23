@@ -176,12 +176,13 @@ class Tower {
 class LaserTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.laser;
     this.type = 'laser';
     this.faction = 'energy';
-    this.damage = 25;
-    this.cooldown = 1.2;
-    this.range = 150;
-    this.cost = 50;
+    this.damage = s.damage;
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#00f0ff';
     this.shape = 'triangle';
   }
@@ -190,12 +191,13 @@ class LaserTower extends Tower {
 class PlasmaTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.plasma;
     this.type = 'plasma';
     this.faction = 'energy';
-    this.damage = 35;
-    this.cooldown = 1.8;
-    this.range = 120;
-    this.cost = 75;
+    this.damage = s.damage;
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#00a2ff';
     this.shape = 'diamond';
     this.size = 18;
@@ -205,12 +207,13 @@ class PlasmaTower extends Tower {
 class RailgunTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.railgun;
     this.type = 'railgun';
     this.faction = 'energy';
-    this.damage = 50;
-    this.cooldown = 3.0;
-    this.range = 200;
-    this.cost = 120;
+    this.damage = s.damage;
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#0066ff';
     this.shape = 'hexagon';
     this.size = 13;
@@ -221,14 +224,15 @@ class RailgunTower extends Tower {
 class CannonTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.cannon;
     this.type = 'cannon';
     this.faction = 'explosive';
-    this.damage = 20;
-    this.cooldown = 2.0;
-    this.range = 100;
-    this.cost = 60;
+    this.damage = s.damage;
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#ff6600';
-    this.explosionRadius = 40;
+    this.explosionRadius = s.explosionRadius;
     this.shape = 'square';
     this.size = 16;
   }
@@ -254,14 +258,15 @@ class CannonTower extends Tower {
 class MissileTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.missile;
     this.type = 'missile';
     this.faction = 'explosive';
-    this.damage = 18;
-    this.cooldown = 1.5;
-    this.range = 130;
-    this.cost = 55;
+    this.damage = s.damage;
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#ff3300';
-    this.explosionRadius = 35;
+    this.explosionRadius = s.explosionRadius;
     this.shape = 'pentagon';
     this.size = 14;
   }
@@ -287,14 +292,15 @@ class MissileTower extends Tower {
 class BombTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.bomb;
     this.type = 'bomb';
     this.faction = 'explosive';
-    this.damage = 22;
-    this.cooldown = 2.5;
-    this.range = 90;
-    this.cost = 90;
+    this.damage = s.damage;
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#cc0000';
-    this.explosionRadius = 50;
+    this.explosionRadius = s.explosionRadius;
     this.shape = 'circle';
     this.size = 18;
   }
@@ -321,15 +327,16 @@ class BombTower extends Tower {
 class EMPTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.emp;
     this.type = 'emp';
     this.faction = 'electromagnetic';
-    this.damage = 5;
-    this.cooldown = 0.5;
-    this.range = 140;
-    this.cost = 45;
+    this.damage = s.damage;
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#9c27b0';
-    this.slowAmount = 0.5; // 50% slow
-    this.slowDuration = 2.0; // seconds
+    this.slowAmount = s.slowAmount; // slow strength (0.5 = 50%)
+    this.slowDuration = s.slowDuration; // seconds
     this.shape = 'ring';
     this.size = 14;
     this.canReveal = true;
@@ -358,15 +365,16 @@ class EMPTower extends Tower {
 class PulseTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.pulse;
     this.type = 'pulse';
     this.faction = 'electromagnetic';
-    this.damage = 0; // No direct damage
-    this.cooldown = 3.0;
-    this.range = 180;
-    this.cost = 70;
+    this.damage = s.damage; // No direct damage
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#673ab7';
-    this.pulseRadius = 100;
-    this.stunDuration = 1.5; // seconds
+    this.pulseRadius = s.pulseRadius;
+    this.stunDuration = s.stunDuration; // seconds
     this.shape = 'double';
     this.size = 16;
     this.canReveal = true;
@@ -391,15 +399,16 @@ class PulseTower extends Tower {
 class DisruptorTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.disruptor;
     this.type = 'disruptor';
     this.faction = 'electromagnetic';
-    this.damage = 8;
-    this.cooldown = 1.0;
-    this.range = 160;
-    this.cost = 65;
+    this.damage = s.damage;
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#3f51b5';
-    this.chainTargets = 3; // Number of enemies to chain to
-    this.chainDamage = 0.6; // 60% damage per chain
+    this.chainTargets = s.chainTargets; // Number of enemies to chain to
+    this.chainDamage = s.chainDamage; // damage fraction per chain
     this.shape = 'bolt';
     this.size = 15;
     this.canReveal = true;
@@ -430,15 +439,16 @@ class DisruptorTower extends Tower {
 class RepairTower extends Tower {
   constructor(game, x, y) {
     super(game, x, y);
+    const s = BALANCE.towers.repair;
     this.type = 'repair';
     this.faction = 'support';
-    this.damage = 0; // No direct damage
-    this.cooldown = 2.0;
-    this.range = 120;
-    this.cost = 50;
+    this.damage = s.damage; // No direct damage
+    this.cooldown = s.cooldown;
+    this.range = s.range;
+    this.cost = s.cost;
     this.color = '#4CAF50';
-    this.repairAmount = 5; // Health repaired per second
-    this.repairDuration = 3.0; // seconds
+    this.repairAmount = s.repairAmount; // Health repaired per pulse
+    this.repairDuration = s.repairDuration; // seconds
     this.shape = 'cross';
     this.size = 14;
   }
@@ -542,18 +552,18 @@ class BoostTower extends Tower {
 
 }
 
-// Tower type registry for selection UI
+// Tower type registry for selection UI (cost/range from BALANCE; names in Chinese)
 const TOWER_TYPES = {
-  laser: { name: 'Laser', class: LaserTower, cost: 50, range: 150, color: '#00f0ff', shape: 'triangle', faction: 'Energy' },
-  plasma: { name: 'Plasma', class: PlasmaTower, cost: 75, range: 120, color: '#00a2ff', shape: 'diamond', faction: 'Energy' },
-  railgun: { name: 'Railgun', class: RailgunTower, cost: 120, range: 200, color: '#0066ff', shape: 'hexagon', faction: 'Energy' },
-  cannon: { name: 'Cannon', class: CannonTower, cost: 60, range: 100, color: '#ff6600', shape: 'square', faction: 'Explosive' },
-  missile: { name: 'Missile', class: MissileTower, cost: 55, range: 130, color: '#ff3300', shape: 'pentagon', faction: 'Explosive' },
-  bomb: { name: 'Bomb', class: BombTower, cost: 90, range: 90, color: '#cc0000', shape: 'circle', faction: 'Explosive' },
-  emp: { name: 'EMP', class: EMPTower, cost: 45, range: 140, color: '#9c27b0', shape: 'ring', faction: 'EM' },
-  pulse: { name: 'Pulse', class: PulseTower, cost: 70, range: 180, color: '#673ab7', shape: 'double', faction: 'EM' },
-  disruptor: { name: 'Disruptor', class: DisruptorTower, cost: 65, range: 160, color: '#3f51b5', shape: 'bolt', faction: 'EM' },
-  repair: { name: 'Repair', class: RepairTower, cost: 50, range: 120, color: '#4CAF50', shape: 'cross', faction: 'Support' }
+  laser: { name: '激光', class: LaserTower, cost: BALANCE.towers.laser.cost, range: BALANCE.towers.laser.range, color: '#00f0ff', shape: 'triangle', faction: 'Energy' },
+  plasma: { name: '等离子', class: PlasmaTower, cost: BALANCE.towers.plasma.cost, range: BALANCE.towers.plasma.range, color: '#00a2ff', shape: 'diamond', faction: 'Energy' },
+  railgun: { name: '轨道炮', class: RailgunTower, cost: BALANCE.towers.railgun.cost, range: BALANCE.towers.railgun.range, color: '#0066ff', shape: 'hexagon', faction: 'Energy' },
+  cannon: { name: '加农炮', class: CannonTower, cost: BALANCE.towers.cannon.cost, range: BALANCE.towers.cannon.range, color: '#ff6600', shape: 'square', faction: 'Explosive' },
+  missile: { name: '导弹', class: MissileTower, cost: BALANCE.towers.missile.cost, range: BALANCE.towers.missile.range, color: '#ff3300', shape: 'pentagon', faction: 'Explosive' },
+  bomb: { name: '炸弹', class: BombTower, cost: BALANCE.towers.bomb.cost, range: BALANCE.towers.bomb.range, color: '#cc0000', shape: 'circle', faction: 'Explosive' },
+  emp: { name: '电磁脉冲', class: EMPTower, cost: BALANCE.towers.emp.cost, range: BALANCE.towers.emp.range, color: '#9c27b0', shape: 'ring', faction: 'EM' },
+  pulse: { name: '脉冲', class: PulseTower, cost: BALANCE.towers.pulse.cost, range: BALANCE.towers.pulse.range, color: '#673ab7', shape: 'double', faction: 'EM' },
+  disruptor: { name: '干扰器', class: DisruptorTower, cost: BALANCE.towers.disruptor.cost, range: BALANCE.towers.disruptor.range, color: '#3f51b5', shape: 'bolt', faction: 'EM' },
+  repair: { name: '修复', class: RepairTower, cost: BALANCE.towers.repair.cost, range: BALANCE.towers.repair.range, color: '#4CAF50', shape: 'cross', faction: 'Support' }
 };
 
 class ResourceTower extends Tower {

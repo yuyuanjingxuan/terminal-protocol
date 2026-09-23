@@ -149,32 +149,32 @@ class TerminalProtocol {
     document.getElementById('exportSaveBtn').addEventListener('click', () => {
       const text = this.game.saveSystem.exportSave(this.game);
       navigator.clipboard.writeText(text).then(() => {
-        this.flashSaveMsg('Save copied to clipboard');
+        this.flashSaveMsg('存档已复制到剪贴板');
       }).catch(() => {
-        prompt('Copy your save code:', text);
+        prompt('复制你的存档码：', text);
       });
     });
     document.getElementById('importSaveBtn').addEventListener('click', () => {
-      const text = prompt('Paste your save code:');
+      const text = prompt('粘贴你的存档码：');
       if (!text) return;
       if (this.game.saveSystem.importSave(text, this.game)) {
         this.game.saveSystem.save(this.game);
         this.updateLevelButtons();
         this.renderTechPanel();
-        this.flashSaveMsg('Save imported');
+        this.flashSaveMsg('存档已导入');
       } else {
-        this.flashSaveMsg('Import failed - invalid code');
+        this.flashSaveMsg('导入失败 - 无效存档码');
       }
     });
     document.getElementById('resetSaveBtn').addEventListener('click', () => {
-      if (!confirm('Reset all progress (tech points, unlocked levels)?')) return;
+      if (!confirm('确定重置全部进度（科技点、已解锁关卡）？')) return;
       this.game.techTree.reset();
       this.game.completedLevels = [];
       this.game.unlockedLevels = ['level1'];
       this.game.saveSystem.clear();
       this.updateLevelButtons();
       this.renderTechPanel();
-      this.flashSaveMsg('Progress reset');
+      this.flashSaveMsg('进度已重置');
     });
 
     // Show the main menu (level select) as the initial screen
@@ -206,8 +206,8 @@ class TerminalProtocol {
         btn.dataset.level = key;
         const done = this.game.completedLevels.includes(key);
         btn.innerHTML = unlocked
-          ? `<span class="menu-level-name">${key.replace('level', 'Level ')}</span><span class="menu-level-status">${done ? '✓ cleared' : '▶ play'}</span>`
-          : `<span class="menu-level-name">${key.replace('level', 'Level ')}</span><span class="menu-level-status">🔒 locked</span>`;
+          ? `<span class="menu-level-name">第 ${key.replace('level', '')} 关</span><span class="menu-level-status">${done ? '✓ 已通关' : '▶ 开始'}</span>`
+          : `<span class="menu-level-name">第 ${key.replace('level', '')} 关</span><span class="menu-level-status">🔒 未解锁</span>`;
         container.appendChild(btn);
       });
     }
@@ -257,14 +257,14 @@ class TerminalProtocol {
           btn.disabled = unlocked || !canBuy;
           btn.innerHTML = `<span class="tech-node-name">${node.name}</span>` +
             `<span class="tech-node-desc">${node.description}</span>` +
-            `<span class="tech-node-cost">${unlocked ? '✓' : node.cost + ' pt'}</span>`;
+            `<span class="tech-node-cost">${unlocked ? '✓' : node.cost + ' 点'}</span>`;
           btn.title = node.description;
           btn.addEventListener('click', () => {
             if (tt.unlockNode(id)) {
               this.game.saveSystem.save(this.game);
               this.renderTechPanel();
               const techEl = document.getElementById('techPoints');
-              if (techEl) techEl.textContent = `Tech: ${tt.points} pts`;
+              if (techEl) techEl.textContent = `科技点: ${tt.points}`;
               // Tech unlock sound + sparkle (Phase 6)
               if (this.game.audio) this.game.audio.playTechUnlock();
               if (this.game.effects) this.game.effects.techUnlock(this.game.canvas.width / 2, 60);
