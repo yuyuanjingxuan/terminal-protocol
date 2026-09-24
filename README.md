@@ -65,7 +65,7 @@ node scripts/build.js
 
 构建脚本会把 `index.html` 引用的所有 JS 源文件内联，在仓库根目录生成 `terminal-protocol.html`，用浏览器打开即可玩，不需要安装任何东西，也不需要联网。
 
-也可以直接在线游玩，无需克隆或构建：**https://yuyuanjingxuan.github.io/terminal-protocol/**（推送到 main 后自动更新）。
+也可以直接在线游玩，无需克隆或构建：[https://yuyuanjingxuan.github.io/terminal-protocol/](https://yuyuanjingxuan.github.io/terminal-protocol/)（推送到 main 后自动更新）。
 
 ## 操作说明
 
