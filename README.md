@@ -6,6 +6,7 @@
 
 [English version →](./README.en.md)
 
+[![Play Online](https://img.shields.io/badge/▶️_Play%20Online-Terminal%20Protocol-brightgreen)](https://yuyuanjingxuan.github.io/terminal-protocol/)
 [![CI](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-v0.1.0-blue)](https://github.com/yuyuanjingxuan/terminal-protocol/releases)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)](https://github.com/yuyuanjingxuan/terminal-protocol)
@@ -63,6 +64,8 @@ node scripts/build.js
 ```
 
 构建脚本会把 `index.html` 引用的所有 JS 源文件内联，在仓库根目录生成 `terminal-protocol.html`，用浏览器打开即可玩，不需要安装任何东西，也不需要联网。
+
+也可以直接在线游玩，无需克隆或构建：**https://yuyuanjingxuan.github.io/terminal-protocol/**（推送到 main 后自动更新）。
 
 ## 操作说明
 

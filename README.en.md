@@ -6,6 +6,7 @@
 
 [中文版 →](./README.md)
 
+[![Play Online](https://img.shields.io/badge/▶️_Play%20Online-Terminal%20Protocol-brightgreen)](https://yuyuanjingxuan.github.io/terminal-protocol/)
 [![CI](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-v0.1.0-blue)](https://github.com/yuyuanjingxuan/terminal-protocol/releases)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)](https://github.com/yuyuanjingxuan/terminal-protocol)
@@ -63,6 +64,8 @@ node scripts/build.js
 ```
 
 The build script inlines every JS source file referenced by `index.html` and produces `terminal-protocol.html` at the repository root. Open it in a browser to play — no install and no network connection required.
+
+Or play online without cloning or building: **https://yuyuanjingxuan.github.io/terminal-protocol/** (auto-deployed on every push to main).
 
 ## Controls
 
