@@ -8,7 +8,7 @@
 
 [![Play Online](https://img.shields.io/badge/▶️_Play%20Online-Terminal%20Protocol-brightgreen)](https://yuyuanjingxuan.github.io/terminal-protocol/)
 [![CI](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-v0.1.0-blue)](https://github.com/yuyuanjingxuan/terminal-protocol/releases)
+[![Version](https://img.shields.io/badge/version-v0.2.1-blue)](https://github.com/yuyuanjingxuan/terminal-protocol/releases)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)](https://github.com/yuyuanjingxuan/terminal-protocol)
 [![Language](https://img.shields.io/badge/language-Vanilla%20JS%20%2B%20Canvas-blue)](https://github.com/yuyuanjingxuan/terminal-protocol)
 [![License](https://img.shields.io/badge/license-Custom%20Non--Commercial-lightgrey)](./LICENSE)
