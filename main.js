@@ -66,7 +66,7 @@ class TerminalProtocol {
     // Main menu buttons
     const menuStartBtn = document.getElementById('menuStartBtn');
     if (menuStartBtn) {
-      menuStartBtn.addEventListener('click', () => this.loadLevel('c1l1'));
+      menuStartBtn.addEventListener('click', () => this.startCampaign());
     }
 
     // Phase 8: difficulty selector (main menu)
@@ -336,6 +336,10 @@ class TerminalProtocol {
     // Re-sync the endless hint (locked text is language-dependent)
     if (this.game && this.game.gameState === 'menu') this.updateDifficultyUI();
 
+    // Phase 9: prologue labels
+    set('prologueHead', t('prologueHead'));
+    set('prologueSkip', t('prologueSkip'));
+
     // Result screen buttons
     set('resultRetryBtn', t('retry'));
     set('resultNextBtn', t('nextLevel'));
@@ -553,6 +557,79 @@ class TerminalProtocol {
 
       container.appendChild(factionEl);
     });
+  }
+
+  // Phase 9: start the campaign — play the opening prologue once, then c1l1
+  startCampaign() {
+    if (!this.game.prologueSeen) {
+      this.showPrologue(() => {
+        this.game.prologueSeen = true;
+        this.game.saveSystem.save(this.game);
+        this.loadLevel('c1l1');
+      });
+    } else {
+      this.loadLevel('c1l1');
+    }
+  }
+
+  // Phase 9: terminal boot-sequence prologue (typewriter, skippable, once)
+  showPrologue(onDone) {
+    const overlay = document.getElementById('prologue');
+    if (!overlay) { if (onDone) onDone(); return; }
+    const linesEl = overlay.querySelector('.prologue-lines');
+    const skipBtn = overlay.querySelector('.prologue-skip');
+    const isEn = I18N.lang === 'en';
+    const lines = (STORY && STORY.prologue)
+      ? STORY.prologue.map(l => isEn ? l.en : l.zh)
+      : [];
+    linesEl.innerHTML = '';
+    overlay.classList.add('show');
+
+    let finished = false;
+    let lineIdx = 0, charIdx = 0;
+    let activeDiv = null;
+    let timer = null;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (timer) { clearInterval(timer); timer = null; }
+      linesEl.innerHTML = '';
+      lines.forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'prologue-line';
+        div.textContent = l;
+        linesEl.appendChild(div);
+      });
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        if (onDone) onDone();
+      }, 1000);
+    };
+
+    skipBtn.onclick = finish;
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(); });
+
+    const step = () => {
+      if (lineIdx >= lines.length) { finish(); return; }
+      const line = lines[lineIdx];
+      if (!activeDiv) {
+        activeDiv = document.createElement('div');
+        activeDiv.className = 'prologue-line';
+        linesEl.appendChild(activeDiv);
+      }
+      if (charIdx < line.length) {
+        charIdx++;
+        activeDiv.textContent = line.slice(0, charIdx);
+      } else {
+        lineIdx++;
+        charIdx = 0;
+        activeDiv = null;
+      }
+    };
+
+    if (lines.length === 0) { finish(); return; }
+    timer = setInterval(step, 18);
   }
 
   loadLevel(levelName) {

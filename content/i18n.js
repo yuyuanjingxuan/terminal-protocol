@@ -59,6 +59,8 @@ const I18N = {
       briefingContinue: '继续 ▶',
       dialogueContinue: '继续',
       dialogueEnd: '结束',
+      prologueHead: '哨兵协议 · 启动序列',
+      prologueSkip: '跳过 ▶',
       logFragmentTitle: '日志碎片',
       ambientNote: '检测到环境广播',
       // Tower upgrade
@@ -219,6 +221,8 @@ const I18N = {
       briefingContinue: 'Continue ▶',
       dialogueContinue: 'Continue',
       dialogueEnd: 'End',
+      prologueHead: 'Sentinel Protocol · Boot Sequence',
+      prologueSkip: 'Skip ▶',
       logFragmentTitle: 'LOG FRAGMENT',
       ambientNote: 'Ambient broadcast detected',
       // Tower upgrade

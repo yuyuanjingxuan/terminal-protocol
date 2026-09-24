@@ -13,7 +13,8 @@ class SaveSystem {
       completedLevels: game.completedLevels.slice(),
       unlockedLevels: game.unlockedLevels.slice(),
       difficulty: game.difficulty || 'normal',
-      endlessBestWave: game.endlessBestWave || 0
+      endlessBestWave: game.endlessBestWave || 0,
+      prologueSeen: !!game.prologueSeen
     };
   }
 
@@ -66,6 +67,10 @@ class SaveSystem {
     }
     if (typeof data.endlessBestWave === 'number' && data.endlessBestWave > 0) {
       game.endlessBestWave = data.endlessBestWave;
+    }
+    // Phase 9: restore prologue-seen flag
+    if (data.prologueSeen) {
+      game.prologueSeen = true;
     }
     return true;
   }

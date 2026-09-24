@@ -40,6 +40,7 @@ class Game {
     this.difficulty = 'normal';   // easy | normal | hard
     this.endlessMode = false;     // true while playing endless mode
     this.endlessBestWave = 0;     // best wave reached in endless mode
+    this.prologueSeen = false;    // Phase 9: opening prologue shown once
   }
 
   init(canvasId) {

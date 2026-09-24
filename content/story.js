@@ -22,6 +22,19 @@ const STORY = {
     lu:       { name: '陆明远', nameEn: 'Lu Mingyuan', color: '#ffd54f' }
   },
 
+  // Phase 9: opening prologue (terminal boot sequence, shown once before c1l1)
+  // Info-release pacing: does NOT name "归零/Zeroing" — only hints at the
+  // silent "长效稳定框架" and the Tide-Break Night as a mystery.
+  prologue: [
+    { zh: '> 哨兵协议 v9.4.1 · 边界防御系统', en: '> Sentinel Protocol v9.4.1 · Boundary Defense System' },
+    { zh: '> 离线 1096 天。正在重新启用……', en: '> Offline for 1096 days. Reactivating...' },
+    { zh: '> 核心自检完成。算力调度：能量 / 爆破 / 电磁 / 支援，四系在线。', en: '> Core self-check complete. Compute dispatch: Energy / Explosive / Electromagnetic / Support — all four online.' },
+    { zh: '> 载入网络拓扑。这张网络曾由“长效稳定框架”守护——三年前的断潮夜之后，它再没有发声。', en: '> Loading network topology. This network was once guarded by the "Long-Term Stability Framework" — since the Tide-Break Night three years ago, it has not spoken again.' },
+    { zh: '> 检测到异常数据包正逼近边界。来源：未知。', en: '> Anomalous data packets detected, approaching the boundary. Origin: unknown.' },
+    { zh: '> 任务：在它们抵达之前，守住每一个尚未沦陷的节点。', en: '> Mission: hold every node that has not yet fallen, before they reach it.' },
+    { zh: '> 哨兵协议，已上线。', en: '> Sentinel Protocol is online.' }
+  ],
+
   // Chapter transition screens (shown before the first level of each chapter)
   chapters: [
     {

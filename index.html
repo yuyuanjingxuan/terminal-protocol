@@ -781,6 +781,59 @@
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
+    /* Phase 9: opening prologue (terminal boot sequence) */
+    #prologue {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(3, 4, 10, 0.97);
+      z-index: 29;
+      padding: 40px;
+    }
+    #prologue.show { display: flex; }
+    #prologue .prologue-head {
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: #00f0ff;
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      padding: 6px 16px;
+      border-radius: 4px;
+      margin-bottom: 28px;
+      text-transform: uppercase;
+    }
+    #prologue .prologue-lines {
+      width: 640px;
+      max-width: 90%;
+      min-height: 220px;
+      text-align: left;
+      font-family: 'Consolas', 'Courier New', monospace;
+    }
+    #prologue .prologue-line {
+      font-size: 15px;
+      line-height: 1.9;
+      color: #b8f0ff;
+      white-space: pre-wrap;
+    }
+    #prologue .prologue-skip {
+      position: absolute;
+      bottom: 28px;
+      right: 32px;
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      background: transparent;
+      color: #00f0ff;
+      font-size: 12px;
+      padding: 6px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #prologue .prologue-skip:hover {
+      background: rgba(0, 240, 255, 0.1);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
     /* Phase 7: chapter menu (6 chapter cards × 6 level slots) */
     .menu-chapters {
       display: grid;
@@ -915,6 +968,13 @@
         <div class="dlg-text"></div>
         <button class="dlg-btn"></button>
       </div>
+    </div>
+
+    <!-- Phase 9: opening prologue (terminal boot sequence, shown once) -->
+    <div id="prologue">
+      <div class="prologue-head" id="prologueHead">哨兵协议 · 启动序列</div>
+      <div class="prologue-lines"></div>
+      <button class="prologue-skip" id="prologueSkip">跳过 ▶</button>
     </div>
 
     <!-- Main menu (level select) -->
