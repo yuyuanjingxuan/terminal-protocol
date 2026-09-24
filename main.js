@@ -270,7 +270,11 @@ class TerminalProtocol {
           slot.dataset.level = key;
           const status = !unlocked ? I18N.t('levelLocked') : (done ? I18N.t('levelDone') : I18N.t('levelStart'));
           slot.innerHTML = `<span class="slot-name">${I18N.levelName(key)}</span><span class="slot-status">${status}</span>`;
-          slot.addEventListener('click', () => this.loadLevel(key));
+          slot.addEventListener('click', () => {
+            // Phase 9: starting from level 1 always plays the prologue
+            if (key === 'c1l1') this.startCampaign();
+            else this.loadLevel(key);
+          });
           slots.appendChild(slot);
         });
         chapterEl.appendChild(slots);
@@ -559,20 +563,15 @@ class TerminalProtocol {
     });
   }
 
-  // Phase 9: start the campaign — play the opening prologue once, then c1l1
+  // Phase 9: start the campaign — play the opening prologue, then c1l1.
+  // Shown every time the player starts from level 1 (not for endless mode).
   startCampaign() {
-    if (!this.game.prologueSeen) {
-      this.showPrologue(() => {
-        this.game.prologueSeen = true;
-        this.game.saveSystem.save(this.game);
-        this.loadLevel('c1l1');
-      });
-    } else {
-      this.loadLevel('c1l1');
-    }
+    this.showPrologue(() => this.loadLevel('c1l1'));
   }
 
-  // Phase 9: terminal boot-sequence prologue (typewriter, skippable, once)
+  // Phase 9: terminal boot-sequence prologue. Typewriter effect; "skip" only
+  // skips the typing (shows all text at once). After typing finishes the
+  // button becomes "continue" and the game waits for the player to read.
   showPrologue(onDone) {
     const overlay = document.getElementById('prologue');
     if (!overlay) { if (onDone) onDone(); return; }
@@ -582,17 +581,18 @@ class TerminalProtocol {
     const lines = (STORY && STORY.prologue)
       ? STORY.prologue.map(l => isEn ? l.en : l.zh)
       : [];
+    if (lines.length === 0) { if (onDone) onDone(); return; }
+
     linesEl.innerHTML = '';
     overlay.classList.add('show');
 
+    let typingDone = false;
     let finished = false;
     let lineIdx = 0, charIdx = 0;
     let activeDiv = null;
     let timer = null;
 
-    const finish = () => {
-      if (finished) return;
-      finished = true;
+    const showAll = () => {
       if (timer) { clearInterval(timer); timer = null; }
       linesEl.innerHTML = '';
       lines.forEach(l => {
@@ -601,17 +601,35 @@ class TerminalProtocol {
         div.textContent = l;
         linesEl.appendChild(div);
       });
-      setTimeout(() => {
+    };
+
+    const onOverlayClick = (e) => { if (e.target === overlay) finish(); };
+
+    const finish = () => {
+      if (finished) return;
+      if (typingDone) {
+        finished = true;
+        overlay.removeEventListener('click', onOverlayClick);
         overlay.classList.remove('show');
         if (onDone) onDone();
-      }, 1000);
+      } else {
+        // Skip the typing, but still wait for the player to read
+        typingDone = true;
+        showAll();
+        skipBtn.textContent = I18N.t('briefingContinue');
+      }
     };
 
     skipBtn.onclick = finish;
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) finish(); });
+    overlay.addEventListener('click', onOverlayClick);
 
     const step = () => {
-      if (lineIdx >= lines.length) { finish(); return; }
+      if (lineIdx >= lines.length) {
+        typingDone = true;
+        if (timer) { clearInterval(timer); timer = null; }
+        skipBtn.textContent = I18N.t('briefingContinue');
+        return;
+      }
       const line = lines[lineIdx];
       if (!activeDiv) {
         activeDiv = document.createElement('div');
@@ -628,7 +646,7 @@ class TerminalProtocol {
       }
     };
 
-    if (lines.length === 0) { finish(); return; }
+    skipBtn.textContent = I18N.t('prologueSkip');
     timer = setInterval(step, 18);
   }
 
