@@ -781,8 +781,8 @@
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
-    /* Phase 9: opening prologue (terminal boot sequence) */
-    #prologue {
+    /* Phase 9: terminal-style full-screen sequences (prologue / epilogue) */
+    #prologue, #epilogue {
       position: absolute;
       inset: 0;
       display: none;
@@ -793,8 +793,8 @@
       z-index: 29;
       padding: 40px;
     }
-    #prologue.show { display: flex; }
-    #prologue .prologue-head {
+    #prologue.show, #epilogue.show { display: flex; }
+    #prologue .prologue-head, #epilogue .prologue-head {
       font-size: 13px;
       letter-spacing: 3px;
       color: #00f0ff;
@@ -804,20 +804,20 @@
       margin-bottom: 28px;
       text-transform: uppercase;
     }
-    #prologue .prologue-lines {
+    #prologue .prologue-lines, #epilogue .prologue-lines {
       width: 640px;
       max-width: 90%;
       min-height: 220px;
       text-align: left;
       font-family: 'Consolas', 'Courier New', monospace;
     }
-    #prologue .prologue-line {
+    #prologue .prologue-line, #epilogue .prologue-line {
       font-size: 15px;
       line-height: 1.9;
       color: #b8f0ff;
       white-space: pre-wrap;
     }
-    #prologue .prologue-skip {
+    #prologue .prologue-skip, #epilogue .prologue-skip {
       position: absolute;
       bottom: 28px;
       right: 32px;
@@ -829,9 +829,17 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    #prologue .prologue-skip:hover {
+    #prologue .prologue-skip:hover, #epilogue .prologue-skip:hover {
       background: rgba(0, 240, 255, 0.1);
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+    #epilogue .prologue-credits {
+      position: absolute;
+      bottom: 28px;
+      left: 32px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: rgba(184, 240, 255, 0.5);
     }
 
     /* Phase 7: chapter menu (6 chapter cards × 6 level slots) */
@@ -970,11 +978,19 @@
       </div>
     </div>
 
-    <!-- Phase 9: opening prologue (terminal boot sequence, shown once) -->
+    <!-- Phase 9: opening prologue (terminal boot sequence, shown on every level-1 start) -->
     <div id="prologue">
       <div class="prologue-head" id="prologueHead">哨兵协议 · 启动序列</div>
       <div class="prologue-lines"></div>
       <button class="prologue-skip" id="prologueSkip">跳过 ▶</button>
+    </div>
+
+    <!-- Phase 9: campaign epilogue (terminal end sequence, shown once after first c6l6 clear) -->
+    <div id="epilogue">
+      <div class="prologue-head" id="epilogueHead">哨兵协议 · 终章</div>
+      <div class="prologue-lines"></div>
+      <div class="prologue-credits" id="epilogueCredits">by yuyuanjingxuan</div>
+      <button class="prologue-skip" id="epilogueSkip">跳过 ▶</button>
     </div>
 
     <!-- Main menu (level select) -->

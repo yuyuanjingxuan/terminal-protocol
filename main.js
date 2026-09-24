@@ -343,6 +343,7 @@ class TerminalProtocol {
     // Phase 9: prologue labels
     set('prologueHead', t('prologueHead'));
     set('prologueSkip', t('prologueSkip'));
+    set('epilogueHead', t('epilogueHead'));
 
     // Result screen buttons
     set('resultRetryBtn', t('retry'));
@@ -510,10 +511,24 @@ class TerminalProtocol {
     const events = STORY.events && STORY.events[key];
     if (events && events.length) queue.push(...events);
 
+    // Phase 9: after the first clear of the final level, play the epilogue
+    // before the result screen.
+    const allKeys = Object.keys(levels);
+    const isFinal = key === allKeys[allKeys.length - 1];
+    const firstClear = isFinal && !this.game.campaignCompleted;
+    const afterDialogue = () => {
+      if (firstClear) {
+        this.game.campaignCompleted = true;
+        this.game.saveSystem.save(this.game);
+        this.showEpilogue(() => this.game.showResultScreen(true, 'win'));
+      } else {
+        this.game.showResultScreen(true, 'win');
+      }
+    };
     if (queue.length === 0) {
-      this.game.showResultScreen(true, 'win');
+      afterDialogue();
     } else {
-      this.showDialogue(queue, () => this.game.showResultScreen(true, 'win'));
+      this.showDialogue(queue, afterDialogue);
     }
   }
 
@@ -569,19 +584,37 @@ class TerminalProtocol {
     this.showPrologue(() => this.loadLevel('c1l1'));
   }
 
-  // Phase 9: terminal boot-sequence prologue. Typewriter effect; "skip" only
-  // skips the typing (shows all text at once). After typing finishes the
-  // button becomes "continue" and the game waits for the player to read.
+  // Phase 9: terminal boot-sequence prologue. Shown every time the player
+  // starts from level 1 (not for endless mode).
   showPrologue(onDone) {
-    const overlay = document.getElementById('prologue');
-    if (!overlay) { if (onDone) onDone(); return; }
-    const linesEl = overlay.querySelector('.prologue-lines');
-    const skipBtn = overlay.querySelector('.prologue-skip');
     const isEn = I18N.lang === 'en';
     const lines = (STORY && STORY.prologue)
       ? STORY.prologue.map(l => isEn ? l.en : l.zh)
       : [];
-    if (lines.length === 0) { if (onDone) onDone(); return; }
+    this.showTerminalSequence('prologue', lines, onDone);
+  }
+
+  // Phase 9: campaign epilogue — terminal end sequence shown once, after the
+  // first clear of the final level (c6l6).
+  showEpilogue(onDone) {
+    const isEn = I18N.lang === 'en';
+    const lines = (STORY && STORY.epilogue)
+      ? STORY.epilogue.map(l => isEn ? l.en : l.zh)
+      : [];
+    this.showTerminalSequence('epilogue', lines, onDone);
+  }
+
+  // Phase 9: shared terminal-style full-screen sequence (prologue / epilogue).
+  // Typewriter effect; "skip" only skips the typing (shows all text at once).
+  // After typing finishes the button becomes "continue" and the game waits
+  // for the player to read.
+  showTerminalSequence(overlayId, lines, onDone) {
+    const overlay = document.getElementById(overlayId);
+    if (!overlay) { if (onDone) onDone(); return; }
+    const linesEl = overlay.querySelector('.prologue-lines');
+    const skipBtn = overlay.querySelector('.prologue-skip');
+    if (!linesEl || !skipBtn) { if (onDone) onDone(); return; }
+    if (!lines || lines.length === 0) { if (onDone) onDone(); return; }
 
     linesEl.innerHTML = '';
     overlay.classList.add('show');

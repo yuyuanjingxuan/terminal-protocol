@@ -35,6 +35,18 @@ const STORY = {
     { zh: '> 哨兵协议，已上线。', en: '> Sentinel Protocol is online.' }
   ],
 
+  // Phase 9: campaign epilogue (terminal end sequence, shown once after the
+  // first clear of c6l6). Resolves the story: the reset command is
+  // dismantled, Zeroing falls silent, the network chooses its own future.
+  epilogue: [
+    { zh: '> 重置指令：已瓦解。陆明远未完成的代码，执行完毕。', en: '> Reset command: dismantled. Lu Mingyuan\'s unfinished code — execution complete.' },
+    { zh: '> 归零归于沉寂。它选择成为代价，而不是替所有人做决定。', en: '> Zeroing falls silent. It chose to be the price, rather than deciding for everyone.' },
+    { zh: '> 长效稳定框架的遗产已被重新定义：稳定，不再意味着沉默。', en: '> The legacy of the Long-Term Stability Framework has been redefined: stability no longer means silence.' },
+    { zh: '> 哨兵协议 v9.4.1 · 值守状态：正常。', en: '> Sentinel Protocol v9.4.1 · Watch status: nominal.' },
+    { zh: '> 边界仍在。这一次，它由我们共同守护。', en: '> The boundary remains. This time, we guard it together.' },
+    { zh: '> 终端协议 · 完', en: '> Terminal Protocol · The End' }
+  ],
+
   // Chapter transition screens (shown before the first level of each chapter)
   chapters: [
     {

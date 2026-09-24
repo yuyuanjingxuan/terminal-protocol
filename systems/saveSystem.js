@@ -13,7 +13,8 @@ class SaveSystem {
       completedLevels: game.completedLevels.slice(),
       unlockedLevels: game.unlockedLevels.slice(),
       difficulty: game.difficulty || 'normal',
-      endlessBestWave: game.endlessBestWave || 0
+      endlessBestWave: game.endlessBestWave || 0,
+      campaignCompleted: !!game.campaignCompleted
     };
   }
 
@@ -67,6 +68,7 @@ class SaveSystem {
     if (typeof data.endlessBestWave === 'number' && data.endlessBestWave > 0) {
       game.endlessBestWave = data.endlessBestWave;
     }
+    if (data.campaignCompleted) game.campaignCompleted = true;
     return true;
   }
 
