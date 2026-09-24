@@ -14,6 +14,14 @@ const BALANCE = {
   spawnInterval: 0.8, // seconds between enemy spawns within a wave
   waveInterval: 5,    // seconds between waves (auto countdown)
 
+  // --- Difficulty multipliers (Phase 8) ---
+  // Applied to enemy HP, speed, and kill rewards at spawn time.
+  difficulty: {
+    easy:   { hp: 0.7,  speed: 0.85, reward: 1.2 },
+    normal: { hp: 1.0,  speed: 1.0,  reward: 1.0 },
+    hard:   { hp: 1.4,  speed: 1.15, reward: 0.85 }
+  },
+
   // --- Towers: cost + combat stats ---
   // Ranges tuned for the 800x600 map: a mid-range tower covers a portion of
   // one path segment, so no single tower can hold the whole route.

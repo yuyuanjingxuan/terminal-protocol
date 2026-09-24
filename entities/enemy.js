@@ -218,7 +218,9 @@ class Enemy {
     if (this.game.effects) this.game.effects.enemyDeath(this.x, this.y, this.color, this.size);
     if (this.game.audio) this.game.audio.playEnemyDie(this.size);
 
-    this.game.gainResources(this.reward);
+    // Phase 8: apply the difficulty reward multiplier
+    const diff = BALANCE.difficulty[this.game.difficulty] || BALANCE.difficulty.normal;
+    this.game.gainResources(this.reward * diff.reward);
     this.doSplit();
   }
 

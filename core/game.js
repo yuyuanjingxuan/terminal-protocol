@@ -35,6 +35,11 @@ class Game {
     this.selectedTower = null; // built tower the player has selected
     this.timeLimit = 0;        // seconds; 0 = no limit
     this.timeRemaining = 0;
+
+    // Phase 8: difficulty + endless mode
+    this.difficulty = 'normal';   // easy | normal | hard
+    this.endlessMode = false;     // true while playing endless mode
+    this.endlessBestWave = 0;     // best wave reached in endless mode
   }
 
   init(canvasId) {
@@ -288,7 +293,9 @@ class Game {
     if (techEl) techEl.textContent = I18N.t('techPoints', { n: this.techTree.points });
     if (waveEl) {
       const wm = this.waveManager;
-      if (this.gameState === 'ready') {
+      if (this.endlessMode) {
+        waveEl.textContent = I18N.t('endlessWave', { n: wm.currentWave });
+      } else if (this.gameState === 'ready') {
         waveEl.textContent = I18N.t('waveReady', { n: wm.waves.length });
       } else if (wm.isWaveActive) {
         waveEl.textContent = I18N.t('waveActive', { cur: wm.currentWave, n: wm.waves.length });
@@ -398,6 +405,15 @@ class Game {
     this.gameState = 'gameover';
     this.isRunning = false;
 
+    // Phase 8: endless mode — record the best wave reached on defeat
+    if (this.endlessMode) {
+      const reached = this.waveManager ? this.waveManager.currentWave : 0;
+      if (reached > this.endlessBestWave) {
+        this.endlessBestWave = reached;
+        this.saveSystem.save(this);
+      }
+    }
+
     // Play win/lose jingle
     if (this.audio) {
       if (isWin) this.audio.playWin();
@@ -429,17 +445,21 @@ class Game {
       }
       if (subtitle) {
         const waves = this.waveManager ? this.waveManager.waves.length : 0;
-        subtitle.textContent = isWin
-          ? I18N.t('winSubtitle', { n: waves }) + (this.lastTechReward ? I18N.t('techReward', { n: this.lastTechReward }) : '')
-          : (reason === 'timeup' ? I18N.t('timeUpSubtitle') : I18N.t('loseSubtitle'));
+        if (this.endlessMode && !isWin) {
+          subtitle.textContent = I18N.t('endlessLoseSubtitle', { n: this.waveManager ? this.waveManager.currentWave : 0 });
+        } else {
+          subtitle.textContent = isWin
+            ? I18N.t('winSubtitle', { n: waves }) + (this.lastTechReward ? I18N.t('techReward', { n: this.lastTechReward }) : '')
+            : (reason === 'timeup' ? I18N.t('timeUpSubtitle') : I18N.t('loseSubtitle'));
+        }
       }
-      // "Next Level" only on victory when a next level exists
+      // "Next Level" only on victory when a next level exists (never in endless)
       const nextBtn = document.getElementById('resultNextBtn');
       if (nextBtn) {
         const allLevels = Object.keys(levels);
         const levelKey = this.currentLevel ? this.currentLevel.key : null;
         const idx = allLevels.indexOf(levelKey);
-        const hasNext = isWin && idx >= 0 && !!allLevels[idx + 1];
+        const hasNext = isWin && !this.endlessMode && idx >= 0 && !!allLevels[idx + 1];
         nextBtn.style.display = hasNext ? 'inline-block' : 'none';
       }
       overlay.classList.add('show');

@@ -69,6 +69,23 @@ class TerminalProtocol {
       menuStartBtn.addEventListener('click', () => this.loadLevel('c1l1'));
     }
 
+    // Phase 8: difficulty selector (main menu)
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.game.difficulty = btn.dataset.diff;
+        this.game.saveSystem.save(this.game);
+        this.updateDifficultyUI();
+      });
+    });
+
+    // Phase 8: endless mode entry (unlocked after clearing all 36 levels)
+    const endlessBtn = document.getElementById('endlessBtn');
+    if (endlessBtn) {
+      endlessBtn.addEventListener('click', () => {
+        if (this.isEndlessUnlocked()) this.loadEndless();
+      });
+    }
+
     // Phase 7: tower upgrade button
     const upBtn = document.querySelector('#upgradePanel .up-btn');
     if (upBtn) {
@@ -79,6 +96,8 @@ class TerminalProtocol {
     const resultRetryBtn = document.getElementById('resultRetryBtn');
     if (resultRetryBtn) {
       resultRetryBtn.addEventListener('click', () => {
+        // Phase 8: retrying endless mode reloads endless, not a campaign level
+        if (this.game.endlessMode) { this.loadEndless(); return; }
         const key = this.game.currentLevel ? this.game.currentLevel.key : 'c1l1';
         this.loadLevel(key);
       });
@@ -260,8 +279,33 @@ class TerminalProtocol {
       container.appendChild(grid);
     }
 
+    // Phase 8: refresh difficulty selector + endless button state
+    this.updateDifficultyUI();
+
     const menu = document.getElementById('mainMenu');
     if (menu) menu.classList.add('show');
+  }
+
+  // Phase 8: sync the difficulty selector + endless button with game state
+  updateDifficultyUI() {
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.diff === this.game.difficulty);
+    });
+    const endlessBtn = document.getElementById('endlessBtn');
+    const hint = document.getElementById('endlessHint');
+    const unlocked = this.isEndlessUnlocked();
+    if (endlessBtn) endlessBtn.disabled = !unlocked;
+    if (hint) {
+      hint.textContent = unlocked
+        ? I18N.t('endlessBest', { n: this.game.endlessBestWave })
+        : I18N.t('endlessLocked');
+    }
+  }
+
+  // Phase 8: endless mode unlocks after all 36 campaign levels are cleared
+  isEndlessUnlocked() {
+    const all = Object.keys(levels);
+    return all.length > 0 && all.every(k => this.game.completedLevels.includes(k));
   }
 
   // Re-render all static UI text for the current language (called on init
@@ -280,6 +324,17 @@ class TerminalProtocol {
     set('menuTitle', t('menuTitle'));
     set('menuSubtitle', t('menuSubtitle'));
     set('menuStartBtn', t('startGame'));
+
+    // Phase 8: difficulty + endless labels
+    set('difficultyLabel', t('difficultyLabel'));
+    const diffKeys = { easy: 'diffEasy', normal: 'diffNormal', hard: 'diffHard' };
+    Object.entries(diffKeys).forEach(([diff, key]) => {
+      const btn = document.querySelector('.diff-btn[data-diff="' + diff + '"]');
+      if (btn) btn.textContent = t(key);
+    });
+    set('endlessBtn', t('endlessBtn'));
+    // Re-sync the endless hint (locked text is language-dependent)
+    if (this.game && this.game.gameState === 'menu') this.updateDifficultyUI();
 
     // Result screen buttons
     set('resultRetryBtn', t('retry'));
@@ -519,6 +574,7 @@ class TerminalProtocol {
     this.game.health = this.game.techTree.getStartingHealth();
     this.game.selectedTowerType = null;
     this.game.selectedTower = null;
+    this.game.endlessMode = false; // Phase 8: campaign level (not endless)
     this.inputHandler.updateTowerButtons();
     if (this.game.effects) this.game.effects.clear();
 
@@ -580,6 +636,69 @@ class TerminalProtocol {
 
     // Phase 7: chapter intro (first level of a chapter) + mission briefing
     this.showLevelIntro(levelName);
+  }
+
+  // Phase 8: endless mode — infinite scaling waves on the final level's map
+  loadEndless() {
+    const levelData = levels['c6l6'];
+    if (!levelData) return;
+    const chapterIdx = chapterIndexForLevel('c6l6');
+    const chapter = chapters[chapterIdx];
+    const path = chapter ? chapter.path : levelData.path;
+
+    // Reset game state (same as loadLevel)
+    this.game.towers = [];
+    this.game.enemies = [];
+    this.game.projectiles = [];
+    this.game.resources = this.game.techTree.getStartingResources();
+    this.game.health = this.game.techTree.getStartingHealth();
+    this.game.selectedTowerType = null;
+    this.game.selectedTower = null;
+    this.game.endlessMode = true;
+    this.inputHandler.updateTowerButtons();
+    if (this.game.effects) this.game.effects.clear();
+
+    this.game.timeLimit = 0;
+    this.game.timeRemaining = 0;
+
+    // Hide overlays
+    const menu = document.getElementById('mainMenu');
+    if (menu) menu.classList.remove('show');
+    const resultScreen = document.getElementById('resultScreen');
+    if (resultScreen) resultScreen.classList.remove('show');
+    const briefingPanel = document.getElementById('briefingPanel');
+    if (briefingPanel) briefingPanel.classList.remove('show');
+    const dialogueBox = document.getElementById('dialogueBox');
+    if (dialogueBox) dialogueBox.classList.remove('show');
+
+    // Restart the loop if a previous game ended
+    if (!this.game.isRunning) {
+      this.game.isRunning = true;
+      this.game.lastTime = performance.now();
+      requestAnimationFrame(this.game.loop.bind(this.game));
+    }
+
+    this.game.currentLevel = {
+      key: 'endless',
+      name: I18N.t('endlessBtn'),
+      path: path,
+      boss: null,
+      ambient: false
+    };
+
+    // Endless: no pre-defined waves; WaveManager generates them procedurally.
+    // Pre-generate wave 1 so "准备就绪" starts it immediately.
+    const waveManager = this.game.waveManager;
+    waveManager.reset();
+    waveManager.endless = true;
+    waveManager.addWave(waveManager.generateEndlessWave(1));
+
+    this.game.setReady();
+
+    // BGM: final chapter
+    if (this.audioManager.ctx) {
+      this.audioManager.startMusic(chapterIdx);
+    }
   }
 }
 

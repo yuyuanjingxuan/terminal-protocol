@@ -11,6 +11,7 @@ class WaveManager {
     this.spawnQueue = [];
     this.spawnTimer = 0;
     this.bossWarningTimer = 0; // seconds remaining of the boss warning banner
+    this.endless = false; // Phase 8: endless mode (procedural waves)
   }
 
   addWave(enemies) {
@@ -80,6 +81,15 @@ class WaveManager {
 
       // Phase 7: apply per-wave stat overrides (hp/shield/stealth/split/summon/...)
       enemy.applyOverrides(data);
+
+      // Phase 8: apply difficulty multipliers (hp/shield/speed)
+      const diff = BALANCE.difficulty[this.game.difficulty] || BALANCE.difficulty.normal;
+      enemy.health *= diff.hp;
+      enemy.maxHealth *= diff.hp;
+      enemy.shield *= diff.hp;
+      enemy.maxShield *= diff.hp;
+      enemy.baseSpeed *= diff.speed;
+
       this.game.addEnemy(enemy);
     }
   }
@@ -101,6 +111,12 @@ class WaveManager {
       this.waveTimer = 0;
     }
 
+    // Phase 8: endless mode — keep one procedurally generated wave queued ahead
+    if (this.endless && !this.isWaveActive && this.currentWave >= this.waves.length &&
+        this.game.enemies.length === 0 && this.spawnQueue.length === 0) {
+      this.addWave(this.generateEndlessWave(this.currentWave + 1));
+    }
+
     if (!this.isWaveActive && this.currentWave < this.waves.length) {
       this.waveTimer += deltaTime;
 
@@ -112,7 +128,50 @@ class WaveManager {
   }
 
   checkWavesComplete() {
-    return this.currentWave >= this.waves.length;
+    // Endless mode never completes — waves are generated forever
+    return !this.endless && this.currentWave >= this.waves.length;
+  }
+
+  // Phase 8: procedurally generate endless wave n (1-based).
+  // Enemy count, HP, speed, and rewards scale with the wave number;
+  // a boss appears every 10th wave.
+  generateEndlessWave(n) {
+    const path = this.game.currentLevel ? this.game.currentLevel.path : null;
+    const wave = [];
+    const count = 6 + Math.floor(n * 1.5);
+    const hpScale = 1 + (n - 1) * 0.12;
+    const speedScale = 1 + Math.min(0.5, (n - 1) * 0.01);
+    const rewardScale = 1 + (n - 1) * 0.05;
+
+    for (let i = 0; i < count; i++) {
+      let type = 'basic';
+      if (n >= 3 && i % 4 === 1) type = 'fast';
+      if (n >= 5 && i % 5 === 2) type = 'armored';
+      if (n >= 6 && i % 8 === 5) type = 'healer';
+      if (n >= 8 && i % 7 === 3) type = 'stealth';
+      if (n >= 10 && i % 6 === 4) type = 'splitter';
+      const base = BALANCE.enemies[type];
+      wave.push({
+        type: type,
+        path: path,
+        hp: Math.round(base.hp * hpScale),
+        speed: Math.round(base.speed * speedScale),
+        reward: Math.round(base.reward * rewardScale)
+      });
+    }
+
+    // Boss every 10th wave, scaling with the cycle number
+    if (n % 10 === 0) {
+      const boss = BALANCE.enemies.boss;
+      const cycle = n / 10;
+      wave.push({
+        type: 'boss',
+        path: path,
+        hp: Math.round(boss.hp * (1 + (cycle - 1) * 0.5)),
+        reward: Math.round(boss.reward * rewardScale)
+      });
+    }
+    return wave;
   }
 
   reset() {
@@ -123,5 +182,6 @@ class WaveManager {
     this.spawnQueue = [];
     this.spawnTimer = 0;
     this.bossWarningTimer = 0;
+    this.endless = false;
   }
 }

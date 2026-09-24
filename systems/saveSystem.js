@@ -11,7 +11,9 @@ class SaveSystem {
       savedAt: Date.now(),
       tech: game.techTree.serialize(),
       completedLevels: game.completedLevels.slice(),
-      unlockedLevels: game.unlockedLevels.slice()
+      unlockedLevels: game.unlockedLevels.slice(),
+      difficulty: game.difficulty || 'normal',
+      endlessBestWave: game.endlessBestWave || 0
     };
   }
 
@@ -56,6 +58,14 @@ class SaveSystem {
     }
     if (validKeys && validKeys.length && !game.unlockedLevels.includes(validKeys[0])) {
       game.unlockedLevels.unshift(validKeys[0]);
+    }
+
+    // Phase 8: restore difficulty + endless best wave
+    if (data.difficulty && BALANCE.difficulty[data.difficulty]) {
+      game.difficulty = data.difficulty;
+    }
+    if (typeof data.endlessBestWave === 'number' && data.endlessBestWave > 0) {
+      game.endlessBestWave = data.endlessBestWave;
     }
     return true;
   }

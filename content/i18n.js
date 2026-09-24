@@ -43,6 +43,17 @@ const I18N = {
       levelLocked: '🔒 未解锁',
       chapterLabel: '第 {n} 章',
       chapterDone: '✓ 已通关',
+      // Difficulty (Phase 8)
+      difficultyLabel: '难度',
+      diffEasy: '简单',
+      diffNormal: '普通',
+      diffHard: '困难',
+      // Endless mode (Phase 8)
+      endlessBtn: '∞ 无尽模式',
+      endlessLocked: '🔒 通关全部关卡后解锁',
+      endlessWave: '无尽波次: {n}',
+      endlessBest: '最佳波次: {n}',
+      endlessLoseSubtitle: '坚持到第 {n} 波',
       // Briefing / dialogue
       briefingTitle: '任务简报',
       briefingContinue: '继续 ▶',
@@ -192,6 +203,17 @@ const I18N = {
       levelLocked: '🔒 Locked',
       chapterLabel: 'Chapter {n}',
       chapterDone: '✓ Cleared',
+      // Difficulty (Phase 8)
+      difficultyLabel: 'Difficulty',
+      diffEasy: 'Easy',
+      diffNormal: 'Normal',
+      diffHard: 'Hard',
+      // Endless mode (Phase 8)
+      endlessBtn: '∞ Endless Mode',
+      endlessLocked: '🔒 Clear all levels to unlock',
+      endlessWave: 'Endless Wave: {n}',
+      endlessBest: 'Best Wave: {n}',
+      endlessLoseSubtitle: 'Survived to wave {n}',
       // Briefing / dialogue
       briefingTitle: 'MISSION BRIEFING',
       briefingContinue: 'Continue ▶',
