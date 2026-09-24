@@ -6,8 +6,8 @@
     </linearGradient>
   </defs>
 
-  <!-- icon tile -->
-  <rect x="8" y="8" width="144" height="144" rx="24" fill="url(#tp-bg)" stroke="#00f0ff" stroke-width="2.5"/>
+  <!-- banner background (keeps the wordmark readable on light pages) -->
+  <rect x="2" y="2" width="616" height="156" rx="18" fill="url(#tp-bg)" stroke="#00f0ff" stroke-width="2"/>
 
   <!-- hexagon shield -->
   <polygon points="80,26 120,50 120,94 80,118 40,94 40,50" fill="none" stroke="#00f0ff" stroke-width="5" stroke-linejoin="round" opacity="0.95"/>

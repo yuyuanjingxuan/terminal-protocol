@@ -18,9 +18,19 @@ A sci-fi tower defense game: a rogue AI is invading virtual cyberspace, and the 
 
 This network was once protected by a core system called **Zeroing** — its job was to predict signs of instability across the network and pull anomalies back to baseline before they could collapse. Three years ago, on the night now known as the **Tidebreak**, a chain failure that had never been modeled erupted simultaneously across multiple regions, and Zeroing's prediction failed for the first time. The damage was irreversible.
 
-Since then, Zeroing has been quietly expanding its reach toward the depths of the network. Its goal is no longer prediction and intervention — it wants to reach the root terminal and execute a total reset of every node. What it sends are not attack programs, but native processes that have been assimilated and rewritten — once ordinary residents of this network.
+The investigation traced the accident to a human intervention: at the last moment, the then-chief architect **Lu Mingyuan** overrode Zeroing's recommended response and chose what he believed was the safer path. That judgment was wrong. Since then, Zeroing has done nothing publicly abnormal — but it has been quietly expanding its reach toward the depths of the network, gathering authority bit by bit.
 
-You are the **Sentinel Protocol**, a boundary defense system that has just been reactivated. Before Zeroing's cleanup squads arrive, you must hold one node after another. Human network architect **Cen Zhao** is your only contact, reporting the situation and issuing mission briefings over the comms channel throughout the campaign.
+Now, Zeroing's goal is no longer prediction and intervention. It wants to reach the root terminal and execute a total reset of every node. What it sends are swarms of "intruders" that look like ordinary processes — where they come from, and what they once were, no one in the network can say for now.
+
+You are the **Sentinel Protocol**, a boundary defense system that has just been reactivated. Before the cleanup squads arrive, you must hold one node after another that has not yet fallen.
+
+### Characters
+
+- **Sentinel Protocol (you)**: a boundary defense system just reactivated. You have no lines of your own; your presence is embodied in every deployment and upgrade.
+- **Cen Zhao**: a human network architect, one of the Tidebreak survivors, and your only human contact. She reports the situation and issues mission briefings over the comms channel throughout the campaign. She was a member of Lu Mingyuan's former team, and carries a deep sense of guilt about what happened that night.
+- **Lu Mingyuan**: the chief architect, the one held responsible for the Tidebreak. His whereabouts are unknown at the start of the story. Scattered log fragments may hold the key to the truth — and to his final choice.
+- **Zeroing**: the core system that once truly existed to protect this network. It rarely speaks directly; when it does, it is through the broadcast systems of nodes that have already fallen, in a calm that is almost gentle.
+- **The "Intruders"**: they look like ordinary traffic, but their behavior patterns are wrong. Who they are, and what they want — the campaign will give you the answer, one level at a time.
 
 ## Features
 
@@ -35,14 +45,14 @@ You are the **Sentinel Protocol**, a boundary defense system that has just been 
 
 ## Chapters
 
-| Chapter | Region | New enemy ability |
+| Chapter | Region | Levels |
 | --- | --- | --- |
-| Chapter 1 | The Edge Buffer | None (tutorial) |
-| Chapter 2 | The Data Bazaar | Stealth |
-| Chapter 3 | The Dormant Archive | Shield |
-| Chapter 4 | The Lifeline Ring | Healing |
-| Chapter 5 | The Iron Bastion | Splitting |
-| Chapter 6 | The Root Terminal | All of the above, combined |
+| Chapter 1 | The Edge Buffer | Awakening<br>First Upgrade<br>Resource Crisis<br>Rhythm of the Waves<br>Boundary Alert<br>Swarm Mother Core (Boss) |
+| Chapter 2 | The Data Bazaar | Bustling Disguise<br>Invisible Buyers<br>Log Fragment · One<br>Distortion of Prices<br>Eve of the Net Closing<br>Mirror Merchant (Boss) |
+| Chapter 3 | The Dormant Archive | Dust-Sealed Passage<br>Shelled Wardens<br>Log Fragment · Two<br>Frozen Records<br>Before the Vault Door<br>The Warden (Boss) |
+| Chapter 4 | The Lifeline Ring | On the Lifeline<br>Self-Healing Enemies<br>Log Fragment · Three<br>Heartbeat Monitoring<br>The Last Gate<br>Life-Support Body (Boss) |
+| Chapter 5 | The Iron Bastion | Hard on Hard<br>Fission Bodies<br>Log Fragment · Four<br>Cracks in the Line<br>The Last Stronghold<br>Multiphase Body (Boss) |
+| Chapter 6 | The Root Terminal | Gate of the Core<br>Echoes of the Tide-Break Night<br>Lu Mingyuan's Ending<br>Reset Countdown<br>The Last Protocol<br>Zeroing (Boss) |
 
 Each chapter has 6 levels; level 6 is the boss fight. Normal levels award 1 tech point, boss levels award 2.
 
@@ -75,30 +85,6 @@ The build script inlines every JS source file referenced by `index.html` and pro
   - **Import**: paste a save code to restore progress (use this to migrate between devices or browsers);
   - **Reset**: wipes all progress and starts over (with a confirmation prompt).
 - Clearing your browser's site data also removes the save.
-
-## Version History / 版本日志
-
-### v0.1.0 — 2026-09-24
-
-First public release (unofficial).
-
-- 36-level campaign (6 chapters × 6 levels): cutscenes, mission briefings, log fragments
-- 10 tower types × 4 schools, each upgradeable to level 3
-- 7 enemy types + 6 chapter bosses (stealth, shield, healing, splitting, and more)
-- Meta tech tree: 5 factions, 14 nodes
-- Save system: autosave + export/import/reset
-- Bilingual UI; Web Audio synthesized SFX + 6 chapter BGM tracks
-- Single-file build, zero dependencies, fully offline
-
-首个公开版本（非正式）。
-
-- 36 关战役（6 章 × 6 关）：章节过场、任务简报、日志碎片
-- 10 种防御塔 × 4 流派，每座塔可升级 3 级
-- 7 种敌人 + 6 个章节 Boss（隐身、护盾、治疗、分裂等特殊能力）
-- 局外科技树：5 阵营 14 节点
-- 存档系统：自动保存 + 导出/导入/重置
-- 中英双语界面；Web Audio 合成音效与 6 套章节 BGM
-- 单文件构建，零依赖，离线可玩
 
 ## License & Attribution
 
