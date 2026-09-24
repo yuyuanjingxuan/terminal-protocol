@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 160" role="img" aria-label="Terminal Protocol 终端协议">
+  <defs>
+    <linearGradient id="tp-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1420"/>
+      <stop offset="1" stop-color="#070b12"/>
+    </linearGradient>
+  </defs>
+
+  <!-- icon tile -->
+  <rect x="8" y="8" width="144" height="144" rx="24" fill="url(#tp-bg)" stroke="#00f0ff" stroke-width="2.5"/>
+
+  <!-- hexagon shield -->
+  <polygon points="80,26 120,50 120,94 80,118 40,94 40,50" fill="none" stroke="#00f0ff" stroke-width="5" stroke-linejoin="round" opacity="0.95"/>
+  <polygon points="80,40 108,56 108,88 80,104 52,88 52,56" fill="none" stroke="#00f0ff" stroke-width="1.5" opacity="0.35"/>
+
+  <!-- terminal prompt chevron -->
+  <path d="M60 56 L84 80 L60 104" fill="none" stroke="#e8f6ff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- cursor block -->
+  <rect x="94" y="69" width="16" height="22" fill="#00f0ff"/>
+
+  <!-- wordmark -->
+  <text x="176" y="76" font-family="Consolas, 'Cascadia Mono', 'Courier New', monospace" font-size="46" font-weight="700" fill="#e8f6ff" letter-spacing="6">TERMINAL</text>
+  <text x="176" y="124" font-family="Consolas, 'Cascadia Mono', 'Courier New', monospace" font-size="46" font-weight="700" fill="#00f0ff" letter-spacing="18">PROTOCOL</text>
+</svg>

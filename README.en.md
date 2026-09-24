@@ -1,9 +1,13 @@
 # Terminal Protocol 终端协议
 
+<p align="center">
+  <img src="assets/logo.svg" alt="Terminal Protocol 终端协议" width="440">
+</p>
+
 [中文版 →](./README.md)
 
 [![CI](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/yuyuanjingxuan/terminal-protocol/actions/workflows/ci.yml)
-[![Status](https://img.shields.io/badge/status-in%20development-blue)](https://github.com/yuyuanjingxuan/terminal-protocol)
+[![Version](https://img.shields.io/badge/version-v0.1.0-blue)](https://github.com/yuyuanjingxuan/terminal-protocol/releases)
 [![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)](https://github.com/yuyuanjingxuan/terminal-protocol)
 [![Language](https://img.shields.io/badge/language-Vanilla%20JS%20%2B%20Canvas-blue)](https://github.com/yuyuanjingxuan/terminal-protocol)
 [![License](https://img.shields.io/badge/license-Custom%20Non--Commercial-lightgrey)](./LICENSE)
@@ -71,6 +75,30 @@ The build script inlines every JS source file referenced by `index.html` and pro
   - **Import**: paste a save code to restore progress (use this to migrate between devices or browsers);
   - **Reset**: wipes all progress and starts over (with a confirmation prompt).
 - Clearing your browser's site data also removes the save.
+
+## Version History / 版本日志
+
+### v0.1.0 — 2026-09-24
+
+First public release (unofficial).
+
+- 36-level campaign (6 chapters × 6 levels): cutscenes, mission briefings, log fragments
+- 10 tower types × 4 schools, each upgradeable to level 3
+- 7 enemy types + 6 chapter bosses (stealth, shield, healing, splitting, and more)
+- Meta tech tree: 5 factions, 14 nodes
+- Save system: autosave + export/import/reset
+- Bilingual UI; Web Audio synthesized SFX + 6 chapter BGM tracks
+- Single-file build, zero dependencies, fully offline
+
+首个公开版本（非正式）。
+
+- 36 关战役（6 章 × 6 关）：章节过场、任务简报、日志碎片
+- 10 种防御塔 × 4 流派，每座塔可升级 3 级
+- 7 种敌人 + 6 个章节 Boss（隐身、护盾、治疗、分裂等特殊能力）
+- 局外科技树：5 阵营 14 节点
+- 存档系统：自动保存 + 导出/导入/重置
+- 中英双语界面；Web Audio 合成音效与 6 套章节 BGM
+- 单文件构建，零依赖，离线可玩
 
 ## License & Attribution
 

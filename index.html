@@ -340,12 +340,23 @@
       inset: 0;
       display: none;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       gap: 18px;
       background: rgba(5, 5, 15, 0.88);
       z-index: 20;
       text-align: center;
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+
+    /* Result screen content is short: auto margins keep it vertically centered */
+    #resultScreen h1 {
+      margin-top: auto;
+    }
+
+    #resultScreen .credit {
+      margin-bottom: auto;
     }
 
     .overlay.show {
@@ -358,6 +369,13 @@
       letter-spacing: 4px;
       color: #00f0ff;
       text-shadow: 0 0 18px rgba(0, 240, 255, 0.7);
+    }
+
+    #menuLogo {
+      width: 88px;
+      height: 88px;
+      margin-bottom: 2px;
+      filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.45));
     }
 
     .overlay .subtitle {
@@ -837,12 +855,25 @@
 
     <!-- Main menu (level select) -->
     <div id="mainMenu" class="overlay">
+      <svg id="menuLogo" viewBox="0 0 160 160" aria-label="Terminal Protocol">
+        <defs>
+          <linearGradient id="tp-bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#0d1420"/>
+            <stop offset="1" stop-color="#070b12"/>
+          </linearGradient>
+        </defs>
+        <rect x="4" y="4" width="152" height="152" rx="26" fill="url(#tp-bg)" stroke="#00f0ff" stroke-width="3"/>
+        <polygon points="80,24 122,49 122,95 80,120 38,95 38,49" fill="none" stroke="#00f0ff" stroke-width="5.5" stroke-linejoin="round" opacity="0.95"/>
+        <polygon points="80,39 109,56 109,89 80,106 51,89 51,56" fill="none" stroke="#00f0ff" stroke-width="1.8" opacity="0.35"/>
+        <path d="M58 54 L84 80 L58 106" fill="none" stroke="#e8f6ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="95" y="68" width="17" height="24" fill="#00f0ff"/>
+      </svg>
       <h1 id="menuTitle">终端协议</h1>
       <p class="subtitle" id="menuSubtitle">守护终端 · 抵御入侵</p>
       <button id="menuStartBtn" class="big-btn">▶ 开始游戏</button>
       <div id="menuLevelList" class="menu-level-list"></div>
       <button id="langBtn" class="lang-btn">English</button>
-      <p class="credit">by yuyuanjingxuan</p>
+      <p class="credit">v0.1.0 · by yuyuanjingxuan</p>
     </div>
 
     <!-- Result screen (win / lose) -->

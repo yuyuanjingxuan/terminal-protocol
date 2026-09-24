@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Terminal Protocol icon">
+  <defs>
+    <linearGradient id="tp-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1420"/>
+      <stop offset="1" stop-color="#070b12"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="4" y="4" width="152" height="152" rx="26" fill="url(#tp-bg)" stroke="#00f0ff" stroke-width="3"/>
+
+  <!-- hexagon shield -->
+  <polygon points="80,24 122,49 122,95 80,120 38,95 38,49" fill="none" stroke="#00f0ff" stroke-width="5.5" stroke-linejoin="round" opacity="0.95"/>
+  <polygon points="80,39 109,56 109,89 80,106 51,89 51,56" fill="none" stroke="#00f0ff" stroke-width="1.8" opacity="0.35"/>
+
+  <!-- terminal prompt chevron -->
+  <path d="M58 54 L84 80 L58 106" fill="none" stroke="#e8f6ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- cursor block -->
+  <rect x="95" y="68" width="17" height="24" fill="#00f0ff"/>
+</svg>
