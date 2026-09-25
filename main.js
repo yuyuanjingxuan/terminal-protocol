@@ -22,6 +22,8 @@ class TerminalProtocol {
         const type = btn.dataset.type;
         this.game.selectedTowerType = (this.game.selectedTowerType === type) ? null : type;
         this.inputHandler.updateTowerButtons();
+        // Phase 9: one-time tower bar hint (first click, campaign only)
+        if (!this.game.seenTowerBar) this.showFirstTimeHint('towerBar');
       });
     });
 
@@ -96,6 +98,12 @@ class TerminalProtocol {
     const tutorialNextBtn = document.getElementById('tutorialNext');
     if (tutorialNextBtn) {
       tutorialNextBtn.addEventListener('click', () => this.advanceTutorial());
+    }
+
+    // Phase 9: one-time first-time hint dismiss
+    const firstTimeCloseBtn = document.getElementById('firstTimeClose');
+    if (firstTimeCloseBtn) {
+      firstTimeCloseBtn.addEventListener('click', () => this.hideFirstTimeHint());
     }
 
     // Result screen buttons
@@ -184,6 +192,8 @@ class TerminalProtocol {
       const panel = document.getElementById('techPanel');
       panel.classList.toggle('open');
       this.renderTechPanel();
+      // Phase 9: one-time tech tree hint (first click, campaign only)
+      if (!this.game.seenTechTree) this.showFirstTimeHint('techTree');
     });
     document.getElementById('techCloseBtn').addEventListener('click', () => {
       document.getElementById('techPanel').classList.remove('open');
@@ -519,6 +529,31 @@ class TerminalProtocol {
     if (box) box.classList.remove('show');
   }
 
+  // Phase 9: one-time first-time hints (tower bar / tech tree).
+  // Shown on first interaction, all campaign levels, never in endless mode.
+  // Suppressed while the c1l1 3-step tutorial is active (to avoid two boxes).
+  showFirstTimeHint(kind) {
+    if (this.game.endlessMode) return;
+    if (this.tutorial) return; // 3-step tutorial is teaching this already
+    if (kind === 'towerBar' && this.game.seenTowerBar) return;
+    if (kind === 'techTree' && this.game.seenTechTree) return;
+    const box = document.getElementById('firstTimeHint');
+    const text = document.getElementById('firstTimeText');
+    const btn = document.getElementById('firstTimeClose');
+    if (!box || !text || !btn) return;
+    text.textContent = I18N.t(kind === 'towerBar' ? 'firstTimeTowerBar' : 'firstTimeTechTree');
+    btn.textContent = I18N.t('firstTimeGotIt');
+    box.classList.add('show');
+    if (kind === 'towerBar') this.game.seenTowerBar = true;
+    else this.game.seenTechTree = true;
+    this.game.saveSystem.save(this.game);
+  }
+
+  hideFirstTimeHint() {
+    const box = document.getElementById('firstTimeHint');
+    if (box) box.classList.remove('show');
+  }
+
   // On level load: show the chapter intro (first level of a chapter) and/or
   // the mission briefing.
   showLevelIntro(key) {
@@ -774,6 +809,7 @@ class TerminalProtocol {
 
     // Phase 9: clear any in-level tutorial from a previous run
     if (this.tutorial) this.endTutorial();
+    this.hideFirstTimeHint();
 
     // Restart the loop if a previous game ended
     if (!this.game.isRunning) {
@@ -856,6 +892,7 @@ class TerminalProtocol {
 
     // Phase 9: clear any in-level tutorial from a previous run
     if (this.tutorial) this.endTutorial();
+    this.hideFirstTimeHint();
 
     // Restart the loop if a previous game ended
     if (!this.game.isRunning) {

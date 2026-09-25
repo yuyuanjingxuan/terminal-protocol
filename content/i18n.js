@@ -75,6 +75,10 @@ const I18N = {
       tutorialStep2: '按 Esc 取消选塔后，点击已建造的塔可升级；右键出售（返还 50%）',
       tutorialStep3: '按「准备就绪 ▶」开始第一波；提前按「下一波」可获得资源奖励',
       tutorialNext: '下一步 ▶',
+      // Phase 9: one-time first-time hints (tower bar / tech tree)
+      firstTimeTowerBar: '点击塔栏选择塔型，再点击地图建造；按 1-0 可快捷选择',
+      firstTimeTechTree: '科技树：用通关获得的科技点强化各系塔，点击节点解锁',
+      firstTimeGotIt: '知道了',
       // Time limit (6-4)
       timerLabel: '重置倒计时 {n}s',
       timeUpTitle: '重置倒计时结束',
@@ -243,6 +247,10 @@ const I18N = {
       tutorialStep2: 'Press Esc to deselect, then click a built tower to upgrade; right-click to sell (50% refund)',
       tutorialStep3: 'Press "Ready ▶" to start the first wave — calling "Next Wave" early grants a resource bonus',
       tutorialNext: 'Next ▶',
+      // Phase 9: one-time first-time hints (tower bar / tech tree)
+      firstTimeTowerBar: 'Click a tower in the bar to select it, then click the map to build; press 1-0 for quick select',
+      firstTimeTechTree: 'Tech Tree: spend tech points (earned by clearing levels) to buff tower factions; click a node to unlock',
+      firstTimeGotIt: 'Got it',
       // Time limit (6-4)
       timerLabel: 'Reset countdown {n}s',
       timeUpTitle: 'RESET COUNTDOWN EXPIRED',

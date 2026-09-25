@@ -41,6 +41,8 @@ class Game {
     this.endlessMode = false;     // true while playing endless mode
     this.endlessBestWave = 0;     // best wave reached in endless mode
     this.campaignCompleted = false; // Phase 9: epilogue shown once after first c6l6 clear
+    this.seenTowerBar = false;    // Phase 9: tower bar first-time hint shown
+    this.seenTechTree = false;    // Phase 9: tech tree first-time hint shown
   }
 
   init(canvasId) {

@@ -14,7 +14,9 @@ class SaveSystem {
       unlockedLevels: game.unlockedLevels.slice(),
       difficulty: game.difficulty || 'normal',
       endlessBestWave: game.endlessBestWave || 0,
-      campaignCompleted: !!game.campaignCompleted
+      campaignCompleted: !!game.campaignCompleted,
+      seenTowerBar: !!game.seenTowerBar,
+      seenTechTree: !!game.seenTechTree
     };
   }
 
@@ -69,6 +71,8 @@ class SaveSystem {
       game.endlessBestWave = data.endlessBestWave;
     }
     if (data.campaignCompleted) game.campaignCompleted = true;
+    if (data.seenTowerBar) game.seenTowerBar = true;
+    if (data.seenTechTree) game.seenTechTree = true;
     return true;
   }
 
