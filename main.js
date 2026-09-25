@@ -92,6 +92,12 @@ class TerminalProtocol {
       upBtn.addEventListener('click', () => this.game.upgradeSelectedTower());
     }
 
+    // Phase 9: in-level tutorial hint (c1l1)
+    const tutorialNextBtn = document.getElementById('tutorialNext');
+    if (tutorialNextBtn) {
+      tutorialNextBtn.addEventListener('click', () => this.advanceTutorial());
+    }
+
     // Result screen buttons
     const resultRetryBtn = document.getElementById('resultRetryBtn');
     if (resultRetryBtn) {
@@ -463,8 +469,54 @@ class TerminalProtocol {
     speakerEl.style.color = cen.color;
     textEl.innerHTML = lines.map(l => `<div>${isEn ? l.en : l.zh}</div>`).join('');
     btnEl.textContent = I18N.t('briefingContinue');
-    btnEl.onclick = () => panel.classList.remove('show');
+    btnEl.onclick = () => {
+      panel.classList.remove('show');
+      // Phase 9: start the in-level tutorial after the first level's briefing
+      if (key === 'c1l1' && !this.game.endlessMode) this.startTutorial();
+    };
     panel.classList.add('show');
+  }
+
+  // Phase 9: in-level tutorial hints (c1l1 only). Three steps that advance
+  // automatically when the player performs the action, or via the button.
+  startTutorial() {
+    this.tutorial = { step: 0, active: true };
+    this.showTutorialStep();
+    this._tutorialPoll = setInterval(() => this.checkTutorialAutoAdvance(), 400);
+  }
+
+  showTutorialStep() {
+    const box = document.getElementById('tutorialHint');
+    const text = document.getElementById('tutorialText');
+    const btn = document.getElementById('tutorialNext');
+    if (!box || !text || !btn || !this.tutorial) return;
+    const steps = [I18N.t('tutorialStep1'), I18N.t('tutorialStep2'), I18N.t('tutorialStep3')];
+    if (this.tutorial.step >= steps.length) { this.endTutorial(); return; }
+    text.textContent = steps[this.tutorial.step];
+    btn.textContent = I18N.t('tutorialNext');
+    box.classList.add('show');
+  }
+
+  advanceTutorial() {
+    if (!this.tutorial || !this.tutorial.active) return;
+    this.tutorial.step++;
+    this.showTutorialStep();
+  }
+
+  checkTutorialAutoAdvance() {
+    if (!this.tutorial || !this.tutorial.active) return;
+    const g = this.game;
+    if (g.gameState === 'gameover') { this.endTutorial(); return; }
+    if (this.tutorial.step === 0 && g.towers.length >= 1) this.advanceTutorial();
+    else if (this.tutorial.step === 1 && g.selectedTower) this.advanceTutorial();
+    else if (this.tutorial.step === 2 && g.gameState === 'playing') this.advanceTutorial();
+  }
+
+  endTutorial() {
+    this.tutorial = null;
+    if (this._tutorialPoll) { clearInterval(this._tutorialPoll); this._tutorialPoll = null; }
+    const box = document.getElementById('tutorialHint');
+    if (box) box.classList.remove('show');
   }
 
   // On level load: show the chapter intro (first level of a chapter) and/or
@@ -720,6 +772,9 @@ class TerminalProtocol {
     const dialogueBox = document.getElementById('dialogueBox');
     if (dialogueBox) dialogueBox.classList.remove('show');
 
+    // Phase 9: clear any in-level tutorial from a previous run
+    if (this.tutorial) this.endTutorial();
+
     // Restart the loop if a previous game ended
     if (!this.game.isRunning) {
       this.game.isRunning = true;
@@ -798,6 +853,9 @@ class TerminalProtocol {
     if (briefingPanel) briefingPanel.classList.remove('show');
     const dialogueBox = document.getElementById('dialogueBox');
     if (dialogueBox) dialogueBox.classList.remove('show');
+
+    // Phase 9: clear any in-level tutorial from a previous run
+    if (this.tutorial) this.endTutorial();
 
     // Restart the loop if a previous game ended
     if (!this.game.isRunning) {

@@ -70,6 +70,11 @@ const I18N = {
       towerLevel: 'Lv.{n}',
       upgradeHint: '点击已建造的塔可升级',
       upgradedMsg: '{name} 升级到 Lv.{n}',
+      // Phase 9: in-level tutorial hints (c1l1)
+      tutorialStep1: '从底部塔栏选择一座塔（或按 1-0），然后点击地图建造',
+      tutorialStep2: '按 Esc 取消选塔后，点击已建造的塔可升级；右键出售（返还 50%）',
+      tutorialStep3: '按「准备就绪 ▶」开始第一波；提前按「下一波」可获得资源奖励',
+      tutorialNext: '下一步 ▶',
       // Time limit (6-4)
       timerLabel: '重置倒计时 {n}s',
       timeUpTitle: '重置倒计时结束',
@@ -233,6 +238,11 @@ const I18N = {
       towerLevel: 'Lv.{n}',
       upgradeHint: 'Click a built tower to upgrade',
       upgradedMsg: '{name} upgraded to Lv.{n}',
+      // Phase 9: in-level tutorial hints (c1l1)
+      tutorialStep1: 'Pick a tower from the bottom bar (or press 1-0), then click the map to build it',
+      tutorialStep2: 'Press Esc to deselect, then click a built tower to upgrade; right-click to sell (50% refund)',
+      tutorialStep3: 'Press "Ready ▶" to start the first wave — calling "Next Wave" early grants a resource bonus',
+      tutorialNext: 'Next ▶',
       // Time limit (6-4)
       timerLabel: 'Reset countdown {n}s',
       timeUpTitle: 'RESET COUNTDOWN EXPIRED',

@@ -637,6 +637,40 @@
       opacity: 1;
     }
 
+    /* Phase 9: in-level tutorial hint (c1l1) */
+    #tutorialHint {
+      position: absolute;
+      top: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: rgba(10, 10, 26, 0.92);
+      border: 1px solid #00f0ff;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 13px;
+      color: #b8f0ff;
+      z-index: 15;
+      max-width: 72%;
+    }
+    #tutorialHint.show { display: flex; }
+    #tutorialHint button {
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      background: transparent;
+      color: #00f0ff;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #tutorialHint button:hover {
+      background: rgba(0, 240, 255, 0.1);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
     /* Phase 7: time limit display */
     #timerDisplay {
       margin-top: 4px;
@@ -953,6 +987,12 @@
     </div>
     <div id="towerTooltip"></div>
     <div id="toast"></div>
+
+    <!-- Phase 9: in-level tutorial hints (c1l1) -->
+    <div id="tutorialHint">
+      <span id="tutorialText"></span>
+      <button id="tutorialNext">下一步 ▶</button>
+    </div>
 
     <!-- Phase 7: tower upgrade panel -->
     <div id="upgradePanel">
