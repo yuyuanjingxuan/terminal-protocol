@@ -815,6 +815,63 @@
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
     }
 
+    /* Phase 11: in-game save import dialog */
+    #importDialog {
+      position: absolute;
+      inset: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(5, 5, 15, 0.7);
+      z-index: 30;
+    }
+    #importDialog.show { display: flex; }
+    #importDialog .dlg-card {
+      width: 480px;
+      max-width: 90%;
+      background: rgba(10, 10, 26, 0.97);
+      border: 2px solid #ffd700;
+      border-radius: 10px;
+      padding: 18px 24px;
+      box-shadow: 0 0 24px rgba(255, 215, 0, 0.3);
+    }
+    #importDialog .dlg-speaker {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+    #importSaveText {
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #e0e8f0;
+      font-family: inherit;
+      font-size: 12px;
+      padding: 8px;
+      resize: vertical;
+    }
+    #importDialog .dlg-btn-row {
+      margin-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    #importDialog .dlg-btn {
+      border: 2px solid #00f0ff;
+      border-radius: 6px;
+      background: rgba(0, 240, 255, 0.1);
+      color: #00f0ff;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 6px 20px;
+    }
+    #importDialog .dlg-btn:hover {
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
     /* Phase 9: terminal-style full-screen sequences (prologue / epilogue) */
     #prologue, #epilogue {
       position: absolute;
@@ -1021,6 +1078,18 @@
         <div class="dlg-speaker"></div>
         <div class="dlg-text"></div>
         <button class="dlg-btn"></button>
+      </div>
+    </div>
+
+    <!-- Phase 11: in-game save import dialog (replaces native prompt) -->
+    <div id="importDialog">
+      <div class="dlg-card">
+        <div class="dlg-speaker" id="importDialogTitle">导入存档</div>
+        <textarea id="importSaveText" rows="5" spellcheck="false"></textarea>
+        <div class="dlg-btn-row">
+          <button class="dlg-btn" id="importCancelBtn">取消</button>
+          <button class="dlg-btn" id="importConfirmBtn">导入</button>
+        </div>
       </div>
     </div>
 

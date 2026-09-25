@@ -1,4 +1,24 @@
 // entities/enemy.js - Base Enemy class with special abilities (Phase 3)
+
+// Phase 11 perf: per-path cumulative segment-length prefix sums, so
+// pathProgress() is O(1) instead of O(pathIndex) with a sqrt per segment.
+// findTarget() calls this for every in-range enemy on every shot, which made
+// it the dominant cost on high-tower / high-enemy-count levels.
+const pathPrefixCache = new WeakMap();
+function pathPrefixSums(path) {
+  let sums = pathPrefixCache.get(path);
+  if (!sums) {
+    sums = new Float64Array(path.length);
+    for (let i = 1; i < path.length; i++) {
+      const dx = path[i].x - path[i - 1].x;
+      const dy = path[i].y - path[i - 1].y;
+      sums[i] = sums[i - 1] + Math.sqrt(dx * dx + dy * dy);
+    }
+    pathPrefixCache.set(path, sums);
+  }
+  return sums;
+}
+
 class Enemy {
   constructor(game, path) {
     this.game = game;
@@ -150,16 +170,13 @@ class Enemy {
 
   // Total distance traveled along the path (higher = further ahead)
   pathProgress() {
-    let progress = 0;
-    for (let i = 0; i < this.pathIndex; i++) {
-      const a = this.path[i];
-      const b = this.path[i + 1];
-      progress += Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
-    }
-    // Distance from the current waypoint to the enemy's position
+    // O(1): precomputed prefix sum up to the current waypoint, plus the
+    // partial distance from that waypoint to the enemy's position.
+    const sums = pathPrefixSums(this.path);
     const cur = this.path[this.pathIndex];
-    progress += Math.sqrt(Math.pow(this.x - cur.x, 2) + Math.pow(this.y - cur.y, 2));
-    return progress;
+    const dx = this.x - cur.x;
+    const dy = this.y - cur.y;
+    return sums[this.pathIndex] + Math.sqrt(dx * dx + dy * dy);
   }
 
   isTargetable() {

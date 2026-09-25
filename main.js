@@ -199,17 +199,38 @@ class TerminalProtocol {
       document.getElementById('techPanel').classList.remove('open');
     });
 
+    // Phase 11: in-game save import dialog (replaces native prompt, which is
+    // blocked in some contexts and breaks headless/automation flows)
+    const importDialog = document.getElementById('importDialog');
+    const importText = document.getElementById('importSaveText');
+    const closeImportDialog = () => {
+      importDialog.classList.remove('show');
+      importText.value = '';
+    };
+
     // Export / import save
     document.getElementById('exportSaveBtn').addEventListener('click', () => {
       const text = this.game.saveSystem.exportSave(this.game);
       navigator.clipboard.writeText(text).then(() => {
         this.flashSaveMsg(I18N.t('saveCopied'));
       }).catch(() => {
-        prompt(I18N.t('saveCopyPrompt'), text);
+        // Clipboard unavailable (e.g. non-secure context): show the code in
+        // the dialog so the player can select and copy it manually.
+        document.getElementById('importDialogTitle').textContent = I18N.t('saveCopyPrompt');
+        importText.value = text;
+        importDialog.classList.add('show');
       });
     });
     document.getElementById('importSaveBtn').addEventListener('click', () => {
-      const text = prompt(I18N.t('savePastePrompt'));
+      document.getElementById('importDialogTitle').textContent = I18N.t('savePastePrompt');
+      importText.value = '';
+      importDialog.classList.add('show');
+      importText.focus();
+    });
+    document.getElementById('importCancelBtn').addEventListener('click', closeImportDialog);
+    document.getElementById('importConfirmBtn').addEventListener('click', () => {
+      const text = importText.value.trim();
+      closeImportDialog();
       if (!text) return;
       if (this.game.saveSystem.importSave(text, this.game)) {
         this.game.saveSystem.save(this.game);

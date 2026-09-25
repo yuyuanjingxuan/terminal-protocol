@@ -136,17 +136,19 @@ class Tower {
   findTarget() {
     // Target the enemy FURTHEST along the path within range (classic TD "first" targeting).
     // Stealthed enemies are invisible unless this tower can reveal them.
+    // Phase 11 perf: squared-distance range check (no sqrt) so out-of-range
+    // enemies are rejected before the (more expensive) pathProgress() call.
     let bestEnemy = null;
     let bestProgress = -1;
+    const rangeSq = this.range * this.range;
 
     this.game.enemies.forEach(enemy => {
       if (enemy.isDead) return;
       if (!enemy.isTargetable() && !this.canReveal) return;
 
-      const distance = Math.sqrt(
-        Math.pow(enemy.x - this.x, 2) + Math.pow(enemy.y - this.y, 2)
-      );
-      if (distance > this.range) return;
+      const dx = enemy.x - this.x;
+      const dy = enemy.y - this.y;
+      if (dx * dx + dy * dy > rangeSq) return;
 
       const progress = enemy.pathProgress();
       if (progress > bestProgress) {
