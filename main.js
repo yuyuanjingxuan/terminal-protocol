@@ -929,4 +929,5 @@ class TerminalProtocol {
 window.addEventListener('load', () => {
   const game = new TerminalProtocol();
   game.init();
+  window.__tp = game; // Test hook: exposes the game instance for the headless auto-play bot (scripts/autotest-bot.js)
 });
