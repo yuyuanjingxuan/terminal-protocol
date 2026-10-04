@@ -152,6 +152,10 @@ class WaveManager {
       if (n >= 6 && i % 8 === 5) type = 'healer';
       if (n >= 8 && i % 7 === 3) type = 'stealth';
       if (n >= 10 && i % 6 === 4) type = 'splitter';
+      // Phase 15: P2 enemy types appear in later endless waves
+      if (n >= 12 && i % 9 === 6) type = 'mirror';
+      if (n >= 14 && i % 10 === 7) type = 'corrosion';
+      if (n >= 16 && i % 11 === 8) type = 'teleport';
       const base = BALANCE.enemies[type];
       wave.push({
         type: type,

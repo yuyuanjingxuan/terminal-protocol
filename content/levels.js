@@ -417,9 +417,9 @@ const chapters = [
         waves: [
           [...rep('splitter', 8), ...rep('armored', 10), ...rep('stealth', 8)],
           [...rep('splitter', 8), ...rep('healer', 6), ...rep('fast', 10)],
-          [...rep('splitter', 10), ...rep('armored', 10), ...rep('stealth', 8)],
-          [...rep('splitter', 10), ...rep('healer', 8), ...rep('armored', 10)],
-          [...rep('splitter', 12), ...rep('armored', 12), ...rep('stealth', 10), ...rep('healer', 6)]
+          [...rep('mirror', 4), ...rep('splitter', 8), ...rep('armored', 10)],
+          [...rep('corrosion', 4), ...rep('splitter', 10), ...rep('stealth', 8)],
+          [...rep('mirror', 6), ...rep('corrosion', 4), ...rep('armored', 12), ...rep('healer', 6)]
         ]
       },
       {
@@ -428,11 +428,11 @@ const chapters = [
         briefingEn: 'The Iron Bastion has only one last stronghold left. Past this, ahead is the Root Terminal. ... (a trace of something personal in her voice)',
         waves: [
           [...rep('splitter', 10), ...rep('armored', 12), ...rep('stealth', 10)],
-          [...rep('splitter', 10), ...rep('healer', 8), ...rep('armored', 12)],
+          [...rep('mirror', 6), ...rep('corrosion', 4), ...rep('armored', 12)],
           [...rep('splitter', 12), ...rep('stealth', 12), ...rep('fast', 10)],
-          [...rep('splitter', 12), ...rep('healer', 10), ...rep('armored', 12)],
-          [...rep('splitter', 14), ...rep('armored', 14), ...rep('stealth', 12), ...rep('healer', 8)],
-          [...rep('splitter', 14), ...rep('armored', 14), ...rep('stealth', 12), ...rep('healer', 10), ...rep('fast', 8)]
+          [...rep('mirror', 8), ...rep('corrosion', 6), ...rep('healer', 8), ...rep('armored', 12)],
+          [...rep('splitter', 14), ...rep('mirror', 8), ...rep('stealth', 12), ...rep('healer', 8)],
+          [...rep('mirror', 10), ...rep('corrosion', 8), ...rep('armored', 14), ...rep('stealth', 12), ...rep('fast', 8)]
         ]
       },
       {
@@ -469,10 +469,10 @@ const chapters = [
         briefingEn: 'This is the outer perimeter of the Root Terminal. This is the last support I can give you. Any further ahead, Zeroing may cut the signal entirely.',
         waves: [
           [...rep('armored', 10), ...rep('stealth', 10), ...rep('basic', 8)],
-          [...rep('splitter', 8), ...rep('healer', 8), ...rep('fast', 10)],
+          [...rep('mirror', 6), ...rep('corrosion', 4), ...rep('fast', 10)],
           [...rep('armored', 12), ...rep('stealth', 12), ...rep('splitter', 8)],
-          [...rep('healer', 10), ...rep('splitter', 10), ...rep('armored', 10)],
-          [...rep('armored', 14), ...rep('stealth', 12), ...rep('splitter', 10), ...rep('healer', 8)]
+          [...rep('mirror', 8), ...rep('corrosion', 6), ...rep('armored', 10)],
+          [...rep('armored', 14), ...rep('stealth', 12), ...rep('mirror', 8), ...rep('corrosion', 6)]
         ]
       },
       {
@@ -507,9 +507,9 @@ const chapters = [
         timeLimit: 240,
         waves: [
           [...rep('armored', 12), ...rep('stealth', 12), ...rep('splitter', 10)],
-          [...rep('healer', 12), ...rep('splitter', 12), ...rep('armored', 12)],
-          [...rep('stealth', 14), ...rep('splitter', 14), ...rep('healer', 12)],
-          [...rep('armored', 16), ...rep('stealth', 14), ...rep('splitter', 14), ...rep('healer', 12)]
+          [...rep('teleport', 6), ...rep('healer', 12), ...rep('armored', 12)],
+          [...rep('stealth', 14), ...rep('splitter', 14), ...rep('teleport', 8)],
+          [...rep('armored', 16), ...rep('teleport', 10), ...rep('splitter', 14), ...rep('healer', 12)]
         ]
       },
       {
@@ -518,11 +518,11 @@ const chapters = [
         briefingEn: 'I\'ve connected Lu Mingyuan\'s unfinished code. This is our only chance to interfere with the reset command from within, if we can\'t stop Zeroing head-on. What comes next will be exceptionally difficult.',
         waves: [
           [...rep('armored', 16), ...rep('stealth', 14), ...rep('splitter', 12), ...rep('healer', 10)],
-          [...rep('splitter', 16), ...rep('healer', 12), ...rep('armored', 16)],
-          [...rep('stealth', 16), ...rep('splitter', 16), ...rep('armored', 14)],
-          [...rep('healer', 14), ...rep('armored', 18), ...rep('stealth', 14)],
-          [...rep('splitter', 18), ...rep('armored', 18), ...rep('stealth', 16), ...rep('healer', 12)],
-          [...rep('armored', 20), ...rep('stealth', 16), ...rep('splitter', 18), ...rep('healer', 14)]
+          [...rep('teleport', 8), ...rep('mirror', 8), ...rep('armored', 16)],
+          [...rep('stealth', 16), ...rep('splitter', 16), ...rep('teleport', 10)],
+          [...rep('healer', 14), ...rep('armored', 18), ...rep('teleport', 12)],
+          [...rep('splitter', 18), ...rep('armored', 18), ...rep('stealth', 16), ...rep('teleport', 12)],
+          [...rep('armored', 20), ...rep('teleport', 14), ...rep('mirror', 12), ...rep('healer', 14)]
         ]
       },
       {

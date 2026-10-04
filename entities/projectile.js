@@ -1,6 +1,6 @@
 // entities/projectile.js - Projectile classes (homing: lock onto target enemy)
 class Projectile {
-  constructor(game, startX, startY, targetX, targetY, damage, targetEnemy = null, faction = null) {
+  constructor(game, startX, startY, targetX, targetY, damage, targetEnemy = null, faction = null, sourceTower = null) {
     this.game = game;
     this.x = startX;
     this.y = startY;
@@ -12,6 +12,7 @@ class Projectile {
     this.color = 'yellow';
     this.targetEnemy = targetEnemy; // homing lock (may die mid-flight)
     this.faction = faction; // 'energy' | 'explosive' | 'electromagnetic' | 'support' | null
+    this.sourceTower = sourceTower; // tower that fired this projectile (for mirror reflection)
     this.lifetime = 3; // safety: despawn after 3s
 
     // Initial direction
@@ -85,8 +86,8 @@ class Projectile {
     }
     if (victim) {
       // Phase 12: energy towers deal bonus damage to EM-marked enemies
-      if (this.faction === 'energy') victim.takeDamageFromEnergy(this.damage);
-      else victim.takeDamage(this.damage);
+      if (this.faction === 'energy') victim.takeDamageFromEnergy(this.damage, this.sourceTower);
+      else victim.takeDamage(this.damage, this.sourceTower);
       // Phase 13: subtle impact tick on hit
       if (this.game.audio) this.game.audio.playHit();
     }

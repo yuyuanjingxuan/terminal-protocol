@@ -57,6 +57,15 @@ class Enemy {
     this.summonType = null;
     this.summonCount = 0;
 
+    // Phase 15: P2 enemy abilities
+    this.reflectPct = 0;        // mirror: fraction of damage reflected to attacker
+    this.corrodeRadius = 0;     // corrosion: radius of attack-speed debuff aura
+    this.corrodeFactor = 1;     // corrosion: multiplier applied to nearby towers' cooldown recovery
+    this.teleportTimer = 0;     // teleport: countdown to next forward jump
+    this.teleportInterval = 0;  // teleport: seconds between jumps
+    this.teleportFrac = 0;      // teleport: fraction of remaining path jumped each time
+    this.shieldRegen = 0;       // boss: shield points regenerated per second
+
     // Phase 7: wave-entry overrides (applied by WaveManager at spawn)
     this.revealAtFrac = 0;   // 0 = disabled; reveal permanently at this health fraction
     this.splitAtFrac = 0;    // 0 = disabled; split once at this health fraction
@@ -88,6 +97,12 @@ class Enemy {
     if (data.splitType) this.splitType = data.splitType;
     if (data.bossName) this.bossName = data.bossName;
     if (data.bossNameEn) this.bossNameEn = data.bossNameEn;
+    if (data.reflectPct) this.reflectPct = data.reflectPct;
+    if (data.corrodeRadius) this.corrodeRadius = data.corrodeRadius;
+    if (data.corrodeFactor) this.corrodeFactor = data.corrodeFactor;
+    if (data.teleportInterval) this.teleportInterval = data.teleportInterval;
+    if (data.teleportFrac) this.teleportFrac = data.teleportFrac;
+    if (data.shieldRegen) this.shieldRegen = data.shieldRegen;
   }
 
   update(deltaTime) {
@@ -104,6 +119,11 @@ class Enemy {
     }
     if (this.revealed > 0) this.revealed -= deltaTime;
     if (this.markTimer > 0) this.markTimer -= deltaTime;
+
+    // Phase 15: boss shield regeneration
+    if (this.shieldRegen > 0 && this.maxShield > 0 && this.shield < this.maxShield) {
+      this.shield = Math.min(this.maxShield, this.shield + this.shieldRegen * deltaTime);
+    }
 
     // Healing (self + nearby allies)
     if (this.healRate > 0) {
@@ -130,6 +150,27 @@ class Enemy {
           minion.pathIndex = this.pathIndex;
           this.game.addEnemy(minion);
         }
+      }
+    }
+
+    // Phase 15: corrosion aura — slow the cooldown recovery of nearby towers
+    if (this.corrodeRadius > 0) {
+      for (const tower of this.game.towers) {
+        const dx = tower.x - this.x;
+        const dy = tower.y - this.y;
+        if (dx * dx + dy * dy <= this.corrodeRadius * this.corrodeRadius) {
+          tower.corrodeTimer = Math.max(tower.corrodeTimer || 0, 0.1);
+          tower.corrodeFactor = this.corrodeFactor;
+        }
+      }
+    }
+
+    // Phase 15: teleport — periodically jump forward along the path
+    if (this.teleportInterval > 0) {
+      this.teleportTimer -= deltaTime;
+      if (this.teleportTimer <= 0) {
+        this.teleportTimer = this.teleportInterval;
+        this.teleportForward(this.teleportFrac);
       }
     }
 
@@ -180,9 +221,9 @@ class Enemy {
   }
 
   // Damage dealt by an energy-faction tower. Applies the mark bonus.
-  takeDamageFromEnergy(amount) {
+  takeDamageFromEnergy(amount, attacker) {
     if (this.isMarked()) amount *= (1 + this.markBonus);
-    this.takeDamage(amount);
+    this.takeDamage(amount, attacker);
   }
 
   reveal(duration) {
@@ -200,6 +241,27 @@ class Enemy {
     return sums[this.pathIndex] + Math.sqrt(dx * dx + dy * dy);
   }
 
+  // Phase 15: teleport forward a fraction of the remaining path length.
+  // Used by the Teleport enemy to skip ahead toward the base.
+  teleportForward(frac) {
+    const total = pathPrefixSums(this.path)[this.path.length - 1];
+    const target = Math.min(total, this.pathProgress() + total * frac);
+    // Walk the path to find the waypoint at/after the target distance
+    const sums = pathPrefixSums(this.path);
+    let idx = this.pathIndex;
+    while (idx < this.path.length - 1 && sums[idx + 1] < target) idx++;
+    const segStart = this.path[idx];
+    const segEnd = this.path[Math.min(idx + 1, this.path.length - 1)];
+    const segLen = sums[idx + 1] - sums[idx] || 1;
+    const t = Math.max(0, Math.min(1, (target - sums[idx]) / segLen));
+    this.pathIndex = idx;
+    this.x = segStart.x + (segEnd.x - segStart.x) * t;
+    this.y = segStart.y + (segEnd.y - segStart.y) * t;
+    // Visual + audio cue
+    if (this.game.effects) this.game.effects.pulseRing(this.x, this.y, 20, this.color);
+    if (this.game.audio) this.game.audio.playTeleport();
+  }
+
   isTargetable() {
     return !this.isStealthed || this.revealed > 0;
   }
@@ -210,7 +272,7 @@ class Enemy {
     }
   }
 
-  takeDamage(amount) {
+  takeDamage(amount, attacker) {
     if (this.isDead) return;
     if (this.shield > 0) {
       this.shield -= amount;
@@ -218,6 +280,12 @@ class Enemy {
       return; // shield absorbs the hit
     }
     this.health -= amount;
+
+    // Phase 15: mirror — reflect a fraction of damage back to the attacker
+    if (this.reflectPct > 0 && attacker && !attacker.isDead) {
+      const reflected = Math.round(amount * this.reflectPct);
+      if (reflected > 0) attacker.takeReflectedDamage(reflected);
+    }
 
     // Phase 7: reveal at a health fraction (e.g. Mirror Merchant, 2-6)
     if (this.isStealthed && this.revealAtFrac > 0 &&
@@ -314,6 +382,42 @@ class Enemy {
       ctx.lineTo(this.x + this.size * 0.5, this.y);
       ctx.lineTo(this.x, this.y + this.size * 0.5);
       ctx.lineTo(this.x - this.size * 0.5, this.y);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (this.reflectPct > 0) {
+      // Mirror: inner triangle pointing up (reflection motif)
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y - this.size * 0.55);
+      ctx.lineTo(this.x + this.size * 0.5, this.y + this.size * 0.45);
+      ctx.lineTo(this.x - this.size * 0.5, this.y + this.size * 0.45);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (this.corrodeRadius > 0) {
+      // Corrosion: inner X + faint acid aura
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(this.x - this.size * 0.5, this.y - this.size * 0.5);
+      ctx.lineTo(this.x + this.size * 0.5, this.y + this.size * 0.5);
+      ctx.moveTo(this.x + this.size * 0.5, this.y - this.size * 0.5);
+      ctx.lineTo(this.x - this.size * 0.5, this.y + this.size * 0.5);
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(118, 255, 3, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.corrodeRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (this.teleportInterval > 0) {
+      // Teleport: inner hourglass / double-triangle
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(this.x - this.size * 0.5, this.y - this.size * 0.5);
+      ctx.lineTo(this.x + this.size * 0.5, this.y - this.size * 0.5);
+      ctx.lineTo(this.x - this.size * 0.5, this.y + this.size * 0.5);
+      ctx.lineTo(this.x + this.size * 0.5, this.y + this.size * 0.5);
       ctx.closePath();
       ctx.stroke();
     } else if (this.maxShield > 0) {
@@ -494,7 +598,62 @@ class SplitterEnemy extends Enemy {
   }
 }
 
-// Boss: huge hp, summons minions periodically
+// Phase 15: Mirror type — reflects a fraction of damage back to the attacker.
+// Punishes brute-force DPS; best handled with slow, heavy hits or by letting
+// it pass while focusing other threats.
+class MirrorEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    const s = BALANCE.enemies.mirror;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
+    this.color = '#00E5FF';
+    this.reflectPct = s.reflectPct;
+  }
+}
+
+// Phase 15: Corrosion type — slows the attack speed of nearby towers.
+// Disrupts your backline; needs to be prioritized or kited away from towers.
+class CorrosionEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    const s = BALANCE.enemies.corrosion;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
+    this.color = '#76FF03';
+    this.corrodeRadius = s.corrodeRadius;
+    this.corrodeFactor = s.corrodeFactor;
+  }
+}
+
+// Phase 15: Teleport type — periodically jumps forward along the path.
+// Skips past your kill zone; needs towers spread along the whole path.
+class TeleportEnemy extends Enemy {
+  constructor(game, path) {
+    super(game, path);
+    const s = BALANCE.enemies.teleport;
+    this.baseSpeed = s.speed;
+    this.health = s.hp;
+    this.maxHealth = s.hp;
+    this.reward = s.reward;
+    this.size = s.size;
+    this.damageToBase = s.damageToBase;
+    this.color = '#FF4081';
+    this.teleportInterval = s.teleportInterval;
+    this.teleportFrac = s.teleportFrac;
+    this.teleportTimer = s.teleportInterval * 0.6; // first jump comes a bit early
+  }
+}
+
+// Boss: huge hp, summons minions periodically, regenerates shield
 class BossEnemy extends Enemy {
   constructor(game, path) {
     super(game, path);
@@ -511,6 +670,8 @@ class BossEnemy extends Enemy {
     this.summonTimer = s.summonTimer; // first burst comes early
     this.summonType = s.summonType;
     this.summonCount = s.summonCount;
+    // Phase 15: boss shield regeneration (if the boss has a shield)
+    this.shieldRegen = s.shieldRegen || 0;
   }
 }
 
@@ -522,5 +683,8 @@ const ENEMY_TYPES = {
   healer: HealerEnemy,
   stealth: StealthEnemy,
   splitter: SplitterEnemy,
+  mirror: MirrorEnemy,
+  corrosion: CorrosionEnemy,
+  teleport: TeleportEnemy,
   boss: BossEnemy
 };

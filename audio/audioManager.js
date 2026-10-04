@@ -231,6 +231,13 @@ class AudioManager {
     this.tone(392, 0.22, { type: 'sine', vol: 0.15, delay: 0.2 }); // G4
   }
 
+  // Phase 15: quick "warp" whoosh when a teleport enemy jumps forward
+  playTeleport() {
+    if (!this.ensureContext()) return;
+    this.tone(300, 0.18, { type: 'sine', vol: 0.12, slideTo: 900 });
+    this.noise(0.12, { vol: 0.08, filterFreq: 2500, slideTo: 400 });
+  }
+
   // ---------- BGM (simple synth loop, per chapter) ----------
 
   // Chapter patterns: [bass note, arp notes] in Hz; 0 = rest

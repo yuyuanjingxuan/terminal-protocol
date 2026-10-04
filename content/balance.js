@@ -46,8 +46,12 @@ const BALANCE = {
     healer:   { speed: 50,  hp: 30,  reward: 14,  size: 11, damageToBase: 1, healRate: 4, healRadius: 90 },
     stealth:  { speed: 70,  hp: 22,  reward: 14,  size: 10, damageToBase: 1 },
     splitter: { speed: 55,  hp: 45,  reward: 18,  size: 15, damageToBase: 1, splitCount: 3, splitType: 'basic' },
+    mirror:   { speed: 45,  hp: 34,  reward: 20,  size: 13, damageToBase: 1, reflectPct: 0.35 },
+    corrosion:{ speed: 40,  hp: 40,  reward: 18,  size: 14, damageToBase: 1, corrodeRadius: 110, corrodeFactor: 0.5 },
+    teleport: { speed: 70,  hp: 26,  reward: 16,  size: 11, damageToBase: 1, teleportInterval: 4, teleportFrac: 0.18 },
     boss:     { speed: 25,  hp: 800, reward: 200, size: 26, damageToBase: 5,
-                summonInterval: 8, summonTimer: 4, summonType: 'basic', summonCount: 2 }
+                summonInterval: 8, summonTimer: 4, summonType: 'basic', summonCount: 2,
+                shieldRegen: 6 }
   }
 };
 

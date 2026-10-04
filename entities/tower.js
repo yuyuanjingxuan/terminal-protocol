@@ -94,6 +94,29 @@ class Tower {
     // Upgrade system (Phase 7, introduced in level 1-2)
     this.level = 1;
     this.maxLevel = 3;
+    // Phase 15: corrosion debuff (applied by Corrosion enemies)
+    this.corrodeTimer = 0;   // seconds of corrosion remaining
+    this.corrodeFactor = 1;  // cooldown-recovery multiplier (<1 = slower)
+  }
+
+  // Phase 15: mirror reflection — damage reflected back to this tower.
+  takeReflectedDamage(amount) {
+    if (this.isDead) return;
+    this.health = (this.health || 100) - amount;
+    if (this.game.effects) this.game.effects.burst(this.x, this.y, '#00E5FF', 4, { speed: 60, life: 0.2, size: 2 });
+    if (this.health <= 0) {
+      this.health = 0;
+      this.destroy();
+    }
+  }
+
+  // Phase 15: remove this tower from the game (used by mirror reflection).
+  destroy() {
+    if (this.isDead) return;
+    this.isDead = true;
+    if (this.game.effects) this.game.effects.explosion(this.x, this.y, this.color || '#00a2ff');
+    if (this.game.audio) this.game.audio.playExplosion();
+    this.game.towers = this.game.towers.filter(t => t !== this);
   }
 
   // Cost to upgrade to the next level (scales with current level)
@@ -118,7 +141,14 @@ class Tower {
   }
 
   update(deltaTime) {
-    this.currentCooldown -= deltaTime;
+    // Phase 15: corrosion debuff — recover cooldown slower while corroded
+    if (this.corrodeTimer > 0) {
+      this.corrodeTimer -= deltaTime;
+      this.currentCooldown -= deltaTime * this.corrodeFactor;
+    } else {
+      this.corrodeFactor = 1;
+      this.currentCooldown -= deltaTime;
+    }
 
     if (this.currentCooldown <= 0) {
       this.findTarget();
@@ -171,7 +201,8 @@ class Tower {
         this.target.y,
         this.damage,
         this.target,
-        this.faction
+        this.faction,
+        this
       );
       this.game.addProjectile(projectile);
     }
