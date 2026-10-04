@@ -3,9 +3,25 @@ class ParticleSystem {
   constructor(game) {
     this.game = game;
     this.particles = [];
+    this.floatingTexts = [];
     this.shakeTime = 0;
     this.shakeDuration = 0;
     this.shakeMagnitude = 0;
+  }
+
+  // Floating text (resource numbers, damage numbers, etc.). Rises and fades.
+  addText(x, y, text, color, opts = {}) {
+    const {
+      size = 14,
+      life = 0.9,
+      rise = 34,
+      weight = 'bold',
+      align = 'center'
+    } = opts;
+    this.floatingTexts.push({
+      x, y, text, color,
+      size, life, maxLife: life, rise, weight, align
+    });
   }
 
   // Spawn a burst of particles at a position
@@ -159,6 +175,17 @@ class ParticleSystem {
       this.shakeTime -= deltaTime;
       if (this.shakeTime < 0) this.shakeTime = 0;
     }
+
+    // Update floating texts
+    for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+      const t = this.floatingTexts[i];
+      t.life -= deltaTime;
+      if (t.life <= 0) {
+        this.floatingTexts.splice(i, 1);
+        continue;
+      }
+      t.y -= (t.rise / t.maxLife) * deltaTime;
+    }
   }
 
   // Returns current shake offset (call before rendering world)
@@ -194,10 +221,26 @@ class ParticleSystem {
       }
       ctx.restore();
     }
+
+    // Render floating texts (on top of particles)
+    for (const t of this.floatingTexts) {
+      const alpha = Math.max(0, t.life / t.maxLife);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = `${t.weight} ${t.size}px Arial`;
+      ctx.textAlign = t.align;
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = t.color;
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = t.color;
+      ctx.fillText(t.text, t.x, t.y);
+      ctx.restore();
+    }
   }
 
   clear() {
     this.particles = [];
+    this.floatingTexts = [];
     this.shakeTime = 0;
   }
 }

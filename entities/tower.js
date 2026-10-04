@@ -94,6 +94,8 @@ class Tower {
     // Upgrade system (Phase 7, introduced in level 1-2)
     this.level = 1;
     this.maxLevel = 3;
+    // Phase 3.2: spawn-in scale animation (0 → 1 over ~0.25s)
+    this.age = 0;
     // Phase 15: corrosion debuff (applied by Corrosion enemies)
     this.corrodeTimer = 0;   // seconds of corrosion remaining
     this.corrodeFactor = 1;  // cooldown-recovery multiplier (<1 = slower)
@@ -141,6 +143,9 @@ class Tower {
   }
 
   update(deltaTime) {
+    // Phase 3.2: advance spawn-in animation
+    if (this.age < 1) this.age = Math.min(1, this.age + deltaTime * 4);
+
     // Phase 15: corrosion debuff — recover cooldown slower while corroded
     if (this.corrodeTimer > 0) {
       this.corrodeTimer -= deltaTime;
@@ -212,6 +217,9 @@ class Tower {
     const r = this.size || 15;
     const color = this.color || '#00a2ff';
 
+    // Phase 3.2: spawn-in scale (ease-out from 0.2 → 1)
+    const scale = this.age < 1 ? 0.2 + 0.8 * (1 - Math.pow(1 - this.age, 3)) : 1;
+
     // Range indicator
     ctx.strokeStyle = hexToRgba(color, 0.2);
     ctx.lineWidth = 1;
@@ -220,13 +228,17 @@ class Tower {
     ctx.stroke();
 
     // Tower body with neon glow (unique shape per type)
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.scale(scale, scale);
     ctx.shadowColor = color;
     ctx.shadowBlur = 15;
     ctx.fillStyle = color;
     ctx.fillRule = 'evenodd';
-    drawTowerShape(ctx, this.x, this.y, r, this.shape);
+    drawTowerShape(ctx, 0, 0, r, this.shape);
     ctx.fill();
     ctx.shadowBlur = 0;
+    ctx.restore();
 
     // Level pips (Phase 7): small dots below the tower, one per level
     if (this.level > 1) {

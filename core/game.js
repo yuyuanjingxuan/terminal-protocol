@@ -385,6 +385,28 @@ class Game {
       }
     }
 
+    // Phase 3.2: wave preview — show the composition of the next wave
+    const wpEl = document.getElementById('wavePreview');
+    if (wpEl) {
+      const wm = this.waveManager;
+      const nextIdx = wm.currentWave; // currentWave already incremented when a wave starts
+      const showPreview = !this.endlessMode && this.gameState !== 'ready' &&
+        nextIdx < wm.waves.length && !wm.isWaveActive;
+      if (showPreview) {
+        const counts = {};
+        for (const e of wm.waves[nextIdx]) {
+          const t = e.type || 'basic';
+          counts[t] = (counts[t] || 0) + 1;
+        }
+        const parts = Object.keys(counts).map(t =>
+          `<span class="wp-item">${I18N.enemyName(t)}×${counts[t]}</span>`);
+        wpEl.innerHTML = `<span class="wp-label">${I18N.t('wavePreviewLabel')}</span>${parts.join('')}`;
+        wpEl.style.display = 'block';
+      } else {
+        wpEl.style.display = 'none';
+      }
+    }
+
     if (selEl) {
       if (this.selectedTowerType) {
         const info = TOWER_TYPES[this.selectedTowerType];
@@ -479,6 +501,42 @@ class Game {
     ctx.fillStyle = '#ff8888';
     ctx.fillText(text, this.canvas.width / 2, y + 19);
     ctx.restore();
+
+    // Phase 3.3: boss mechanic hint below the warning banner
+    const hint = this.getBossMechanicHint();
+    if (hint) {
+      ctx.save();
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = '#ff4444';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = '#ffb3b3';
+      ctx.fillText(hint, this.canvas.width / 2, y + 58);
+      ctx.restore();
+    }
+  }
+
+  // Phase 3.3: build a localized boss-mechanic hint from the current boss wave.
+  // Returns '' when there is no boss wave queued.
+  getBossMechanicHint() {
+    const wm = this.waveManager;
+    if (!wm || this.endlessMode) return '';
+    // The boss wave data (with mechanics) is captured on currentLevel at load time.
+    const bossWave = this.currentLevel && this.currentLevel.bossWave;
+    const bossData = bossWave && bossWave.find(e => e.type === 'boss');
+    if (!bossData) return '';
+    const mechs = [];
+    if (bossData.summonType) mechs.push(I18N.t('bossMechSummon'));
+    if (bossData.shield) mechs.push(I18N.t('bossMechShield'));
+    if (bossData.stealth) mechs.push(I18N.t('bossMechStealth'));
+    if (bossData.healRate) mechs.push(I18N.t('bossMechHeal'));
+    if (bossData.splitAtFrac) mechs.push(I18N.t('bossMechSplit'));
+    if (mechs.length === 0) return '';
+    const name = (this.currentLevel && this.currentLevel.boss)
+      ? (I18N.lang === 'en' ? this.currentLevel.boss.nameEn : this.currentLevel.boss.name)
+      : I18N.t('bossLabel');
+    return I18N.t('bossMechHint', { name, mechs: mechs.join('、') });
   }
 
   gameOver(isWin, reason) {
@@ -590,6 +648,8 @@ class Game {
   spendResources(amount) {
     if (this.resources >= amount) {
       this.resources -= amount;
+      // Floating resource number (negative, red) — Phase 3.2
+      if (this.effects) this.effects.addText(this.canvas.width / 2, this.canvas.height - 40, `-${Math.round(amount)}`, '#ff5252', { size: 16, life: 0.8 });
       return true;
     }
     return false;
@@ -597,10 +657,16 @@ class Game {
 
   gainResources(amount) {
     this.resources += amount;
+    // Floating resource number (positive, green) — Phase 3.2
+    if (this.effects && amount > 0) this.effects.addText(this.canvas.width / 2, this.canvas.height - 40, `+${Math.round(amount)}`, '#00e676', { size: 16, life: 0.8 });
   }
 
   takeDamage(amount) {
     this.health -= amount;
+    // Phase 3.2: floating health-loss indicator at the terminal
+    if (this.effects && amount > 0) {
+      this.effects.addText(this.canvas.width / 2, this.canvas.height - 70, `-${Math.round(amount)} HP`, '#ff5252', { size: 16, life: 0.9, rise: 40 });
+    }
   }
 
   isLevelUnlocked(levelName) {
@@ -627,6 +693,12 @@ class Game {
     if (!this.spendResources(cost)) return false;
     tower.upgrade();
     if (this.audio) this.audio.playUpgrade();
+    // Phase 3.2: level-up flash + expanding ring at the tower
+    if (this.effects) {
+      this.effects.pulseRing(tower.x, tower.y, tower.size + 6, tower.color || '#00a2ff');
+      this.effects.burst(tower.x, tower.y, tower.color || '#00a2ff', 12, { speed: 90, life: 0.5, size: 2.5 });
+      this.effects.addText(tower.x, tower.y - tower.size - 8, `Lv.${tower.level}`, '#ffd740', { size: 15, life: 0.9, rise: 30 });
+    }
     if (this.inputHandler) this.inputHandler.showToast(I18N.t('upgradedMsg', { name: I18N.towerName(tower.type), n: tower.level }));
     return true;
   }

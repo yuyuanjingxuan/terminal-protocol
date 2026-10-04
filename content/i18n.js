@@ -17,6 +17,7 @@ const I18N = {
       waveReady: '波次: 0/{n} — 建造防御，然后按「准备就绪」',
       waveActive: '波次: {cur}/{n}',
       waveCountdown: '波次: {cur}/{n}（{s}秒后下一波）',
+      wavePreviewLabel: '下一波: ',
       readyBtn: '准备就绪 ▶',
       nextWaveBtn: '下一波 ▶',
       selected: '已选择: {name}（{cost}）',
@@ -110,6 +111,12 @@ const I18N = {
       toggleMusic: '开关音乐',
       // Boss
       bossLabel: '核心进程',
+      bossMechSummon: '会召唤小怪',
+      bossMechShield: '拥有护盾',
+      bossMechStealth: '会隐形',
+      bossMechHeal: '会治疗友军',
+      bossMechSplit: '会分裂',
+      bossMechHint: '⚠ {name}：{mechs} ⚠',
       // Towers
       tower_laser: '激光',
       tower_plasma: '等离子',
@@ -121,6 +128,17 @@ const I18N = {
       tower_pulse: '眩晕脉冲',
       tower_disruptor: '干扰器',
       tower_repair: '资源塔',
+      // Enemy names (wave preview)
+      enemy_basic: '普通',
+      enemy_fast: '快速',
+      enemy_armored: '装甲',
+      enemy_healer: '治疗',
+      enemy_stealth: '隐形',
+      enemy_splitter: '分裂',
+      enemy_mirror: '镜像',
+      enemy_corrosion: '腐蚀',
+      enemy_teleport: '传送',
+      enemy_boss: 'BOSS',
       // Tower descriptions (tooltip)
       towerDesc_laser: '单体高伤，射速快',
       towerDesc_plasma: '单体中伤，射速较慢',
@@ -200,6 +218,7 @@ const I18N = {
       waveReady: 'Wave: 0/{n} — build defenses, then press "Ready"',
       waveActive: 'Wave: {cur}/{n}',
       waveCountdown: 'Wave: {cur}/{n} (next in {s}s)',
+      wavePreviewLabel: 'Next: ',
       readyBtn: 'Ready ▶',
       nextWaveBtn: 'Next Wave ▶',
       selected: 'Selected: {name} ({cost})',
@@ -293,6 +312,12 @@ const I18N = {
       toggleMusic: 'Toggle music',
       // Boss
       bossLabel: 'CORE PROCESS',
+      bossMechSummon: 'summons minions',
+      bossMechShield: 'has a shield',
+      bossMechStealth: 'turns stealthy',
+      bossMechHeal: 'heals allies',
+      bossMechSplit: 'splits on damage',
+      bossMechHint: '⚠ {name}: {mechs} ⚠',
       // Towers
       tower_laser: 'Laser',
       tower_plasma: 'Plasma',
@@ -304,6 +329,17 @@ const I18N = {
       tower_pulse: 'Stun Pulse',
       tower_disruptor: 'Disruptor',
       tower_repair: 'Resource',
+      // Enemy names (wave preview)
+      enemy_basic: 'Basic',
+      enemy_fast: 'Fast',
+      enemy_armored: 'Armored',
+      enemy_healer: 'Healer',
+      enemy_stealth: 'Stealth',
+      enemy_splitter: 'Splitter',
+      enemy_mirror: 'Mirror',
+      enemy_corrosion: 'Corrosion',
+      enemy_teleport: 'Teleport',
+      enemy_boss: 'BOSS',
       // Tower descriptions (tooltip)
       towerDesc_laser: 'Single target, high damage, fast fire rate',
       towerDesc_plasma: 'Single target, medium damage, slower fire rate',
@@ -390,6 +426,11 @@ const I18N = {
   // Localized display name for a tower type ('laser' → 激光 / Laser)
   towerName(type) {
     return this.t('tower_' + type);
+  },
+
+  // Localized display name for an enemy type ('basic' → 普通 / Basic)
+  enemyName(type) {
+    return this.t('enemy_' + type);
   },
 
   // Localized short description for a tower type (tooltip)

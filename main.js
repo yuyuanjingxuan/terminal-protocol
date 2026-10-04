@@ -926,7 +926,9 @@ class TerminalProtocol {
       path: path,
       boss: levelData.boss || null,
       ambient: !!levelData.ambient,
-      chapter: chapterIdx
+      chapter: chapterIdx,
+      // Phase 3.3: capture the boss wave data (with mechanics) for the boss hint
+      bossWave: levelData.waves.find(w => w.some(e => e.type === 'boss')) || null
     };
 
     // Setup wave manager

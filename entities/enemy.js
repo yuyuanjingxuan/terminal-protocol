@@ -281,6 +281,18 @@ class Enemy {
     }
     this.health -= amount;
 
+    // Phase 3.2: floating damage number (skip when shielded — shield absorbs)
+    if (this.game.effects) {
+      const dmg = Math.round(amount);
+      this.game.effects.addText(
+        this.x + (Math.random() - 0.5) * 10,
+        this.y - this.size - 4,
+        String(dmg),
+        '#ffffff',
+        { size: 12, life: 0.7, rise: 26 }
+      );
+    }
+
     // Phase 15: mirror — reflect a fraction of damage back to the attacker
     if (this.reflectPct > 0 && attacker && !attacker.isDead) {
       const reflected = Math.round(amount * this.reflectPct);
