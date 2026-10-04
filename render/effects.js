@@ -120,6 +120,23 @@ class ParticleSystem {
     this.shakeMagnitude = magnitude;
   }
 
+  // Boss entrance: a heavy screen shake plus a full-screen red shockwave ring
+  // that expands from the path start, signalling the boss's arrival.
+  bossEntrance(x, y, strength) {
+    this.shake(0.7, 6 + strength * 8);
+    this.particles.push({
+      x, y, vx: 0, vy: 0,
+      life: 1.0, maxLife: 1.0,
+      size: 20, color: '#ff283c', gravity: 0, fade: true, ring: true, grow: true
+    });
+    // secondary expanding ring
+    this.particles.push({
+      x, y, vx: 0, vy: 0,
+      life: 0.8, maxLife: 0.8,
+      size: 8, color: '#ff283c', gravity: 0, fade: true, ring: true, grow: true
+    });
+  }
+
   update(deltaTime) {
     // Update particles
     for (let i = this.particles.length - 1; i >= 0; i--) {

@@ -36,6 +36,15 @@ class WaveManager {
       if (waveEnemies.some(e => e.type === 'boss')) {
         this.bossWarningTimer = 4;
         if (this.game.audio) this.game.audio.playBossWarning();
+        // Boss entrance environmental effect: shake + red shockwave, scaled by
+        // the boss's max HP so stronger bosses hit harder.
+        const bossData = waveEnemies.find(e => e.type === 'boss');
+        const bossHp = (bossData && bossData.hp) || 1000;
+        const strength = Math.max(0, Math.min(1, bossHp / 1500));
+        const path = this.game.currentLevel ? this.game.currentLevel.path : null;
+        const sx = path && path.length > 0 ? path[0].x : this.game.canvas.width / 2;
+        const sy = path && path.length > 0 ? path[0].y : this.game.canvas.height / 2;
+        if (this.game.effects) this.game.effects.bossEntrance(sx, sy, strength);
       }
 
       // Wave start effect + sound at the path start (Phase 6)

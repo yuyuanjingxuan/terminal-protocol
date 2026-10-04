@@ -25,7 +25,7 @@ const BG_THEMES = [
   { bg: '#160a1e', accent: '#e040fb', accent2: '#ff4081', name: 'root' }       // Ch6 Root Terminal
 ];
 
-function renderBackground(ctx, chapterIdx, levelKey, time, w, h) {
+function renderBackground(ctx, chapterIdx, levelKey, time, w, h, bossState) {
   const theme = BG_THEMES[chapterIdx] || BG_THEMES[0];
 
   // Per-level base color so each of the 36 levels has a distinct overall tint
@@ -45,6 +45,93 @@ function renderBackground(ctx, chapterIdx, levelKey, time, w, h) {
   // Dispatch to the exact level background
   const fn = LEVEL_BG[levelKey] || LEVEL_BG['c1l1'];
   fn(ctx, theme, time, w, h);
+
+  // Boss presence: overlay an environmental pressure effect matched to the
+  // boss's strength. Stronger bosses (higher max HP) and a boss that is
+  // wounded (low current HP) both raise the tension.
+  if (bossState && bossState.active) {
+    renderBossPressure(ctx, theme, time, w, h, bossState);
+  }
+}
+
+// Boss environmental pressure overlay. Drawn on top of the level background so
+// every boss fight visibly changes the environment, with intensity scaling by
+// boss strength and remaining health.
+function renderBossPressure(ctx, theme, time, w, h, bossState) {
+  // intensity 0..1: base from boss max HP (stronger boss = more pressure),
+  // plus a wounded factor (lower current HP = more desperate).
+  const hpFrac = Math.max(0, Math.min(1, bossState.hpFrac));
+  const wounded = (1 - hpFrac) * 0.5;
+  const strength = Math.max(0, Math.min(1, bossState.strength));
+  const intensity = Math.min(1, 0.35 + strength * 0.45 + wounded);
+
+  // Threat color: red for the boss, tinted toward the chapter accent so it
+  // still feels native to the level.
+  const threat = '255, 40, 60';
+  const accent = theme.accent.replace('#', '');
+  const ar = parseInt(accent.substr(0, 2), 16);
+  const ag = parseInt(accent.substr(2, 2), 16);
+  const ab = parseInt(accent.substr(4, 2), 16);
+
+  // 1) Breathing red pulse across the whole scene (stronger = faster + brighter)
+  const pulse = 0.5 + 0.5 * Math.sin(time * (2 + strength * 3));
+  const pulseAlpha = (0.06 + intensity * 0.10) * pulse;
+  const pg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.75);
+  pg.addColorStop(0, 'rgba(' + threat + ',0)');
+  pg.addColorStop(0.6, 'rgba(' + threat + ',' + (pulseAlpha * 0.5).toFixed(3) + ')');
+  pg.addColorStop(1, 'rgba(' + threat + ',' + pulseAlpha.toFixed(3) + ')');
+  ctx.fillStyle = pg;
+  ctx.fillRect(0, 0, w, h);
+
+  // 2) Darkened vignette that closes in as the boss gets stronger
+  const vg = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.15,
+    w / 2, h / 2, Math.max(w, h) * 0.72);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,' + (0.35 + intensity * 0.4).toFixed(3) + ')');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, w, h);
+
+  // 3) Top & bottom threat bands (alarm strips) — brighter when wounded
+  const bandAlpha = 0.18 + intensity * 0.25 + wounded * 0.2;
+  const bandH = 6 + intensity * 10;
+  const bandGrad = ctx.createLinearGradient(0, 0, 0, bandH);
+  bandGrad.addColorStop(0, 'rgba(' + threat + ',' + bandAlpha.toFixed(3) + ')');
+  bandGrad.addColorStop(1, 'rgba(' + threat + ',0)');
+  ctx.fillStyle = bandGrad;
+  ctx.fillRect(0, 0, w, bandH);
+  ctx.save();
+  ctx.translate(0, h);
+  ctx.scale(1, -1);
+  ctx.fillRect(0, 0, w, bandH);
+  ctx.restore();
+
+  // 4) Slow drifting threat streaks (only for stronger bosses) — reads as the
+  // boss's presence bleeding into the environment.
+  if (strength > 0.4) {
+    ctx.strokeStyle = 'rgba(' + threat + ',' + (0.05 + intensity * 0.08).toFixed(3) + ')';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 5; i++) {
+      const seed = i * 137.5;
+      const y = ((bgRand(seed) * h) + time * (8 + strength * 20)) % h;
+      const x = bgRand(seed + 1) * w;
+      const len = 40 + bgRand(seed + 2) * 90;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + len, y);
+      ctx.stroke();
+    }
+  }
+
+  // 5) Chapter-accented energy crackle near the boss's current position
+  if (bossState.x != null && bossState.y != null) {
+    const cx = bossState.x, cy = bossState.y;
+    const r = 30 + intensity * 40;
+    const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    cg.addColorStop(0, 'rgba(' + ar + ',' + ag + ',' + ab + ',' + (0.25 + intensity * 0.3).toFixed(3) + ')');
+    cg.addColorStop(1, 'rgba(' + ar + ',' + ag + ',' + ab + ',0)');
+    ctx.fillStyle = cg;
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+  }
 }
 
 // ============================================================================

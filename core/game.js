@@ -120,6 +120,29 @@ class Game {
     }
   }
 
+  // Compute the current boss presence for the background pressure effect.
+  // Returns null when no boss is alive. strength (0..1) scales with the boss's
+  // max HP so stronger bosses exert more environmental pressure; hpFrac is the
+  // boss's remaining health fraction (drives the "wounded" desperation).
+  getBossState() {
+    let boss = null;
+    for (const e of this.enemies) {
+      if (e.isBoss) { boss = e; break; }
+    }
+    if (!boss) return null;
+
+    // Normalize boss max HP against the strongest boss (c6l6 "归零" = 1500).
+    const strength = Math.max(0, Math.min(1, boss.maxHealth / 1500));
+    const hpFrac = boss.maxHealth > 0 ? Math.max(0, boss.health / boss.maxHealth) : 0;
+    return {
+      active: true,
+      strength: strength,
+      hpFrac: hpFrac,
+      x: boss.x,
+      y: boss.y
+    };
+  }
+
   render() {
     const ctx = this.ctx;
     // Clear canvas with dark background
@@ -130,7 +153,7 @@ class Game {
     // gets a distinct, story-matched visual)
     const chapterIdx = this.currentLevel ? this.currentLevel.chapter : 0;
     const levelKey = this.currentLevel ? this.currentLevel.key : null;
-    renderBackground(ctx, chapterIdx, levelKey, this.time, this.canvas.width, this.canvas.height);
+    renderBackground(ctx, chapterIdx, levelKey, this.time, this.canvas.width, this.canvas.height, this.getBossState());
 
     // Apply screen shake offset to the world
     const shake = this.effects.getShakeOffset();
