@@ -408,6 +408,22 @@ class Game {
             btnEl.disabled = this.resources < tower.upgradeCost();
           }
         }
+        // Phase 14: active skill button (support towers with a skill)
+        const skillEl = upEl.querySelector('.up-skill');
+        if (skillEl) {
+          if (typeof tower.useSkill === 'function') {
+            skillEl.style.display = 'block';
+            if (tower.skillTimer > 0) {
+              skillEl.textContent = I18N.t('skillCooldown', { n: Math.ceil(tower.skillTimer) });
+              skillEl.disabled = true;
+            } else {
+              skillEl.textContent = I18N.t('skillBtn', { name: I18N.t(tower.skillName), n: tower.skillCost });
+              skillEl.disabled = this.resources < tower.skillCost;
+            }
+          } else {
+            skillEl.style.display = 'none';
+          }
+        }
         upEl.style.display = 'block';
       } else {
         upEl.style.display = 'none';

@@ -82,6 +82,17 @@ class InputHandler {
         this.game.selectedTowerType = null;
         this.updateTowerButtons();
       }
+      // Phase 14: 'F' triggers the selected tower's active skill
+      if ((e.key === 'f' || e.key === 'F') && this.game.selectedTower) {
+        const tower = this.game.selectedTower;
+        if (typeof tower.useSkill === 'function') {
+          if (tower.useSkill()) {
+            if (this.game.audio) this.game.audio.playPulse();
+          } else {
+            if (this.game.audio) this.game.audio.playError();
+          }
+        }
+      }
     });
   }
 

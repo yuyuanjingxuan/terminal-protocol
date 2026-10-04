@@ -723,6 +723,24 @@
       opacity: 0.4;
       cursor: default;
     }
+    /* Phase 14: active skill button (support towers) */
+    #upgradePanel .up-skill {
+      border: 2px solid #9c27b0;
+      border-radius: 6px;
+      background: rgba(156, 39, 176, 0.12);
+      color: #e1bee7;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 6px 10px;
+      margin-top: 4px;
+    }
+    #upgradePanel .up-skill:hover:not(:disabled) {
+      box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
+    }
+    #upgradePanel .up-skill:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
 
     /* Phase 7: briefing panel (top, semi-transparent, shown on level load) */
     #briefingPanel {
@@ -1067,6 +1085,7 @@
       <span class="up-name"></span>
       <span class="up-level"></span>
       <button class="up-btn"></button>
+      <button class="up-skill" style="display:none"></button>
     </div>
 
     <!-- Phase 7: mission briefing (shown on level load) -->

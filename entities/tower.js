@@ -495,6 +495,31 @@ class RepairTower extends Tower {
     this.resourceAmount = s.repairAmount; // Resources generated per cycle
     this.shape = 'cross';
     this.size = 14;
+    // Phase 14: active skill — full-screen EMP pulse
+    this.skillName = 'skillEmp';
+    this.skillCost = 40;      // resources to activate
+    this.skillCooldown = 30;  // seconds between uses
+    this.skillTimer = 0;      // remaining cooldown
+    this.skillStun = 3;       // seconds enemies are stunned
+  }
+
+  // Phase 14: active skill — stun every enemy on screen for a short time.
+  // Returns true if the skill fired, false if on cooldown / not enough resources.
+  useSkill() {
+    if (this.skillTimer > 0) return false;
+    if (!this.game.spendResources(this.skillCost)) return false;
+    this.skillTimer = this.skillCooldown;
+    // Stun all living enemies
+    this.game.enemies.forEach(enemy => {
+      if (!enemy.isDead) enemy.applyStun(this.skillStun);
+    });
+    // Full-screen pulse ring + shake + sound
+    if (this.game.effects) {
+      this.game.effects.pulseRing(this.game.canvas.width / 2, this.game.canvas.height / 2, 400, '#9c27b0');
+      this.game.effects.shake(0.3, 6);
+    }
+    if (this.game.audio) this.game.audio.playPulse();
+    return true;
   }
 
   update(deltaTime) {
@@ -504,6 +529,7 @@ class RepairTower extends Tower {
       this.attack();
       this.currentCooldown = this.cooldown;
     }
+    if (this.skillTimer > 0) this.skillTimer = Math.max(0, this.skillTimer - deltaTime);
   }
 
   findTarget() {

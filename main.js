@@ -97,6 +97,21 @@ class TerminalProtocol {
       upBtn.addEventListener('click', () => this.game.upgradeSelectedTower());
     }
 
+    // Phase 14: active skill button (support towers)
+    const skillBtn = document.querySelector('#upgradePanel .up-skill');
+    if (skillBtn) {
+      skillBtn.addEventListener('click', () => {
+        const tower = this.game.selectedTower;
+        if (tower && typeof tower.useSkill === 'function') {
+          if (tower.useSkill()) {
+            if (this.game.audio) this.game.audio.playPulse();
+          } else {
+            if (this.game.audio) this.game.audio.playError();
+          }
+        }
+      });
+    }
+
     // Phase 9: in-level tutorial hint (c1l1)
     const tutorialNextBtn = document.getElementById('tutorialNext');
     if (tutorialNextBtn) {
