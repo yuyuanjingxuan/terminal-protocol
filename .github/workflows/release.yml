@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          # Find the previous tag (excluding the current one)
+          PREV=$(git tag --sort=-version:refname | grep -v "^${TAG}$" | head -n 1 || true)
+          if [ -n "$PREV" ]; then
+            RANGE="${PREV}..${TAG}"
+          else
+            RANGE=""
+          fi
+          {
+            echo "## ${TAG}"
+            echo ""
+            echo "### 更新 / Changes"
+            echo ""
+            if [ -n "$RANGE" ]; then
+              git log --oneline --no-merges "$RANGE" | sed 's/^/- /'
+            else
+              git log --oneline --no-merges | sed 's/^/- /'
+            fi
+          } > NOTES.md
+          echo "notes written"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: NOTES.md
+          draft: false
+          prerelease: false
