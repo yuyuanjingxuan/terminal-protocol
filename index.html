@@ -19,6 +19,13 @@
       font-family: Arial, sans-serif;
     }
 
+    #gameFrame {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
     #gameContainer {
       position: relative;
     }
@@ -26,7 +33,7 @@
     #gameCanvas {
       display: block;
       max-width: calc(100vw - 32px);
-      max-height: calc(100vh - 110px);
+      max-height: calc(100vh - 210px);
       height: auto;
       background-color: #000;
       border: 2px solid #444;
@@ -82,10 +89,6 @@
     }
 
     #waveControls {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
       display: flex;
       gap: 6px;
       background-color: rgba(0, 0, 0, 0.7);
@@ -120,10 +123,6 @@
     }
 
     #towerBar {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
       display: flex;
       gap: 6px;
       background-color: rgba(0, 0, 0, 0.7);
@@ -178,9 +177,6 @@
     }
 
     #techBtn {
-      position: absolute;
-      top: 62px;
-      right: 10px;
       border: 2px solid #ffd700;
       border-radius: 6px;
       background: #1a1a2e;
@@ -200,7 +196,7 @@
 
     #techPanel {
       position: absolute;
-      top: 96px;
+      top: 8px;
       right: 10px;
       width: 300px;
       max-height: 460px;
@@ -580,7 +576,7 @@
 
     #towerTooltip {
       position: absolute;
-      bottom: 78px;
+      bottom: 10px;
       transform: translateX(-50%);
       background: rgba(10, 10, 26, 0.95);
       border: 1px solid #00f0ff;
@@ -623,7 +619,7 @@
 
     #toast {
       position: absolute;
-      bottom: 80px;
+      bottom: 10px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(10, 10, 26, 0.9);
@@ -1023,7 +1019,18 @@
   </style>
 </head>
 <body>
-  <div id="gameContainer">
+  <div id="gameFrame">
+    <div id="waveControls">
+      <button id="nextWaveBtn" class="wave-btn">下一波</button>
+      <button class="speed-btn active" data-speed="1">1x</button>
+      <button class="speed-btn" data-speed="2">2x</button>
+      <button class="speed-btn" data-speed="3">3x</button>
+      <button id="muteBtn" class="wave-btn" title="开关音效">🔊</button>
+      <button id="musicBtn" class="wave-btn" title="开关音乐">🎵</button>
+      <button id="langBtn2" class="wave-btn lang-btn-inline" title="Language">EN</button>
+      <button id="techBtn">⚡ 科技</button>
+    </div>
+    <div id="gameContainer">
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <div id="uiPanel">
       <div id="resources">资源: 150</div>
@@ -1033,7 +1040,6 @@
       <div id="timerDisplay" style="display:none"></div>
       <div id="selectedInfo"></div>
     </div>
-    <button id="techBtn">⚡ 科技</button>
     <div id="techPanel">
       <h3><span id="techPanelTitle">科技树</span> <button id="techCloseBtn" title="关闭">✕</button></h3>
       <div id="techNodes"></div>
@@ -1043,27 +1049,6 @@
         <button id="resetSaveBtn">重置</button>
       </div>
       <div id="saveMsg"></div>
-    </div>
-    <div id="waveControls">
-      <button id="nextWaveBtn" class="wave-btn">下一波</button>
-      <button class="speed-btn active" data-speed="1">1x</button>
-      <button class="speed-btn" data-speed="2">2x</button>
-      <button class="speed-btn" data-speed="3">3x</button>
-      <button id="muteBtn" class="wave-btn" title="开关音效">🔊</button>
-      <button id="musicBtn" class="wave-btn" title="开关音乐">🎵</button>
-      <button id="langBtn2" class="wave-btn lang-btn-inline" title="Language">EN</button>
-    </div>
-    <div id="towerBar">
-      <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span><span class="tname">激光</span><span class="cost">50</span></button>
-      <button class="tower-btn" data-type="plasma" style="border-color:#00a2ff"><span class="key">2</span><span class="tname">等离子</span><span class="cost">75</span></button>
-      <button class="tower-btn" data-type="railgun" style="border-color:#0066ff"><span class="key">3</span><span class="tname">轨道炮</span><span class="cost">120</span></button>
-      <button class="tower-btn" data-type="cannon" style="border-color:#ff6600"><span class="key">4</span><span class="tname">加农炮</span><span class="cost">60</span></button>
-      <button class="tower-btn" data-type="missile" style="border-color:#ff3300"><span class="key">5</span><span class="tname">导弹</span><span class="cost">55</span></button>
-      <button class="tower-btn" data-type="bomb" style="border-color:#cc0000"><span class="key">6</span><span class="tname">炸弹</span><span class="cost">90</span></button>
-      <button class="tower-btn" data-type="emp" style="border-color:#9c27b0"><span class="key">7</span><span class="tname">EMP</span><span class="cost">45</span></button>
-      <button class="tower-btn" data-type="pulse" style="border-color:#673ab7"><span class="key">8</span><span class="tname">眩晕脉冲</span><span class="cost">70</span></button>
-      <button class="tower-btn" data-type="disruptor" style="border-color:#3f51b5"><span class="key">9</span><span class="tname">干扰器</span><span class="cost">65</span></button>
-      <button class="tower-btn" data-type="repair" style="border-color:#4CAF50"><span class="key">0</span><span class="tname">资源塔</span><span class="cost">120</span></button>
     </div>
     <div id="towerTooltip"></div>
     <div id="toast"></div>
@@ -1174,6 +1159,19 @@
       </div>
       <p class="credit">by yuyuanjingxuan</p>
     </div>
+  </div>
+  <div id="towerBar">
+    <button class="tower-btn" data-type="laser" style="border-color:#00f0ff"><span class="key">1</span><span class="tname">激光</span><span class="cost">50</span></button>
+    <button class="tower-btn" data-type="plasma" style="border-color:#00a2ff"><span class="key">2</span><span class="tname">等离子</span><span class="cost">75</span></button>
+    <button class="tower-btn" data-type="railgun" style="border-color:#0066ff"><span class="key">3</span><span class="tname">轨道炮</span><span class="cost">120</span></button>
+    <button class="tower-btn" data-type="cannon" style="border-color:#ff6600"><span class="key">4</span><span class="tname">加农炮</span><span class="cost">60</span></button>
+    <button class="tower-btn" data-type="missile" style="border-color:#ff3300"><span class="key">5</span><span class="tname">导弹</span><span class="cost">55</span></button>
+    <button class="tower-btn" data-type="bomb" style="border-color:#cc0000"><span class="key">6</span><span class="tname">炸弹</span><span class="cost">90</span></button>
+    <button class="tower-btn" data-type="emp" style="border-color:#9c27b0"><span class="key">7</span><span class="tname">EMP</span><span class="cost">45</span></button>
+    <button class="tower-btn" data-type="pulse" style="border-color:#673ab7"><span class="key">8</span><span class="tname">眩晕脉冲</span><span class="cost">70</span></button>
+    <button class="tower-btn" data-type="disruptor" style="border-color:#3f51b5"><span class="key">9</span><span class="tname">干扰器</span><span class="cost">65</span></button>
+    <button class="tower-btn" data-type="repair" style="border-color:#4CAF50"><span class="key">0</span><span class="tname">资源塔</span><span class="cost">120</span></button>
+  </div>
   </div>
 
   <!-- Include all JavaScript files (i18n.js + balance.js first: other scripts read them) -->
