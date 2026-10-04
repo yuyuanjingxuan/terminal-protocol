@@ -32,9 +32,6 @@
 
     #gameCanvas {
       display: block;
-      max-width: calc(100vw - 32px);
-      max-height: calc(100vh - 210px);
-      height: auto;
       background-color: #000;
       border: 2px solid #444;
     }
@@ -90,10 +87,13 @@
 
     #waveControls {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 6px;
       background-color: rgba(0, 0, 0, 0.7);
       padding: 8px;
       border-radius: 8px;
+      max-width: calc(100vw - 32px);
     }
 
     .wave-btn,
@@ -124,10 +124,13 @@
 
     #towerBar {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 6px;
       background-color: rgba(0, 0, 0, 0.7);
       padding: 8px;
       border-radius: 8px;
+      max-width: calc(100vw - 32px);
     }
 
     .tower-btn {

@@ -285,7 +285,47 @@ class TerminalProtocol {
     this.applyLanguageUI();
     this.showMainMenu();
 
+    // Responsive canvas: size the game window to fill the available viewport
+    // while preserving the 4:3 aspect ratio (internal resolution stays 800x600
+    // so game logic and balance are unaffected). Recompute on every resize.
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+
     console.log('Terminal Protocol initialized');
+  }
+
+  // Size the canvas to fill the available space while keeping the 4:3 aspect
+  // ratio. The internal resolution (canvas.width/height) is left at 800x600;
+  // only the CSS display size changes. On the main menu the control bars are
+  // hidden, so more vertical space is available than during a level.
+  resizeCanvas() {
+    const canvas = document.getElementById('gameCanvas');
+    if (!canvas) return;
+    const menu = document.getElementById('mainMenu');
+    const onMenu = menu && menu.classList.contains('show');
+    const waveControls = document.getElementById('waveControls');
+    const towerBar = document.getElementById('towerBar');
+    const barsVisible = !onMenu &&
+      waveControls && waveControls.style.display !== 'none' &&
+      towerBar && towerBar.style.display !== 'none';
+
+    // Reserve vertical space for the control bars when they are visible.
+    const reserve = barsVisible ? 150 : 40;
+    const availW = window.innerWidth - 32;
+    const availH = window.innerHeight - reserve;
+
+    // Fit the 4:3 canvas into the available box (letterboxed).
+    let w = availW;
+    let h = w * (3 / 4);
+    if (h > availH) {
+      h = availH;
+      w = h * (4 / 3);
+    }
+    w = Math.max(200, Math.floor(w));
+    h = Math.max(150, Math.floor(h));
+
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
   }
 
   // Show the main menu overlay (level select)
@@ -351,6 +391,9 @@ class TerminalProtocol {
     if (towerBar) towerBar.style.display = 'none';
     const uiPanel = document.getElementById('uiPanel');
     if (uiPanel) uiPanel.style.display = 'none';
+
+    // Recompute canvas size now that the control bars are hidden
+    this.resizeCanvas();
   }
 
   // Phase 8: sync the difficulty selector + endless button with game state
@@ -862,6 +905,9 @@ class TerminalProtocol {
     const uiPanel = document.getElementById('uiPanel');
     if (uiPanel) uiPanel.style.display = 'block';
 
+    // Recompute canvas size now that the control bars are visible
+    this.resizeCanvas();
+
     // Phase 9: clear any in-level tutorial from a previous run
     if (this.tutorial) this.endTutorial();
     this.hideFirstTimeHint();
@@ -953,6 +999,9 @@ class TerminalProtocol {
     if (towerBar) towerBar.style.display = 'flex';
     const uiPanel = document.getElementById('uiPanel');
     if (uiPanel) uiPanel.style.display = 'block';
+
+    // Recompute canvas size now that the control bars are visible
+    this.resizeCanvas();
 
     // Phase 9: clear any in-level tutorial from a previous run
     if (this.tutorial) this.endTutorial();
