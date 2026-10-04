@@ -43,6 +43,10 @@ class Enemy {
     this.slowTimer = 0;
     this.slowFactor = 1;
     this.stunTimer = 0;
+    // Phase 12: EM mark synergy — EM towers mark enemies, energy towers deal
+    // bonus damage to marked targets (encourages EM + Energy combos).
+    this.markTimer = 0;      // seconds of mark remaining
+    this.markBonus = 0.5;    // +50% damage from energy towers while marked
     this.healRate = 0; // hp per second
     this.healRadius = 0; // 0 = self only
     this.splitCount = 0;
@@ -99,6 +103,7 @@ class Enemy {
       if (this.slowTimer <= 0) this.slowFactor = 1;
     }
     if (this.revealed > 0) this.revealed -= deltaTime;
+    if (this.markTimer > 0) this.markTimer -= deltaTime;
 
     // Healing (self + nearby allies)
     if (this.healRate > 0) {
@@ -162,6 +167,22 @@ class Enemy {
 
   applyStun(duration) {
     this.stunTimer = Math.max(this.stunTimer, duration);
+  }
+
+  // Phase 12: EM mark — refresh the mark duration. While marked, energy
+  // towers deal bonus damage (see takeDamageFromEnergy).
+  applyMark(duration) {
+    this.markTimer = Math.max(this.markTimer, duration);
+  }
+
+  isMarked() {
+    return this.markTimer > 0;
+  }
+
+  // Damage dealt by an energy-faction tower. Applies the mark bonus.
+  takeDamageFromEnergy(amount) {
+    if (this.isMarked()) amount *= (1 + this.markBonus);
+    this.takeDamage(amount);
   }
 
   reveal(duration) {
@@ -325,6 +346,15 @@ class Enemy {
       ctx.font = '10px Arial';
       ctx.textAlign = 'center';
       ctx.fillText('*', this.x, this.y - this.size - 14);
+    }
+    // Phase 12: EM mark — pulsing purple ring around marked enemies
+    if (this.isMarked()) {
+      const pulse = 0.5 + 0.5 * Math.sin(this.game.time * 8);
+      ctx.strokeStyle = `rgba(156, 39, 176, ${0.5 + 0.4 * pulse})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size + 5 + pulse * 2, 0, Math.PI * 2);
+      ctx.stroke();
     }
 
     // Shield bar (above health bar)

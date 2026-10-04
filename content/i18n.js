@@ -139,6 +139,13 @@ const I18N = {
       towerCounter_emp: '隐身 / 快速',
       towerCounter_pulse: '隐身 / 成群',
       towerCounter_disruptor: '成群 / 隐身',
+      // Phase 12: EM + Energy synergy (tooltip)
+      towerSynergy_laser: '对「电磁标记」敌人 +50% 伤害',
+      towerSynergy_plasma: '对「电磁标记」敌人 +50% 伤害',
+      towerSynergy_railgun: '对「电磁标记」敌人 +50% 伤害',
+      towerSynergy_emp: '命中后标记敌人，能量塔对其增伤',
+      towerSynergy_pulse: '命中后标记敌人，能量塔对其增伤',
+      towerSynergy_disruptor: '命中后标记敌人，能量塔对其增伤',
       // Early wave call reward
       earlyCallMsg: '提前召唤下一波，奖励 {n} 资源',
       // Boss warning banner
@@ -311,6 +318,13 @@ const I18N = {
       towerCounter_emp: 'Stealth / Fast',
       towerCounter_pulse: 'Stealth / Swarm',
       towerCounter_disruptor: 'Swarm / Stealth',
+      // Phase 12: EM + Energy synergy (tooltip)
+      towerSynergy_laser: '+50% damage to EM-marked enemies',
+      towerSynergy_plasma: '+50% damage to EM-marked enemies',
+      towerSynergy_railgun: '+50% damage to EM-marked enemies',
+      towerSynergy_emp: 'Marks enemies on hit; energy towers deal bonus damage',
+      towerSynergy_pulse: 'Marks enemies on hit; energy towers deal bonus damage',
+      towerSynergy_disruptor: 'Marks enemies on hit; energy towers deal bonus damage',
       // Early wave call reward
       earlyCallMsg: 'Early call: +{n} resources',
       // Boss warning banner
@@ -379,6 +393,15 @@ const I18N = {
   // Returns '' when the tower has no counter entry (e.g. resource tower).
   towerCounter(type) {
     const key = 'towerCounter_' + type;
+    const table = this.STRINGS[this.lang] || this.STRINGS.zh;
+    if (table[key] !== undefined) return table[key];
+    return this.STRINGS.zh[key] !== undefined ? this.STRINGS.zh[key] : '';
+  },
+
+  // Phase 12: localized EM + Energy synergy hint (tooltip).
+  // Returns '' when the tower has no synergy entry (e.g. explosive/support).
+  towerSynergy(type) {
+    const key = 'towerSynergy_' + type;
     const table = this.STRINGS[this.lang] || this.STRINGS.zh;
     if (table[key] !== undefined) return table[key];
     return this.STRINGS.zh[key] !== undefined ? this.STRINGS.zh[key] : '';

@@ -40,11 +40,14 @@ class TerminalProtocol {
           if (s.damage > 0) stats.push(I18N.t('ttDamage', { n: s.damage }));
           if (s.range > 0) stats.push(I18N.t('ttRange', { n: s.range }));
           const counter = I18N.towerCounter(type);
+          // Phase 12: EM + Energy synergy hint
+          const synergy = I18N.towerSynergy(type);
           tooltip.innerHTML =
             `<b>${I18N.towerName(type)}</b> <span class="tt-cost">${info.cost}</span><br>` +
             (stats.length ? stats.join(' · ') + '<br>' : '') +
             `<span class="tt-desc">${I18N.towerDesc(type)}</span><br>` +
             (counter ? `<span class="tt-counter">${I18N.t('ttCounter', { n: counter })}</span><br>` : '') +
+            (synergy ? `<span class="tt-synergy">${synergy}</span><br>` : '') +
             `<span class="tt-hint">${I18N.t('sellHint')}</span>`;
           const rect = btn.getBoundingClientRect();
           const contRect = container.getBoundingClientRect();

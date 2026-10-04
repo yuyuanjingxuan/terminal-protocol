@@ -1,6 +1,6 @@
 // entities/projectile.js - Projectile classes (homing: lock onto target enemy)
 class Projectile {
-  constructor(game, startX, startY, targetX, targetY, damage, targetEnemy = null) {
+  constructor(game, startX, startY, targetX, targetY, damage, targetEnemy = null, faction = null) {
     this.game = game;
     this.x = startX;
     this.y = startY;
@@ -11,6 +11,7 @@ class Projectile {
     this.isDead = false;
     this.color = 'yellow';
     this.targetEnemy = targetEnemy; // homing lock (may die mid-flight)
+    this.faction = faction; // 'energy' | 'explosive' | 'electromagnetic' | 'support' | null
     this.lifetime = 3; // safety: despawn after 3s
 
     // Initial direction
@@ -82,7 +83,11 @@ class Projectile {
         }
       }
     }
-    if (victim) victim.takeDamage(this.damage);
+    if (victim) {
+      // Phase 12: energy towers deal bonus damage to EM-marked enemies
+      if (this.faction === 'energy') victim.takeDamageFromEnergy(this.damage);
+      else victim.takeDamage(this.damage);
+    }
   }
 
   render(ctx) {
@@ -218,6 +223,8 @@ class EMPProjectile extends Projectile {
       if (distance < 15) {
         enemy.takeDamage(this.damage);
         enemy.applySlow(this.slowAmount, this.slowDuration);
+        // Phase 12: EM mark — energy towers deal bonus damage to marked enemies
+        enemy.applyMark(this.slowDuration + 1);
         // EM faction reveals stealthed enemies near the impact
         enemy.reveal(this.slowDuration + 1);
         for (const other of enemies) {
@@ -288,6 +295,8 @@ class PulseProjectile extends Projectile {
 
       if (distance < this.radius) {
         enemy.applyStun(this.stunDuration);
+        // Phase 12: EM mark — energy towers deal bonus damage to marked enemies
+        enemy.applyMark(this.stunDuration + 1);
         // Pulse also reveals stealthed enemies in the radius
         enemy.reveal(this.stunDuration + 1);
       }
@@ -349,6 +358,8 @@ class ChainProjectile extends Projectile {
 
       if (distance < 15) {
         enemy.takeDamage(this.damage);
+        // Phase 12: EM mark — energy towers deal bonus damage to marked enemies
+        enemy.applyMark(2);
         // Disruptor chains reveal stealthed enemies
         enemy.reveal(2);
         break;

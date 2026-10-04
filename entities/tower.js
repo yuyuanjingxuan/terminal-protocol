@@ -170,7 +170,8 @@ class Tower {
         this.target.x,
         this.target.y,
         this.damage,
-        this.target
+        this.target,
+        this.faction
       );
       this.game.addProjectile(projectile);
     }
