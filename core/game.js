@@ -126,9 +126,11 @@ class Game {
     ctx.fillStyle = '#0a0a1a';
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Phase 10: per-chapter themed animated background
+    // Phase 10: per-level themed animated background (each of the 36 levels
+    // gets a distinct, story-matched visual)
     const chapterIdx = this.currentLevel ? this.currentLevel.chapter : 0;
-    renderBackground(ctx, chapterIdx, this.time, this.canvas.width, this.canvas.height);
+    const levelKey = this.currentLevel ? this.currentLevel.key : null;
+    renderBackground(ctx, chapterIdx, levelKey, this.time, this.canvas.width, this.canvas.height);
 
     // Apply screen shake offset to the world
     const shake = this.effects.getShakeOffset();
