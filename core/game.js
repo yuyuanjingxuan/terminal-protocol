@@ -5,6 +5,7 @@ class Game {
     this.ctx = null;
     this.lastTime = 0;
     this.deltaTime = 0;
+    this.time = 0; // accumulated seconds, drives background animation
     this.isRunning = false;
     this.speed = 1; // game speed multiplier (1x/2x/3x)
     this.gameState = 'menu'; // menu | ready | playing | gameover
@@ -60,6 +61,7 @@ class Game {
 
     // Clamp large frame gaps (e.g. tab switch) and apply game speed
     const dt = Math.min(this.deltaTime, 0.05) * this.speed;
+    this.time += dt;
     this.update(dt);
     this.render();
 
@@ -123,6 +125,10 @@ class Game {
     // Clear canvas with dark background
     ctx.fillStyle = '#0a0a1a';
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Phase 10: per-chapter themed animated background
+    const chapterIdx = this.currentLevel ? this.currentLevel.chapter : 0;
+    renderBackground(ctx, chapterIdx, this.time, this.canvas.width, this.canvas.height);
 
     // Apply screen shake offset to the world
     const shake = this.effects.getShakeOffset();
@@ -262,6 +268,36 @@ class Game {
     }
     ctx.stroke();
     ctx.shadowBlur = 0;
+
+    // Phase 10: data-flow animation along the path (moving light pulses hinting
+    // at enemy travel direction). Compute total path length for uniform spacing.
+    let totalLen = 0;
+    const segLens = [];
+    for (let i = 0; i < path.length - 1; i++) {
+      const dx = path[i + 1].x - path[i].x;
+      const dy = path[i + 1].y - path[i].y;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      segLens.push(len);
+      totalLen += len;
+    }
+    const flowCount = 5;
+    const flowSpeed = 60; // px per second
+    for (let f = 0; f < flowCount; f++) {
+      // Position along the path, looping
+      let d = (this.time * flowSpeed + (f / flowCount) * totalLen) % totalLen;
+      let seg = 0;
+      while (d > segLens[seg] && seg < segLens.length - 1) {
+        d -= segLens[seg];
+        seg++;
+      }
+      const t = segLens[seg] > 0 ? d / segLens[seg] : 0;
+      const px = path[seg].x + (path[seg + 1].x - path[seg].x) * t;
+      const py = path[seg].y + (path[seg + 1].y - path[seg].y) * t;
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.35)';
+      ctx.beginPath();
+      ctx.arc(px, py, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // Draw start marker
     ctx.fillStyle = '#00ff88';

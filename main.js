@@ -845,7 +845,8 @@ class TerminalProtocol {
       name: levelData.name,
       path: path,
       boss: levelData.boss || null,
-      ambient: !!levelData.ambient
+      ambient: !!levelData.ambient,
+      chapter: chapterIdx
     };
 
     // Setup wave manager
@@ -927,7 +928,8 @@ class TerminalProtocol {
       name: I18N.t('endlessBtn'),
       path: path,
       boss: null,
-      ambient: false
+      ambient: false,
+      chapter: chapterIdx
     };
 
     // Endless: no pre-defined waves; WaveManager generates them procedurally.
