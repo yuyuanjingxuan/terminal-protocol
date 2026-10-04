@@ -109,6 +109,8 @@ class WaveManager {
     if (this.isWaveActive && this.game.enemies.length === 0 && this.spawnQueue.length === 0) {
       this.isWaveActive = false;
       this.waveTimer = 0;
+      // Phase 13: wave-cleared motif
+      if (this.game.audio) this.game.audio.playWaveEnd();
     }
 
     // Phase 8: endless mode — keep one procedurally generated wave queued ahead

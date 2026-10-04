@@ -87,6 +87,8 @@ class Projectile {
       // Phase 12: energy towers deal bonus damage to EM-marked enemies
       if (this.faction === 'energy') victim.takeDamageFromEnergy(this.damage);
       else victim.takeDamage(this.damage);
+      // Phase 13: subtle impact tick on hit
+      if (this.game.audio) this.game.audio.playHit();
     }
   }
 

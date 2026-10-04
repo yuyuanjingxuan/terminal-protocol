@@ -9,6 +9,7 @@ class AudioManager {
     this.musicEnabled = true; // BGM toggle
     this.noiseBuffer = null;
     this.lastAttackSound = 0; // throttle attack sounds
+    this.lastHitSound = 0;    // throttle hit sounds
     this.musicTimer = null;
     this.musicStep = 0;
     this.musicNextTime = 0;
@@ -202,6 +203,32 @@ class AudioManager {
     if (!this.ensureContext()) return;
     const notes = [880, 1108.73, 1318.51]; // A5 C#6 E6
     notes.forEach((f, i) => this.tone(f, 0.2, { type: 'sine', vol: 0.12, delay: i * 0.08 }));
+  }
+
+  // Subtle impact tick when a projectile lands (throttled to avoid overload)
+  playHit() {
+    if (!this.ensureContext()) return;
+    const now = performance.now();
+    if (now - this.lastHitSound < 40) return; // max ~25/s
+    this.lastHitSound = now;
+    this.tone(220, 0.05, { type: 'square', vol: 0.05, slideTo: 120 });
+    this.noise(0.04, { vol: 0.04, filterFreq: 2000, slideTo: 800 });
+  }
+
+  // Rising confirmation chime when a tower is upgraded
+  playUpgrade() {
+    if (!this.ensureContext()) return;
+    this.tone(523.25, 0.09, { type: 'triangle', vol: 0.14 }); // C5
+    this.tone(659.25, 0.09, { type: 'triangle', vol: 0.14, delay: 0.07 }); // E5
+    this.tone(783.99, 0.16, { type: 'triangle', vol: 0.16, delay: 0.14 }); // G5
+  }
+
+  // Short descending "wave cleared" motif
+  playWaveEnd() {
+    if (!this.ensureContext()) return;
+    this.tone(659.25, 0.12, { type: 'sine', vol: 0.14 }); // E5
+    this.tone(523.25, 0.12, { type: 'sine', vol: 0.14, delay: 0.1 }); // C5
+    this.tone(392, 0.22, { type: 'sine', vol: 0.15, delay: 0.2 }); // G4
   }
 
   // ---------- BGM (simple synth loop, per chapter) ----------

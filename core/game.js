@@ -587,6 +587,7 @@ class Game {
     if (tower.level >= tower.maxLevel) return false;
     if (!this.spendResources(cost)) return false;
     tower.upgrade();
+    if (this.audio) this.audio.playUpgrade();
     if (this.inputHandler) this.inputHandler.showToast(I18N.t('upgradedMsg', { name: I18N.towerName(tower.type), n: tower.level }));
     return true;
   }
