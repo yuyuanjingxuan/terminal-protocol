@@ -344,11 +344,13 @@ class TerminalProtocol {
     const menu = document.getElementById('mainMenu');
     if (menu) menu.classList.add('show');
 
-    // Hide the in-level control bars on the main menu (shown when a level starts)
+    // Hide the in-level control bars and status panel on the main menu (shown when a level starts)
     const waveControls = document.getElementById('waveControls');
     if (waveControls) waveControls.style.display = 'none';
     const towerBar = document.getElementById('towerBar');
     if (towerBar) towerBar.style.display = 'none';
+    const uiPanel = document.getElementById('uiPanel');
+    if (uiPanel) uiPanel.style.display = 'none';
   }
 
   // Phase 8: sync the difficulty selector + endless button with game state
@@ -852,11 +854,13 @@ class TerminalProtocol {
     const dialogueBox = document.getElementById('dialogueBox');
     if (dialogueBox) dialogueBox.classList.remove('show');
 
-    // Show the in-level control bars (hidden on the main menu)
+    // Show the in-level control bars and status panel (hidden on the main menu)
     const waveControls = document.getElementById('waveControls');
     if (waveControls) waveControls.style.display = 'flex';
     const towerBar = document.getElementById('towerBar');
     if (towerBar) towerBar.style.display = 'flex';
+    const uiPanel = document.getElementById('uiPanel');
+    if (uiPanel) uiPanel.style.display = 'block';
 
     // Phase 9: clear any in-level tutorial from a previous run
     if (this.tutorial) this.endTutorial();
@@ -942,11 +946,13 @@ class TerminalProtocol {
     const dialogueBox = document.getElementById('dialogueBox');
     if (dialogueBox) dialogueBox.classList.remove('show');
 
-    // Show the in-level control bars (hidden on the main menu)
+    // Show the in-level control bars and status panel (hidden on the main menu)
     const waveControls = document.getElementById('waveControls');
     if (waveControls) waveControls.style.display = 'flex';
     const towerBar = document.getElementById('towerBar');
     if (towerBar) towerBar.style.display = 'flex';
+    const uiPanel = document.getElementById('uiPanel');
+    if (uiPanel) uiPanel.style.display = 'block';
 
     // Phase 9: clear any in-level tutorial from a previous run
     if (this.tutorial) this.endTutorial();
